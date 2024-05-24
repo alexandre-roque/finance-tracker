@@ -1,106 +1,56 @@
-'use client';
-
-import React, { useState } from 'react';
-import Logo, { LogoMobile } from '@/components/Logo';
-import { ThemeSwitcherButton } from '@/components/ThemeSwitcherButton';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { cn } from '@/lib/utils';
-import { Menu } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { sideBarLinks as items } from '@/constants';
+import { Bell, CircleUser, Home, LineChart, Menu, Package, Package2, Search, ShoppingCart, Users } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import Logo from './Logo';
+import { sideBarLinks } from '@/constants';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { ThemeSwitcherButton } from './ThemeSwitcherButton';
+import Header from './Header';
 
 const Navbar = () => {
 	return (
-		<>
-			<DesktopNavbar />
-			<MobileNavbar />
-		</>
+		<div className='hidden border-r bg-muted/40 md:block'>
+			<div className='flex h-full max-h-screen flex-col gap-2'>
+				<div className='flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6'>
+					<Logo />
+				</div>
+				<nav className='grid gap-2 items-start px-2 text-sm font-medium lg:px-4'>
+					<TooltipProvider>
+						{sideBarLinks.map((sideBarLink, index) => (
+							<Tooltip key={index}>
+								<TooltipTrigger>
+									<Link
+										href={sideBarLink.route}
+										className='flex items-center gap-3 rounded-lg pl-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted'
+									>
+										{sideBarLink.icon}
+										<span className='hidden lg:block'>{sideBarLink.label}</span>
+										<div className='block lg:hidden'>
+											<TooltipContent sideOffset={3} side='right'>
+												<span>{sideBarLink.label}</span>
+											</TooltipContent>
+										</div>
+									</Link>
+								</TooltipTrigger>
+							</Tooltip>
+						))}
+					</TooltipProvider>
+				</nav>
+			</div>
+		</div>
 	);
 };
-
-function MobileNavbar() {
-	const [isOpen, setIsOpen] = useState(false);
-
-	return (
-		<div className='block border-separate bg-background md:hidden'>
-			<nav className='container flex items-center justify-between px-8'>
-				<Sheet open={isOpen} onOpenChange={setIsOpen}>
-					<SheetTrigger asChild>
-						<Button variant={'ghost'} size={'icon'}>
-							<Menu />
-						</Button>
-					</SheetTrigger>
-					<SheetContent className='w-[400px] sm:w-[540px]' side='left'>
-						<Logo />
-						<div className='flex flex-col gap-1 pt-4'>
-							{items.map((item) => (
-								<NavbarItem
-									key={item.label}
-									route={item.route}
-									label={item.label}
-									clickCallback={() => setIsOpen((prev) => !prev)}
-								/>
-							))}
-						</div>
-					</SheetContent>
-				</Sheet>
-				<div className='flex h-[80px] min-h-[60px] items-center gap-x-4'>
-					<LogoMobile />
-				</div>
-				<div className='flex items-center gap-2'>
-					<ThemeSwitcherButton />
-				</div>
-			</nav>
-		</div>
-	);
-}
-
-function DesktopNavbar() {
-	return (
-		<div className='hidden border-separate border-b bg-background md:block'>
-			<nav className='container flex items-center justify-between px-8'>
-				<div className='flex h-[80px] min-h-[60px] items-center gap-x-4'>
-					<Logo />
-					<div className='flex h-full'>
-						{items.map((item) => (
-							<NavbarItem key={item.label} route={item.route} label={item.label} />
-						))}
-					</div>
-				</div>
-				<div className='flex items-center gap-2'>
-					<ThemeSwitcherButton />
-				</div>
-			</nav>
-		</div>
-	);
-}
-
-function NavbarItem({ route, label, clickCallback }: { route: string; label: string; clickCallback?: () => void }) {
-	const pathname = usePathname();
-	const isActive = pathname === route;
-
-	return (
-		<div className='relative flex items-center'>
-			<Link
-				href={route}
-				className={cn(
-					buttonVariants({ variant: 'ghost' }),
-					'w-full justify-start text-lg text-muted-foreground hover:text-foreground',
-					isActive && 'text-foreground'
-				)}
-				onClick={() => {
-					if (clickCallback) clickCallback();
-				}}
-			>
-				{label}
-			</Link>
-			{isActive && (
-				<div className='absolute -bottom-[2px] left-1/2 hidden h-[2px] w-[80%] -translate-x-1/2 rounded-xl bg-foreground md:block' />
-			)}
-		</div>
-	);
-}
 
 export default Navbar;

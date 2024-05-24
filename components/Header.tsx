@@ -15,8 +15,11 @@ import {
 	DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import HeaderCommandBox from './HeaderCommandBox';
+import LogoutDropdownItem from './LogoutDropdownItem';
+import { auth } from '@/auth';
 
 const Header = async () => {
+	const session = await auth();
 	return (
 		<header className='flex h-14 items-center justify-between md:justify-end gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6'>
 			<Sheet>
@@ -72,6 +75,7 @@ const Header = async () => {
 						<DropdownMenuLabel>Minha conta</DropdownMenuLabel>
 						<DropdownMenuItem>Configurações</DropdownMenuItem>
 						<DropdownMenuSeparator />
+						{session && <LogoutDropdownItem />}
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>

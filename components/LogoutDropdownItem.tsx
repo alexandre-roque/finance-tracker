@@ -2,10 +2,11 @@
 
 import React from 'react';
 import { DropdownMenuItem } from './ui/dropdown-menu';
-import { signOut } from '@/auth';
+import { useRouter } from 'next/navigation';
 
 const LogoutDropdownItem = () => {
-	return <DropdownMenuItem onClick={() => signOut()}>Logout</DropdownMenuItem>;
+	const router = useRouter();
+	return <DropdownMenuItem onClick={() => router.push('/api/auth/signout')}>Logout</DropdownMenuItem>;
 };
 
 export default LogoutDropdownItem;

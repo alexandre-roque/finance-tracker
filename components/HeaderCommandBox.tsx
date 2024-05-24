@@ -37,7 +37,13 @@ const HeaderCommandBox = ({ trigger }: { trigger: ReactNode }) => {
 					{sideBarLinks
 						.filter((sideBarLink) => sideBarLink.route !== pathname)
 						.map((sideBarLink, index) => (
-							<CommandItem value={sideBarLink.route} onSelect={(value) => router.push(value)} key={index}>
+							<CommandItem
+								className='flex items-center gap-2'
+								value={sideBarLink.route}
+								onSelect={(value) => router.push(value)}
+								key={index}
+							>
+								{sideBarLink.icon}
 								{sideBarLink.label}
 							</CommandItem>
 						))}

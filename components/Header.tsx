@@ -73,7 +73,9 @@ const Header = async () => {
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align='end'>
 						<DropdownMenuLabel>Minha conta</DropdownMenuLabel>
-						<DropdownMenuItem>Configurações</DropdownMenuItem>
+						<DropdownMenuItem>
+							<Link href={'/manage'}>Configurações</Link>
+						</DropdownMenuItem>
 						<DropdownMenuSeparator />
 						{session && <LogoutDropdownItem />}
 					</DropdownMenuContent>

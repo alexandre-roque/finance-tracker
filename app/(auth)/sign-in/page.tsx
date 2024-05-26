@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/components/ui/icons';
-import LoginInForm from '../../../components/LoginForm';
+import AuthForm from '../../../components/AuthForm';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 
@@ -47,7 +47,7 @@ const SignIn = () => {
 							<span className='bg-background px-2 text-muted-foreground'>Ou continue com</span>
 						</div>
 					</div>
-					<LoginInForm type='sign-in' />
+					<AuthForm type='sign-in' />
 				</CardContent>
 			</Card>
 		</main>

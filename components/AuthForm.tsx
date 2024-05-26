@@ -14,7 +14,7 @@ import { z } from 'zod';
 import { authFormSchema } from '@/schemas';
 import Link from 'next/link';
 
-export default function LoginInForm({ type }: { type: 'sign-in' | 'sign-up' }) {
+export default function AuthForm({ type }: { type: 'sign-in' | 'sign-up' }) {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -22,6 +22,11 @@ export default function LoginInForm({ type }: { type: 'sign-in' | 'sign-up' }) {
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
+		defaultValues: {
+			email: '',
+			password: '',
+			name: '',
+		},
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -35,7 +40,7 @@ export default function LoginInForm({ type }: { type: 'sign-in' | 'sign-up' }) {
 			});
 
 			if (result?.error) {
-				toast.error('User not found or incorrect credentials!');
+				toast.error('Usuário não encontrado ou credenciais incorretas!');
 			} else {
 				router.push('/');
 			}
@@ -47,9 +52,9 @@ export default function LoginInForm({ type }: { type: 'sign-in' | 'sign-up' }) {
 
 			if (result.errorMessage) {
 				if (result.errorMessage.name === 'LibsqlError') {
-					toast.error('Duplicated emails, please use another');
+					toast.error('Email duplicado, favor usar outro');
 				} else {
-					toast.error('An error has occured');
+					toast.error('Ocorreu um erro, tente novamente!');
 				}
 			} else {
 				await signIn('credentials', {

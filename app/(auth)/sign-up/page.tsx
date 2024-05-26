@@ -1,4 +1,4 @@
-import LoginInForm from '@/components/LoginForm';
+import AuthForm from '@/components/AuthForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const SignUp = async () => {
@@ -10,7 +10,7 @@ const SignUp = async () => {
 					<CardDescription>Insira seu e-mail abaixo para criar a sua conta</CardDescription>
 				</CardHeader>
 				<CardContent className='grid gap-4'>
-					<LoginInForm type='sign-up' />
+					<AuthForm type='sign-up' />
 				</CardContent>
 			</Card>
 		</main>

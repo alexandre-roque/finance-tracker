@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import * as usersSchema from './schema/users';
+import * as financeSchema from './schema/finance';
 
 const client = createClient({
 	url: process.env.TURSO_CONNECTION_URL!,
@@ -8,5 +9,5 @@ const client = createClient({
 });
 
 export const db = drizzle(client, {
-	schema: { ...usersSchema },
+	schema: { ...usersSchema, ...financeSchema },
 });

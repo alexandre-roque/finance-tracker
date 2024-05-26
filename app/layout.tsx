@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, IBM_Plex_Serif } from 'next/font/google';
 import './globals.css';
 import RootProviders from '@/components/RootProviders';
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 const ibmPlexSerif = IBM_Plex_Serif({
@@ -27,6 +28,7 @@ export default function RootLayout({
 		<html suppressHydrationWarning lang='ptBr'>
 			<body className={`${inter.className} ${ibmPlexSerif.variable}`}>
 				<RootProviders>{children}</RootProviders>
+				<Toaster />
 			</body>
 		</html>
 	);

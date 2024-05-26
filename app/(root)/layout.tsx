@@ -13,7 +13,6 @@ export default function RootLayout({
 			<div className='flex flex-col'>
 				<Header />
 				<main>{children}</main>
-				<Toaster />
 			</div>
 		</div>
 	);

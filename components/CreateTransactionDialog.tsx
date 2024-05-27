@@ -47,8 +47,8 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 			card: '',
 			amount: 0,
 			date: new Date(),
-			businessDay: 1,
-			dayOfTheMonth: 1,
+			businessDay: 0,
+			dayOfTheMonth: 0,
 		},
 	});
 
@@ -90,9 +90,11 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 			form.reset({
 				type,
 				description: '',
+				card: '',
 				amount: 0,
 				date: new Date(),
-				category: undefined,
+				businessDay: 0,
+				dayOfTheMonth: 0,
 			});
 
 			// After creating a transaction, we need to invalidate the overview query which will refetch data in the homepage

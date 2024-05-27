@@ -3,6 +3,7 @@
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { categories, monthHistories, recurringTransactions, transactions, yearHistories } from '@/db/schema/finance';
+import { DateToUTCDate, getBusinessDayOfMonth } from '@/lib/utils';
 import { createTransactionSchema, createTransactionSchemaType } from '@/schemas';
 import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
@@ -43,18 +44,116 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 
 	await db.transaction(async (trx) => {
 		if (isRecurring) {
-			await trx.insert(recurringTransactions).values({
-				userId,
-				amount,
-				type,
-				teamId,
-				dayOfTheMonth,
-				businessDay,
-				cardId,
-				description: description || '',
-				category: categoryRow.name,
-				categoryIcon: categoryRow.icon,
-			});
+			const [recurringTransaction] = await trx
+				.insert(recurringTransactions)
+				.values({
+					userId,
+					amount,
+					type,
+					teamId,
+					cardId,
+					dayOfTheMonth: dayOfTheMonth ?? null,
+					businessDay: businessDay ?? null,
+					description: description || '',
+					category: categoryRow.name,
+					categoryIcon: categoryRow.icon,
+				})
+				.returning();
+
+			if (recurringTransaction) {
+				const d = new Date();
+				const dayInMonth = d.getUTCDate();
+				const businessDayCount = getBusinessDayOfMonth(d);
+
+				if (dayInMonth === dayOfTheMonth || businessDay === businessDayCount) {
+					await trx.insert(transactions).values({
+						userId,
+						amount,
+						type,
+						teamId,
+						cardId,
+						date: DateToUTCDate(new Date()),
+						description: description || '',
+						category: categoryRow.name,
+						categoryIcon: categoryRow.icon,
+					});
+
+					// Atualiza monthHistory
+					const [existingMonthHistory] = await trx
+						.select()
+						.from(monthHistories)
+						.where(
+							and(
+								eq(monthHistories.userId, userId),
+								eq(monthHistories.day, date.getUTCDate()),
+								eq(monthHistories.month, date.getUTCMonth()),
+								eq(monthHistories.year, date.getUTCFullYear())
+							)
+						);
+
+					if (existingMonthHistory) {
+						await trx
+							.update(monthHistories)
+							.set({
+								expense: (existingMonthHistory.expense ?? 0) + (type === 'expense' ? amount : 0),
+								income: (existingMonthHistory.income ?? 0) + (type === 'income' ? amount : 0),
+							})
+							.where(
+								and(
+									eq(monthHistories.userId, userId),
+									eq(monthHistories.day, date.getUTCDate()),
+									eq(monthHistories.month, date.getUTCMonth()),
+									eq(monthHistories.year, date.getUTCFullYear())
+								)
+							);
+					} else {
+						await trx.insert(monthHistories).values({
+							userId,
+							day: date.getUTCDate(),
+							month: date.getUTCMonth(),
+							year: date.getUTCFullYear(),
+							expense: type === 'expense' ? amount : 0,
+							income: type === 'income' ? amount : 0,
+						});
+					}
+
+					// Atualiza yearHistory
+					const [existingYearHistory] = await trx
+						.select()
+						.from(yearHistories)
+						.where(
+							and(
+								eq(yearHistories.userId, userId),
+								eq(yearHistories.month, date.getUTCMonth()),
+								eq(yearHistories.year, date.getUTCFullYear())
+							)
+						);
+
+					if (existingYearHistory) {
+						await trx
+							.update(yearHistories)
+							.set({
+								expense: (existingYearHistory.expense ?? 0) + (type === 'expense' ? amount : 0),
+								income: (existingYearHistory.income ?? 0) + (type === 'income' ? amount : 0),
+							})
+							.where(
+								and(
+									eq(yearHistories.userId, userId),
+									eq(yearHistories.month, date.getUTCMonth()),
+									eq(yearHistories.year, date.getUTCFullYear())
+								)
+							);
+					} else {
+						await trx.insert(yearHistories).values({
+							userId,
+							month: date.getUTCMonth(),
+							year: date.getUTCFullYear(),
+							expense: type === 'expense' ? amount : 0,
+							income: type === 'income' ? amount : 0,
+						});
+					}
+				}
+			}
 
 			return;
 		}

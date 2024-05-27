@@ -34,8 +34,8 @@ export const createTransactionSchema = z.object({
 	card: z.string().optional(),
 	type: z.union([z.literal('income'), z.literal('expense')]),
 	teamId: z.string().optional(),
-	dayOfTheMonth: z.coerce.number().positive().max(31).optional(),
-	businessDay: z.coerce.number().positive().max(31).optional(),
+	dayOfTheMonth: z.coerce.number().positive().max(31).or(z.literal(0)).optional(),
+	businessDay: z.coerce.number().positive().max(31).or(z.literal(0)).optional(),
 	isRecurring: z.coerce.boolean(),
 });
 

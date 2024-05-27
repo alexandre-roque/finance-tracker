@@ -9,8 +9,11 @@ export const userSettings = sqliteTable('userSetting', {
 		.$defaultFn(() => ulid()),
 	userId: text('userId')
 		.notNull()
+		.unique()
 		.references(() => users.id, { onDelete: 'cascade' }),
 	currency: text('currency'),
+	mainIncomeCategory: text('mainIncomeCategory'),
+	mainExpenseCategory: text('mainExpenseCategory'),
 	mainCard: text('mainCard').references(() => cards.id, { onDelete: 'set null' }),
 });
 
@@ -36,14 +39,16 @@ export const categories = sqliteTable(
 		userId: text('userId')
 			.notNull()
 			.references(() => users.id, { onDelete: 'cascade' }),
-		name: text('name'),
-		icon: text('icon'),
-		type: text('type').default('income'),
+		name: text('name').notNull(),
+		icon: text('icon').notNull(),
+		type: text('type').default('income').notNull(),
 	},
 	(table) => ({
 		unq: unique().on(table.name, table.userId, table.type),
 	})
 );
+
+export type categoriesType = typeof categories.$inferSelect;
 
 export const transactions = sqliteTable('transaction', {
 	id: text('id')
@@ -54,12 +59,14 @@ export const transactions = sqliteTable('transaction', {
 	userId: text('userId')
 		.notNull()
 		.references(() => users.id, { onDelete: 'cascade' }),
-	amount: text('amount'),
+	amount: integer('amount'),
 	description: text('description'),
 	date: integer('date', { mode: 'timestamp_ms' }).default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
 	type: text('type').default('income'),
-	categoryId: text('categoryId'),
+	cardId: text('cardId').references(() => cards.id, { onDelete: 'set null' }),
+	category: text('category'),
 	categoryIcon: text('categoryIcon'),
+	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
 });
 
 export const recurringTransactions = sqliteTable('recurringTransaction', {
@@ -71,13 +78,15 @@ export const recurringTransactions = sqliteTable('recurringTransaction', {
 	userId: text('userId')
 		.notNull()
 		.references(() => users.id, { onDelete: 'cascade' }),
-	amount: text('amount'),
+	amount: integer('amount'),
 	description: text('description'),
 	dayOfTheMonth: integer('dayOfTheMonth'),
 	businessDay: integer('businessDay'),
 	type: text('type').default('income'),
-	categoryId: text('categoryId'),
+	cardId: text('cardId').references(() => cards.id, { onDelete: 'set null' }),
+	category: text('category'),
 	categoryIcon: text('categoryIcon'),
+	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
 });
 
 export const monthHistories = sqliteTable(
@@ -91,6 +100,7 @@ export const monthHistories = sqliteTable(
 		year: integer('year'),
 		income: integer('income'),
 		expense: integer('expense'),
+		teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
 	},
 	(table) => ({
 		pk: primaryKey({ columns: [table.day, table.month, table.year, table.userId] }),
@@ -103,13 +113,14 @@ export const yearHistories = sqliteTable(
 		userId: text('userId')
 			.notNull()
 			.references(() => users.id, { onDelete: 'cascade' }),
-		day: integer('day'),
+		month: integer('month'),
 		year: integer('year'),
 		income: integer('income'),
 		expense: integer('expense'),
+		teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
 	},
 	(table) => ({
-		pk: primaryKey({ columns: [table.day, table.year, table.userId] }),
+		pk: primaryKey({ columns: [table.month, table.year, table.userId] }),
 	})
 );
 

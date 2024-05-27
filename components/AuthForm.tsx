@@ -89,6 +89,7 @@ export default function AuthForm({ type }: { type: 'sign-in' | 'sign-up' }) {
 						name='password'
 						label='Password'
 						placeholder='Digite sua senha'
+						type='password'
 					/>
 				</form>
 			</Form>

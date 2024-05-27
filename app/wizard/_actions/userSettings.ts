@@ -31,14 +31,29 @@ export async function UpdateUserCurrency(currency: string) {
 }
 export async function UpdateUserCard(cardId: string) {
 	const session = await auth();
-	if (!session || !session.user) {
+	if (!session || !session.user || !session.user.id) {
 		redirect('/sign-in');
 	}
 
 	const [userSettingsResult] = await db
 		.update(userSettings)
 		.set({ mainCard: cardId })
-		.where(eq(userSettings.userId, session.user.id!))
+		.where(eq(userSettings.userId, session.user.id))
+		.returning();
+
+	return userSettingsResult;
+}
+
+export async function UpdateUserCategory({ categoryId, type }: { categoryId: string; type: string }) {
+	const session = await auth();
+	if (!session || !session.user || !session.user.id) {
+		redirect('/sign-in');
+	}
+
+	const [userSettingsResult] = await db
+		.update(userSettings)
+		.set(type === 'income' ? { mainIncomeCategory: categoryId } : { mainExpenseCategory: categoryId })
+		.where(eq(userSettings.userId, session.user.id))
 		.returning();
 
 	return userSettingsResult;

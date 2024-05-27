@@ -1,6 +1,5 @@
 import Header from '@/components/Header';
 import Navbar from '@/components/Navbar';
-import { Toaster } from '@/components/ui/sonner';
 
 export default function RootLayout({
 	children,

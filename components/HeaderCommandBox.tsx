@@ -11,11 +11,28 @@ import {
 } from '@/components/ui/command';
 import { sideBarLinks } from '@/constants';
 import { usePathname, useRouter } from 'next/navigation';
+import CreateTransactionDialog from './CreateTransactionDialog';
+import { Frown, Smile } from 'lucide-react';
+import { UserSettingsType } from '@/db/schema/finance';
 
-const HeaderCommandBox = ({ trigger }: { trigger: ReactNode }) => {
+const HeaderCommandBox = ({ trigger, userSettings }: { trigger: ReactNode; userSettings: UserSettingsType }) => {
 	const [open, setOpen] = useState(false);
 	const router = useRouter();
 	const pathname = usePathname();
+
+	const [openedActions, setOpenedActions] = useState({
+		income: false,
+		expense: false,
+	});
+
+	useEffect(() => {
+		if (!open) {
+			setOpenedActions({
+				income: false,
+				expense: false,
+			});
+		}
+	}, [open]);
 
 	useEffect(() => {
 		const down = (e: KeyboardEvent) => {
@@ -33,7 +50,7 @@ const HeaderCommandBox = ({ trigger }: { trigger: ReactNode }) => {
 			<CommandInput placeholder='Digite uma funcionalidade' />
 			<CommandList>
 				<CommandEmpty>Sem resultados</CommandEmpty>
-				<CommandGroup heading='Sugestões'>
+				<CommandGroup heading='Links'>
 					{sideBarLinks
 						.filter((sideBarLink) => sideBarLink.route !== pathname)
 						.map((sideBarLink, index) => (
@@ -47,6 +64,50 @@ const HeaderCommandBox = ({ trigger }: { trigger: ReactNode }) => {
 								{sideBarLink.label}
 							</CommandItem>
 						))}
+				</CommandGroup>
+				<CommandGroup heading='Ações'>
+					<CommandItem
+						onSelect={() =>
+							setOpenedActions({
+								income: true,
+								expense: false,
+							})
+						}
+						className='flex items-center gap-2'
+					>
+						<CreateTransactionDialog
+							userSettings={userSettings}
+							isSelected={openedActions['income']}
+							type='income'
+							trigger={
+								<div className='flex items-center gap-2 w-full'>
+									<Smile />
+									Nova receita
+								</div>
+							}
+						/>
+					</CommandItem>
+					<CommandItem
+						onSelect={() =>
+							setOpenedActions({
+								income: false,
+								expense: true,
+							})
+						}
+						className='flex items-center gap-2'
+					>
+						<CreateTransactionDialog
+							userSettings={userSettings}
+							isSelected={openedActions['expense']}
+							type='expense'
+							trigger={
+								<div className='flex items-center gap-2 w-full'>
+									<Frown />
+									Nova despesa
+								</div>
+							}
+						/>
+					</CommandItem>
 				</CommandGroup>
 			</CommandList>
 		</CommandDialog>

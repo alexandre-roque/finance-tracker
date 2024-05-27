@@ -1,19 +1,26 @@
 import { auth } from '@/auth';
 import CardComboBox from '@/components/CardComboBox';
+import CategoryPicker from '@/components/CategoryPicker';
+import { TransactionTitle } from '@/components/CreateTransactionDialog';
 import CurrencyComboBox from '@/components/CurrencyComboBox';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { db } from '@/db';
+import { userSettings } from '@/db/schema/finance';
+import { eq } from 'drizzle-orm';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import React from 'react';
 
 const Wizard = async () => {
 	const session = await auth();
-	if (!session) {
+	if (!session || !session.user || !session.user.id) {
 		redirect('/sign-in');
 	}
+
+	const [currentUserSettings] = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id));
 
 	return (
 		<div className='container flex max-w-2xl flex-col items-center justify-between gap-4'>
@@ -39,14 +46,36 @@ const Wizard = async () => {
 			</Card>
 			<Card className='w-full'>
 				<CardHeader>
+					<CardTitle>
+						Categoria principal para <TransactionTitle type='income' />
+					</CardTitle>
+					<CardDescription>Selecione qual será sua categoria principal para receita</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<CategoryPicker userSettings={currentUserSettings} type='income' isConfiguring />
+				</CardContent>
+			</Card>
+			<Card className='w-full'>
+				<CardHeader>
+					<CardTitle>
+						Categoria principal para <TransactionTitle type='expense' />
+					</CardTitle>
+					<CardDescription>Selecione qual será sua categoria principal para despesa</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<CategoryPicker userSettings={currentUserSettings} type='expense' isConfiguring />
+				</CardContent>
+			</Card>
+			<Card className='w-full'>
+				<CardHeader>
 					<CardTitle>Cartões</CardTitle>
 					<CardDescription>Selecione qual será o seu cartão principal</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<CardComboBox />
+					<CardComboBox isConfiguring userSettings={currentUserSettings} />
 				</CardContent>
 			</Card>
-			<Separator />
+
 			<Button className='w-full' asChild>
 				<Link href={'/'}>Tudo certo! Leve-me para página inicial</Link>
 			</Button>

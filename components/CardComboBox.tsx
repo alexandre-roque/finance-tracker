@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -14,15 +14,16 @@ import { UpdateUserCard } from '@/app/wizard/_actions/userSettings';
 import { Plus } from 'lucide-react';
 import CardCreationDialog from './CardCreationDialog';
 
-const CardComboBox = () => {
+interface Props {
+	onChange?: (value: string) => void;
+	isConfiguring?: boolean;
+	userSettings?: UserSettingsType;
+}
+
+const CardComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
 	const [open, setOpen] = useState(false);
 	const isDesktop = useMediaQuery('(min-width: 768px)');
 	const [selectedOption, setSelectedOption] = useState<CardsType | null>(null);
-
-	const userSettingsQuery = useQuery<UserSettingsType>({
-		queryKey: ['userSettings'],
-		queryFn: () => fetch('/api/user-settings').then((res) => res.json()),
-	});
 
 	const cardsQuery = useQuery<CardsType[]>({
 		queryKey: ['cards'],
@@ -46,28 +47,37 @@ const CardComboBox = () => {
 		},
 	});
 
-	const selectOption = React.useCallback(
+	const selectOption = useCallback(
 		(card: CardsType | null) => {
-			if (!card) {
-				toast.error('Selecione um cartão');
-				return;
+			if (isConfiguring) {
+				if (!card) {
+					toast.error('Selecione um cartão');
+					return;
+				}
+
+				toast.loading('Configurando cartão...', {
+					id: 'update-card',
+				});
+
+				mutation.mutate(card.id);
+			} else {
+				setSelectedOption(card);
 			}
-
-			toast.loading('Configurando cartão...', {
-				id: 'update-card',
-			});
-
-			mutation.mutate(card.id);
 		},
-		[mutation]
+		[mutation, isConfiguring]
 	);
 
 	useEffect(() => {
-		if (!userSettingsQuery.data) return;
+		if (!userSettings) return;
 		if (!cardsQuery.data) return;
-		const currentCard = cardsQuery.data.find((card) => card.id === userSettingsQuery.data.mainCard);
+		const currentCard = cardsQuery.data.find((card) => card.id === userSettings.mainCard);
 		if (currentCard) setSelectedOption(currentCard);
-	}, [cardsQuery.data, userSettingsQuery.data]);
+	}, [cardsQuery.data, userSettings]);
+
+	useEffect(() => {
+		if (!selectedOption) return;
+		if (onChange) onChange(selectedOption.id);
+	}, [onChange, selectedOption]);
 
 	if (isDesktop) {
 		return (

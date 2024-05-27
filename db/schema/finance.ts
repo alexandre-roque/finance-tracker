@@ -59,15 +59,19 @@ export const transactions = sqliteTable('transaction', {
 	userId: text('userId')
 		.notNull()
 		.references(() => users.id, { onDelete: 'cascade' }),
-	amount: integer('amount'),
+	amount: integer('amount').notNull(),
 	description: text('description'),
-	date: integer('date', { mode: 'timestamp_ms' }).default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
-	type: text('type').default('income'),
+	date: integer('date', { mode: 'timestamp_ms' })
+		.default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`)
+		.notNull(),
+	type: text('type').default('income').notNull(),
 	cardId: text('cardId').references(() => cards.id, { onDelete: 'set null' }),
 	category: text('category'),
 	categoryIcon: text('categoryIcon'),
 	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
 });
+
+export type transactionsType = typeof transactions.$inferSelect;
 
 export const recurringTransactions = sqliteTable('recurringTransaction', {
 	id: text('id')
@@ -107,6 +111,8 @@ export const monthHistories = sqliteTable(
 	})
 );
 
+export type monthHistoryType = typeof monthHistories.$inferSelect;
+
 export const yearHistories = sqliteTable(
 	'yearHistory',
 	{
@@ -123,6 +129,8 @@ export const yearHistories = sqliteTable(
 		pk: primaryKey({ columns: [table.month, table.year, table.userId] }),
 	})
 );
+
+export type yearHistoryType = typeof yearHistories.$inferSelect;
 
 export const teams = sqliteTable('team', {
 	id: text('id').primaryKey(),

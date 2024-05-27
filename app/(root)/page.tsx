@@ -1,5 +1,7 @@
 import { auth } from '@/auth';
 import CreateTransactionDialog from '@/components/CreateTransactionDialog';
+import Overview from '@/components/Overview';
+import History from '@/components/History';
 import { Button } from '@/components/ui/button';
 import { db } from '@/db';
 import { userSettings } from '@/db/schema/finance';
@@ -20,7 +22,7 @@ const Home = async () => {
 	}
 
 	return (
-		<div className='h-full bg-background'>
+		<div className='h-full bg-background mb-12'>
 			<div className='border-b bg-card'>
 				<div className='container flex flex-wrap items-center justify-between gap-6 py-8'>
 					<p className='text-2xl font-bold'>Olá, {session.user.name}! 👋</p>
@@ -54,6 +56,8 @@ const Home = async () => {
 					</div>
 				</div>
 			</div>
+			<Overview userSettings={currentUserSettings} />
+			<History userSettings={currentUserSettings} />
 		</div>
 	);
 };

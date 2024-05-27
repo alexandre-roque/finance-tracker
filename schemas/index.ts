@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { Currencies } from '@/lib/currencies';
+import { differenceInDays } from 'date-fns';
+import { MAX_DATE_RANGE_DAYS } from '@/constants';
 
 export const authFormSchema = (type: string) =>
 	z.object({
@@ -55,3 +57,16 @@ export const deleteCategorySchema = z.object({
 });
 
 export type deleteCategorySchemaType = z.infer<typeof deleteCategorySchema>;
+
+export const OverviewQuerySchema = z
+	.object({
+		from: z.coerce.date(),
+		to: z.coerce.date(),
+	})
+	.refine((args) => {
+		const { from, to } = args;
+		const days = differenceInDays(to, from);
+
+		const isValidRange = days >= 0 && days <= MAX_DATE_RANGE_DAYS;
+		return isValidRange;
+	});

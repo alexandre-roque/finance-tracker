@@ -27,7 +27,13 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings }: Props) 
 
 	const categoriesQuery = useQuery({
 		queryKey: ['categories', type],
-		queryFn: () => fetch(`/api/categories?type=${type}`).then((res) => res.json()),
+		queryFn: () =>
+			fetch('/api/categories', {
+				method: 'POST',
+				body: JSON.stringify({
+					type,
+				}),
+			}).then((res) => res.json()),
 	});
 
 	const { mutate } = useMutation({

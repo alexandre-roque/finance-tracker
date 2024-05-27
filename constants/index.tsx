@@ -6,3 +6,5 @@ export const sideBarLinks = [
 	{ label: 'Analytics', route: '/analytics', icon: <LineChart /> },
 	{ label: 'Gerenciar', route: '/manage', icon: <Settings /> },
 ];
+
+export const MAX_DATE_RANGE_DAYS = 90;

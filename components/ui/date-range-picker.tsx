@@ -69,12 +69,13 @@ const PRESETS: Preset[] = [
 	{ name: 'today', label: 'Hoje' },
 	{ name: 'yesterday', label: 'Ontem' },
 	{ name: 'last7', label: 'Últimos 7 dias' },
-	{ name: 'last14', label: 'Últimos 14 dias' },
 	{ name: 'last30', label: 'Últimos 30 dias' },
 	{ name: 'thisWeek', label: 'Essa semana' },
 	{ name: 'lastWeek', label: 'Última semana' },
 	{ name: 'thisMonth', label: 'Esse mês' },
 	{ name: 'lastMonth', label: 'Último mês' },
+	{ name: 'nextMonth', label: 'Próximo mês' },
+	{ name: 'next2Months', label: 'Próximos 2 meses' },
 ];
 
 /** The DateRangePicker component allows a user to select a range of dates */
@@ -151,11 +152,6 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 				from.setHours(0, 0, 0, 0);
 				to.setHours(23, 59, 59, 999);
 				break;
-			case 'last14':
-				from.setDate(from.getDate() - 13);
-				from.setHours(0, 0, 0, 0);
-				to.setHours(23, 59, 59, 999);
-				break;
 			case 'last30':
 				from.setDate(from.getDate() - 29);
 				from.setHours(0, 0, 0, 0);
@@ -181,6 +177,22 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 				from.setMonth(from.getMonth() - 1);
 				from.setDate(1);
 				from.setHours(0, 0, 0, 0);
+				to.setDate(0);
+				to.setHours(23, 59, 59, 999);
+				break;
+			case 'nextMonth':
+				from.setMonth(from.getMonth() + 1);
+				from.setDate(1);
+				from.setHours(0, 0, 0, 0);
+				to.setMonth(to.getMonth() + 2);
+				to.setDate(0);
+				to.setHours(23, 59, 59, 999);
+				break;
+			case 'next2Months':
+				from.setMonth(from.getMonth() + 1);
+				from.setDate(1);
+				from.setHours(0, 0, 0, 0);
+				to.setMonth(to.getMonth() + 3);
 				to.setDate(0);
 				to.setHours(23, 59, 59, 999);
 				break;

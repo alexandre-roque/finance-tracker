@@ -29,7 +29,7 @@ export async function UpdateUserCurrency(currency: string) {
 
 	return userSettingsResult;
 }
-export async function UpdateUserCard(cardId: string) {
+export async function UpdateUserCard(cardId: string | null) {
 	const session = await auth();
 	if (!session || !session.user || !session.user.id) {
 		redirect('/sign-in');

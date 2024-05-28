@@ -42,6 +42,7 @@ function CreateCategoryDialog({ type, successCallback, trigger }: Props) {
 	const form = useForm<createCategorySchemaType>({
 		resolver: zodResolver(createCategorySchema),
 		defaultValues: {
+			name: '',
 			type,
 		},
 	});

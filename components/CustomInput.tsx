@@ -11,12 +11,14 @@ interface CustomInput {
 	placeholder?: string;
 	description?: string;
 	disabled?: boolean;
+	fullWidth?: boolean;
 }
 
 const CustomInput = ({
 	name,
 	label,
 	control,
+	fullWidth,
 	placeholder,
 	description,
 	type = 'text',
@@ -27,7 +29,7 @@ const CustomInput = ({
 			control={control}
 			name={name}
 			render={({ field }) => (
-				<FormItem>
+				<FormItem className={fullWidth ? 'w-full' : ''}>
 					<FormLabel className='form-label'>{label}</FormLabel>
 					<div className='flex w-full flex-col'>
 						<FormControl>

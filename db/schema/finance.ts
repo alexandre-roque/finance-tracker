@@ -65,10 +65,11 @@ export const transactions = sqliteTable('transaction', {
 		.default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`)
 		.notNull(),
 	type: text('type').default('income').notNull(),
-	cardId: text('cardId').references(() => cards.id, { onDelete: 'set null' }),
+	cardId: text('cardId'),
 	category: text('category'),
 	categoryIcon: text('categoryIcon'),
 	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
+	installmentId: text('installmentId'),
 });
 
 export type transactionsType = typeof transactions.$inferSelect;

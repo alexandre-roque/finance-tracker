@@ -17,11 +17,11 @@ import { createCardSchema as formSchema } from '@/schemas';
 import { z } from 'zod';
 import { Form } from './ui/form';
 import CustomInput from './CustomInput';
-import { Loader2 } from 'lucide-react';
+import { Loader2, PlusSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 
-const CardCreationDialog = ({ trigger }: { trigger: ReactNode }) => {
+const CardCreationDialog = ({ trigger }: { trigger?: ReactNode }) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [open, setOpen] = useState(false);
 	const queryClient = useQueryClient();
@@ -68,9 +68,19 @@ const CardCreationDialog = ({ trigger }: { trigger: ReactNode }) => {
 	};
 
 	return (
-		<Dialog open={open}>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<div onClick={() => setOpen(true)}>{trigger}</div>
+				{trigger ? (
+					trigger
+				) : (
+					<Button
+						variant={'ghost'}
+						className='flex border-separate items-center justify-start roudned-none border-b px-3 py-3 text-muted-foreground'
+					>
+						<PlusSquare className='mr-2 h-4 w-4' />
+						Criar novo
+					</Button>
+				)}
 			</DialogTrigger>
 			<DialogContent className='sm:max-w-[425px]'>
 				<DialogHeader>

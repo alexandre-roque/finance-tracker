@@ -4,13 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TransactionType, cn } from '@/lib/utils';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { UseQueryResult, useMutation, useQuery } from '@tanstack/react-query';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { categoriesType as Category, UserSettingsType } from '@/db/schema/finance';
 import CreateCategoryDialog from './CreateCategoryDialog';
 import { toast } from 'sonner';
 import { UpdateUserCategory } from '@/app/wizard/_actions/userSettings';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { Drawer, DrawerContent, DrawerTrigger } from './ui/drawer';
+import SkeletonWrapper from './SkeletonWrapper';
 
 interface Props {
 	type: TransactionType;
@@ -24,6 +27,7 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings }: Props) 
 	const [value, setValue] = useState(
 		type === 'income' ? userSettings?.mainIncomeCategory ?? '' : userSettings?.mainExpenseCategory ?? ''
 	);
+	const isDesktop = useMediaQuery('(min-width: 768px)');
 
 	const categoriesQuery = useQuery({
 		queryKey: ['categories', type],
@@ -34,6 +38,7 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings }: Props) 
 					type,
 				}),
 			}).then((res) => res.json()),
+		staleTime: 60 * 1000 * 10,
 	});
 
 	const { mutate } = useMutation({
@@ -82,52 +87,107 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings }: Props) 
 		[setValue, setOpen]
 	);
 
+	if (isDesktop) {
+		return (
+			<SkeletonWrapper isLoading={categoriesQuery.isFetching}>
+				<Popover open={open} onOpenChange={setOpen}>
+					<PopoverTrigger asChild>
+						<Button
+							variant={'outline'}
+							role='combobox'
+							aria-expanded={open}
+							className='w-full justify-between'
+						>
+							{selectedCategory ? <CategoryRow category={selectedCategory} /> : 'Selecionar categoria'}
+							<ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
+						</Button>
+					</PopoverTrigger>
+					<PopoverContent className='w-full p-0'>
+						<OptionsList
+							type={type}
+							successCallback={successCallback}
+							categoriesQuery={categoriesQuery}
+							onSelect={(category) => {
+								handleConfiguring(category.name);
+								setValue(category.name);
+								setOpen((prev) => !prev);
+							}}
+							value={value}
+						/>
+					</PopoverContent>
+				</Popover>
+			</SkeletonWrapper>
+		);
+	}
+
 	return (
-		<Popover open={open} onOpenChange={setOpen}>
-			<PopoverTrigger asChild>
-				<Button variant={'outline'} role='combobox' aria-expanded={open} className='w-full justify-between'>
-					{selectedCategory ? <CategoryRow category={selectedCategory} /> : 'Selecionar categoria'}
-					<ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
-				</Button>
-			</PopoverTrigger>
-			<PopoverContent className='w-full p-0'>
-				<Command
-					onSubmit={(e) => {
-						e.preventDefault();
-					}}
-				>
-					<CommandInput placeholder='Pesquisar categoria...' />
-					<CreateCategoryDialog type={type} successCallback={successCallback} />
-					<CommandEmpty>
-						<p>Não encontrada</p>
-						<p className='text-xs text-muted-foreground mt-1'>Dica: Cria uma nova categoria</p>
-					</CommandEmpty>
-					<CommandGroup>
-						<CommandList>
-							{categoriesQuery.data &&
-								categoriesQuery.data.map((category: Category) => (
-									<CommandItem
-										key={category.name}
-										onSelect={() => {
-											handleConfiguring(category.name);
-											setValue(category.name);
-											setOpen((prev) => !prev);
-										}}
-									>
-										<CategoryRow category={category} />
-										<Check
-											className={cn(
-												'mr-2 w-4 h-4 opacity-0',
-												value === category.name && 'opacity-100'
-											)}
-										/>
-									</CommandItem>
-								))}
-						</CommandList>
-					</CommandGroup>
-				</Command>
-			</PopoverContent>
-		</Popover>
+		<SkeletonWrapper isLoading={categoriesQuery.isFetching}>
+			<Drawer open={open} onOpenChange={setOpen}>
+				<DrawerTrigger asChild>
+					<Button variant={'outline'} role='combobox' aria-expanded={open} className='w-full justify-between'>
+						{selectedCategory ? <CategoryRow category={selectedCategory} /> : 'Selecionar categoria'}
+						<ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
+					</Button>
+				</DrawerTrigger>
+				<DrawerContent>
+					<div className='mt-4 mb-20 border-t'>
+						<OptionsList
+							type={type}
+							successCallback={successCallback}
+							categoriesQuery={categoriesQuery}
+							onSelect={(category) => {
+								handleConfiguring(category.name);
+								setValue(category.name);
+								setOpen((prev) => !prev);
+							}}
+							value={value}
+						/>
+					</div>
+				</DrawerContent>
+			</Drawer>
+		</SkeletonWrapper>
+	);
+}
+
+function OptionsList({
+	type,
+	successCallback,
+	categoriesQuery,
+	onSelect,
+	value,
+}: {
+	type: TransactionType;
+	successCallback: (category: Category) => void;
+	categoriesQuery: UseQueryResult<any, Error>;
+	onSelect: (category: Category) => void;
+	value: string;
+}) {
+	return (
+		<Command
+			onSubmit={(e) => {
+				e.preventDefault();
+			}}
+		>
+			<CommandInput placeholder='Pesquisar categoria...' />
+			<CreateCategoryDialog type={type} successCallback={successCallback} />
+			<CommandEmpty>
+				<p>Não encontrada</p>
+				<p className='text-xs text-muted-foreground mt-1'>Dica: Cria uma nova categoria</p>
+			</CommandEmpty>
+			<CommandGroup>
+				<CommandList>
+					{categoriesQuery.data &&
+						categoriesQuery.data.map((category: Category) => (
+							<CommandItem key={category.name} onSelect={() => onSelect(category)}>
+								<CategoryRow category={category} />
+								<Check
+									className={cn('mr-2 w-4 h-4 opacity-0', value === category.name && 'opacity-100')}
+								/>
+							</CommandItem>
+						))}
+				</CommandList>
+			</CommandGroup>
+		</Command>
 	);
 }
 

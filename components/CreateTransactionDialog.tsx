@@ -30,6 +30,9 @@ import CategoryPicker from './CategoryPicker';
 import { CreateTransaction } from '@/app/(root)/_actions/transactions';
 import { UserSettingsType } from '@/db/schema/finance';
 import CardComboBox from './CardComboBox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { GetFormatterForCurrency } from '@/lib/currencies';
+import { Input } from './ui/input';
 
 interface Props {
 	trigger: ReactNode;
@@ -39,6 +42,8 @@ interface Props {
 }
 
 function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSettings }: Props) {
+	const currencyFormatter = GetFormatterForCurrency(userSettings.currency || 'BRL');
+
 	const form = useForm<createTransactionSchemaType>({
 		resolver: zodResolver(createTransactionSchema),
 		defaultValues: {
@@ -57,6 +62,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 	const dateValue = form.watch('date');
 	const dayOfTheMonth = form.watch('dayOfTheMonth');
 	const businessDay = form.watch('businessDay');
+	const amount = form.watch('amount');
 
 	useEffect(() => {
 		if (isSelected) {
@@ -104,6 +110,11 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 
 			setOpen((prev) => !prev);
 		},
+		onError: (err) => {
+			toast.error(`Erro ao criar transação ${err.message}`, {
+				id: 'create-transaction',
+			});
+		},
 	});
 
 	const onSubmit = useCallback(
@@ -129,15 +140,64 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 
 				<Form {...form}>
 					<form className='space-y-4' onSubmit={form.handleSubmit(onSubmit)}>
-						<CustomInput control={form.control} name='description' label='Descrição' />
-						<CustomInput control={form.control} name='amount' label='Quantidade' type='number' />
+						<CustomInput
+							control={form.control}
+							name='description'
+							label='Descrição'
+							placeholder='Digite a descrição da transação'
+						/>
+						<div className='flex gap-2 items-center'>
+							<CustomInput
+								fullWidth={type !== 'expense' || isRecurringValue}
+								control={form.control}
+								name='amount'
+								label='Valor'
+								type='number'
+							/>
+							{type === 'expense' && !isRecurringValue && (
+								<FormField
+									control={form.control}
+									name='category'
+									render={() => (
+										<FormItem className='flex flex-col w-1/2'>
+											<FormLabel className='pb-2'>Quantidade de parcelas</FormLabel>
+											<FormControl>
+												<Select
+													onValueChange={(value) => {
+														form.setValue('installments', parseInt(value));
+													}}
+												>
+													<SelectTrigger className='w-full'>
+														<SelectValue placeholder='Parcelas' />
+													</SelectTrigger>
+													<SelectContent>
+														{Array.from({ length: amount > 1000 ? 20 : 10 }).map((_, i) => {
+															const currentValue = i + 1;
+															return (
+																<SelectItem
+																	key={currentValue}
+																	value={currentValue.toString()}
+																>
+																	{i + 1} x{' '}
+																	{currencyFormatter.format(amount / currentValue)}
+																</SelectItem>
+															);
+														})}
+													</SelectContent>
+												</Select>
+											</FormControl>
+										</FormItem>
+									)}
+								/>
+							)}
+						</div>
 
 						<div className='flex items-center gap-2'>
 							<FormField
 								control={form.control}
 								name='category'
 								render={() => (
-									<FormItem className='flex flex-col'>
+									<FormItem className='flex flex-col w-1/2'>
 										<FormLabel>Categoria</FormLabel>
 										<FormControl>
 											<CategoryPicker

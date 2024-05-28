@@ -11,7 +11,7 @@ import { CardsType, UserSettingsType } from '@/db/schema/finance';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { toast } from 'sonner';
 import { UpdateUserCard } from '@/app/wizard/_actions/userSettings';
-import { Plus } from 'lucide-react';
+import { ChevronsUpDown, Plus } from 'lucide-react';
 import CardCreationDialog from './CardCreationDialog';
 
 interface Props {
@@ -28,12 +28,13 @@ const CardComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
 	const cardsQuery = useQuery<CardsType[]>({
 		queryKey: ['cards'],
 		queryFn: () => fetch('/api/cards').then((res) => res.json()),
+		staleTime: 60 * 1000 * 10,
 	});
 
 	const mutation = useMutation({
 		mutationFn: UpdateUserCard,
 		onSuccess: (data: UserSettingsType) => {
-			toast.success(`Cartão principal selecionado com sucesso 🎉`, {
+			toast.success('Cartão principal configurado com sucesso 🎉', {
 				id: 'update-card',
 			});
 
@@ -51,15 +52,20 @@ const CardComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
 		(card: CardsType | null) => {
 			if (isConfiguring) {
 				if (!card) {
-					toast.error('Selecione um cartão');
-					return;
+					toast.loading('Retirando cartão...', {
+						id: 'update-card',
+					});
+				} else {
+					toast.loading('Configurando cartão...', {
+						id: 'update-card',
+					});
 				}
 
 				toast.loading('Configurando cartão...', {
 					id: 'update-card',
 				});
 
-				mutation.mutate(card.id);
+				mutation.mutate(card?.id ?? null);
 			} else {
 				setSelectedOption(card);
 			}
@@ -83,20 +89,12 @@ const CardComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
 		return (
 			<SkeletonWrapper isLoading={cardsQuery.isFetching}>
 				<Popover open={open} onOpenChange={setOpen}>
-					<div className='flex'>
-						<PopoverTrigger asChild>
-							<Button variant='outline' className='w-full justify-start' disabled={mutation.isPending}>
-								{selectedOption ? <>{selectedOption.name}</> : <>Selecionar cartão</>}
-							</Button>
-						</PopoverTrigger>
-						<CardCreationDialog
-							trigger={
-								<Button size='icon' variant='outline' className='grid-auto'>
-									<Plus />
-								</Button>
-							}
-						/>
-					</div>
+					<PopoverTrigger asChild>
+						<Button variant='outline' className='w-full justify-between' disabled={mutation.isPending}>
+							{selectedOption ? <>{selectedOption.name}</> : <>Selecionar cartão</>}
+							<ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
+						</Button>
+					</PopoverTrigger>
 					<PopoverContent className='w-[200px] p-0' align='start'>
 						<OptionList setOpen={setOpen} setSelectedOption={selectOption} cards={cardsQuery.data} />
 					</PopoverContent>
@@ -109,8 +107,9 @@ const CardComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
 		<SkeletonWrapper isLoading={cardsQuery.isFetching}>
 			<Drawer open={open} onOpenChange={setOpen}>
 				<DrawerTrigger asChild>
-					<Button variant='outline' className='w-full justify-start' disabled={mutation.isPending}>
+					<Button variant='outline' className='w-full justify-between' disabled={mutation.isPending}>
 						{selectedOption ? <>{selectedOption.name}</> : <>Selecionar cartão</>}
+						<ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
 					</Button>
 				</DrawerTrigger>
 				<DrawerContent>
@@ -135,9 +134,18 @@ function OptionList({
 	return (
 		<Command>
 			<CommandInput placeholder='Filtrar cartões...' />
+			<CardCreationDialog />
 			<CommandList>
 				<CommandEmpty>Nenhum resultado encontrado</CommandEmpty>
 				<CommandGroup>
+					<CommandItem
+						onSelect={() => {
+							setSelectedOption(null);
+							setOpen(false);
+						}}
+					>
+						Nenhum cartão
+					</CommandItem>
 					{cards?.map((card) => (
 						<CommandItem
 							key={card.id}

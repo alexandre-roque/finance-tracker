@@ -1,5 +1,6 @@
 'use server';
 
+import moment from 'moment';
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { categories, monthHistories, recurringTransactions, transactions, yearHistories } from '@/db/schema/finance';
@@ -7,6 +8,7 @@ import { DateToUTCDate, getBusinessDayOfMonth } from '@/lib/utils';
 import { createTransactionSchema, createTransactionSchemaType } from '@/schemas';
 import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
+import { ulid } from 'ulid';
 
 export async function CreateTransaction(form: createTransactionSchemaType) {
 	const parsedBody = createTransactionSchema.safeParse(form);
@@ -32,6 +34,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 		businessDay,
 		dayOfTheMonth,
 		card: cardId,
+		installments,
 	} = parsedBody.data;
 	const [categoryRow] = await db
 		.select()
@@ -51,7 +54,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 					amount,
 					type,
 					teamId,
-					cardId,
+					cardId: cardId ?? null,
 					dayOfTheMonth: dayOfTheMonth ?? null,
 					businessDay: businessDay ?? null,
 					description: description || '',
@@ -71,7 +74,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 						amount,
 						type,
 						teamId,
-						cardId,
+						cardId: cardId ?? null,
 						date: DateToUTCDate(new Date()),
 						description: description || '',
 						category: categoryRow.name,
@@ -158,38 +161,28 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 			return;
 		}
 
-		await trx.insert(transactions).values({
-			userId,
-			amount,
-			date,
-			type,
-			teamId,
-			cardId,
-			description: description || '',
-			category: categoryRow.name,
-			categoryIcon: categoryRow.icon,
-		});
+		let howManyInstallments = !installments ? 1 : installments;
+		const installmentId = installments > 1 ? ulid() : null;
 
-		// Atualiza monthHistory
-		const [existingMonthHistory] = await trx
-			.select()
-			.from(monthHistories)
-			.where(
-				and(
-					eq(monthHistories.userId, userId),
-					eq(monthHistories.day, date.getUTCDate()),
-					eq(monthHistories.month, date.getUTCMonth()),
-					eq(monthHistories.year, date.getUTCFullYear())
-				)
-			);
+		for (let i = 0; i < (howManyInstallments ?? 1); i++) {
+			await trx.insert(transactions).values({
+				userId,
+				amount: amount / howManyInstallments,
+				date: moment(date).add(i, 'months').toDate(),
+				type,
+				teamId,
+				installmentId,
+				cardId: cardId ?? null,
+				description:
+					(description || '') + (howManyInstallments > 1 ? ` (${i + 1}/${howManyInstallments})` : ''),
+				category: categoryRow.name,
+				categoryIcon: categoryRow.icon,
+			});
 
-		if (existingMonthHistory) {
-			await trx
-				.update(monthHistories)
-				.set({
-					expense: (existingMonthHistory.expense ?? 0) + (type === 'expense' ? amount : 0),
-					income: (existingMonthHistory.income ?? 0) + (type === 'income' ? amount : 0),
-				})
+			// Atualiza monthHistory
+			const [existingMonthHistory] = await trx
+				.select()
+				.from(monthHistories)
 				.where(
 					and(
 						eq(monthHistories.userId, userId),
@@ -198,36 +191,37 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 						eq(monthHistories.year, date.getUTCFullYear())
 					)
 				);
-		} else {
-			await trx.insert(monthHistories).values({
-				userId,
-				day: date.getUTCDate(),
-				month: date.getUTCMonth(),
-				year: date.getUTCFullYear(),
-				expense: type === 'expense' ? amount : 0,
-				income: type === 'income' ? amount : 0,
-			});
-		}
 
-		// Atualiza yearHistory
-		const [existingYearHistory] = await trx
-			.select()
-			.from(yearHistories)
-			.where(
-				and(
-					eq(yearHistories.userId, userId),
-					eq(yearHistories.month, date.getUTCMonth()),
-					eq(yearHistories.year, date.getUTCFullYear())
-				)
-			);
+			if (existingMonthHistory) {
+				await trx
+					.update(monthHistories)
+					.set({
+						expense: (existingMonthHistory.expense ?? 0) + (type === 'expense' ? amount : 0),
+						income: (existingMonthHistory.income ?? 0) + (type === 'income' ? amount : 0),
+					})
+					.where(
+						and(
+							eq(monthHistories.userId, userId),
+							eq(monthHistories.day, date.getUTCDate()),
+							eq(monthHistories.month, date.getUTCMonth()),
+							eq(monthHistories.year, date.getUTCFullYear())
+						)
+					);
+			} else {
+				await trx.insert(monthHistories).values({
+					userId,
+					day: date.getUTCDate(),
+					month: date.getUTCMonth(),
+					year: date.getUTCFullYear(),
+					expense: type === 'expense' ? amount : 0,
+					income: type === 'income' ? amount : 0,
+				});
+			}
 
-		if (existingYearHistory) {
-			await trx
-				.update(yearHistories)
-				.set({
-					expense: (existingYearHistory.expense ?? 0) + (type === 'expense' ? amount : 0),
-					income: (existingYearHistory.income ?? 0) + (type === 'income' ? amount : 0),
-				})
+			// Atualiza yearHistory
+			const [existingYearHistory] = await trx
+				.select()
+				.from(yearHistories)
 				.where(
 					and(
 						eq(yearHistories.userId, userId),
@@ -235,14 +229,30 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 						eq(yearHistories.year, date.getUTCFullYear())
 					)
 				);
-		} else {
-			await trx.insert(yearHistories).values({
-				userId,
-				month: date.getUTCMonth(),
-				year: date.getUTCFullYear(),
-				expense: type === 'expense' ? amount : 0,
-				income: type === 'income' ? amount : 0,
-			});
+
+			if (existingYearHistory) {
+				await trx
+					.update(yearHistories)
+					.set({
+						expense: (existingYearHistory.expense ?? 0) + (type === 'expense' ? amount : 0),
+						income: (existingYearHistory.income ?? 0) + (type === 'income' ? amount : 0),
+					})
+					.where(
+						and(
+							eq(yearHistories.userId, userId),
+							eq(yearHistories.month, date.getUTCMonth()),
+							eq(yearHistories.year, date.getUTCFullYear())
+						)
+					);
+			} else {
+				await trx.insert(yearHistories).values({
+					userId,
+					month: date.getUTCMonth(),
+					year: date.getUTCFullYear(),
+					expense: type === 'expense' ? amount : 0,
+					income: type === 'income' ? amount : 0,
+				});
+			}
 		}
 	});
 }

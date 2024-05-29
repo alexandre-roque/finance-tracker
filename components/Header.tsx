@@ -28,11 +28,6 @@ const Header = async () => {
 		redirect('/sign-in');
 	}
 
-	const [currentUserSettings] = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id));
-
-	if (!currentUserSettings) {
-		redirect('/wizard');
-	}
 	return (
 		<header className='flex h-14 items-center justify-between md:justify-end gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6'>
 			<Sheet>
@@ -66,7 +61,6 @@ const Header = async () => {
 			</Sheet>
 			<div className='flex gap-2 items-center'>
 				<HeaderCommandBox
-					userSettings={currentUserSettings}
 					trigger={
 						<div className='relative ml-auto flex-1 md:grow-0'>
 							<Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />

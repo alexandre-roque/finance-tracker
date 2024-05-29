@@ -32,7 +32,6 @@ import { UserSettingsType } from '@/db/schema/finance';
 import CardComboBox from './CardComboBox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { GetFormatterForCurrency } from '@/lib/currencies';
-import { Input } from './ui/input';
 
 interface Props {
 	trigger: ReactNode;
@@ -106,6 +105,10 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 			// After creating a transaction, we need to invalidate the overview query which will refetch data in the homepage
 			queryClient.invalidateQueries({
 				queryKey: ['overview'],
+			});
+
+			queryClient.invalidateQueries({
+				queryKey: ['transactions'],
 			});
 
 			setOpen((prev) => !prev);

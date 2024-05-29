@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CardsType, UserSettingsType } from '@/db/schema/finance';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { toast } from 'sonner';
@@ -24,11 +24,11 @@ const CardComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
 	const [open, setOpen] = useState(false);
 	const isDesktop = useMediaQuery('(min-width: 768px)');
 	const [selectedOption, setSelectedOption] = useState<CardsType | null>(null);
+	const queryClient = useQueryClient();
 
 	const cardsQuery = useQuery<CardsType[]>({
 		queryKey: ['cards'],
 		queryFn: () => fetch('/api/cards').then((res) => res.json()),
-		staleTime: 60 * 1000 * 10,
 	});
 
 	const mutation = useMutation({
@@ -39,6 +39,9 @@ const CardComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
 			});
 
 			setSelectedOption(cardsQuery.data?.find((c) => c.id === data.mainCard) || null);
+			queryClient.invalidateQueries({
+				queryKey: ['user-settings'],
+			});
 		},
 		onError: (e) => {
 			console.error(e);

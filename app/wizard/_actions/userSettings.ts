@@ -44,7 +44,7 @@ export async function UpdateUserCard(cardId: string | null) {
 	return userSettingsResult;
 }
 
-export async function UpdateUserCategory({ categoryId, type }: { categoryId: string; type: string }) {
+export async function UpdateUserCategory({ categoryId, type }: { categoryId?: string | null; type: string }) {
 	const session = await auth();
 	if (!session || !session.user || !session.user.id) {
 		redirect('/sign-in');

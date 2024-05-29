@@ -42,6 +42,7 @@ export const categories = sqliteTable(
 		name: text('name').notNull(),
 		icon: text('icon').notNull(),
 		type: text('type').default('income').notNull(),
+		teamId: text('teamId'),
 	},
 	(table) => ({
 		unq: unique().on(table.name, table.userId, table.type),
@@ -168,5 +169,17 @@ export const pendingTeamAprovals = sqliteTable(
 	},
 	(table) => ({
 		pk: primaryKey({ columns: [table.inviterId, table.guestId, table.teamId] }),
+	})
+);
+
+export const dailyRecurrenceCheckers = sqliteTable(
+	'dailyRecurrenceChecker',
+	{
+		day: integer('day'),
+		month: integer('month'),
+		year: integer('year'),
+	},
+	(table) => ({
+		pk: primaryKey({ columns: [table.day, table.month, table.year] }),
 	})
 );

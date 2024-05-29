@@ -7,7 +7,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Currencies, Currency } from '@/lib/currencies';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UserSettingsType } from '@/db/schema/finance';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { toast } from 'sonner';
@@ -17,6 +17,7 @@ const CurrencyComboBox = () => {
 	const [open, setOpen] = React.useState(false);
 	const isDesktop = useMediaQuery('(min-width: 768px)');
 	const [selectedOption, setSelectedOption] = useState<Currency | null>(null);
+	const queryClient = useQueryClient();
 
 	const userSettings = useQuery<UserSettingsType>({
 		queryKey: ['userSettings'],
@@ -37,6 +38,9 @@ const CurrencyComboBox = () => {
 			});
 
 			setSelectedOption(Currencies.find((c) => c.value === data.currency) || null);
+			queryClient.invalidateQueries({
+				queryKey: ['user-settings'],
+			});
 		},
 		onError: (e) => {
 			console.error(e);

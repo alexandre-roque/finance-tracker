@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TransactionType, cn } from '@/lib/utils';
-import { UseQueryResult, useMutation, useQuery } from '@tanstack/react-query';
+import { UseQueryResult, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { categoriesType as Category, UserSettingsType } from '@/db/schema/finance';
@@ -28,6 +28,7 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings }: Props) 
 		type === 'income' ? userSettings?.mainIncomeCategory ?? '' : userSettings?.mainExpenseCategory ?? ''
 	);
 	const isDesktop = useMediaQuery('(min-width: 768px)');
+	const queryClient = useQueryClient();
 
 	const categoriesQuery = useQuery({
 		queryKey: ['categories', type],
@@ -38,27 +39,27 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings }: Props) 
 					type,
 				}),
 			}).then((res) => res.json()),
-		staleTime: 60 * 1000 * 10,
 	});
 
 	const { mutate } = useMutation({
 		mutationFn: UpdateUserCategory,
 		onSuccess: (data: UserSettingsType) => {
-			toast.success(`Categoria atualizada com sucesso 🎉`, {
-				id: 'update-expense',
+			toast.success('Categoria padrão atualizada com sucesso 🎉', {
+				id: 'update-category',
 			});
-
-			setValue(
-				categoriesQuery.data?.find(
-					(category: Category) =>
-						category.name === (type === 'income' ? data.mainIncomeCategory : data.mainExpenseCategory)
-				).name
+			const cCategory = categoriesQuery.data?.find(
+				(category: Category) =>
+					category.name === (type === 'income' ? data.mainIncomeCategory : data.mainExpenseCategory)
 			);
+			setValue(cCategory?.name);
+			queryClient.invalidateQueries({
+				predicate: (query) => query.queryKey[0] === 'user-settings' && !query.queryKey[1],
+			});
 		},
 		onError: (e) => {
 			console.error(e);
 			toast.error('Algo deu errado, tente novamente', {
-				id: 'update-expense',
+				id: 'update-category',
 			});
 		},
 	});
@@ -102,14 +103,15 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings }: Props) 
 							<ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
 						</Button>
 					</PopoverTrigger>
-					<PopoverContent className='w-full p-0'>
+					<PopoverContent align='start' className='w-full p-0'>
 						<OptionsList
+							isConfiguring={isConfiguring}
 							type={type}
 							successCallback={successCallback}
 							categoriesQuery={categoriesQuery}
 							onSelect={(category) => {
-								handleConfiguring(category.name);
-								setValue(category.name);
+								handleConfiguring(category?.name || '');
+								setValue(category?.name || '');
 								setOpen((prev) => !prev);
 							}}
 							value={value}
@@ -132,12 +134,13 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings }: Props) 
 				<DrawerContent>
 					<div className='mt-4 mb-20 border-t'>
 						<OptionsList
+							isConfiguring={isConfiguring}
 							type={type}
 							successCallback={successCallback}
 							categoriesQuery={categoriesQuery}
 							onSelect={(category) => {
-								handleConfiguring(category.name);
-								setValue(category.name);
+								handleConfiguring(category?.name || '');
+								setValue(category?.name || '');
 								setOpen((prev) => !prev);
 							}}
 							value={value}
@@ -150,16 +153,18 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings }: Props) 
 }
 
 function OptionsList({
+	isConfiguring,
 	type,
 	successCallback,
 	categoriesQuery,
 	onSelect,
 	value,
 }: {
+	isConfiguring?: boolean;
 	type: TransactionType;
 	successCallback: (category: Category) => void;
 	categoriesQuery: UseQueryResult<any, Error>;
-	onSelect: (category: Category) => void;
+	onSelect: (category: Category | null) => void;
 	value: string;
 }) {
 	return (
@@ -176,6 +181,15 @@ function OptionsList({
 			</CommandEmpty>
 			<CommandGroup>
 				<CommandList>
+					{isConfiguring && (
+						<CommandItem
+							onSelect={() => {
+								onSelect(null);
+							}}
+						>
+							Nenhuma categoria padrão
+						</CommandItem>
+					)}
 					{categoriesQuery.data &&
 						categoriesQuery.data.map((category: Category) => (
 							<CommandItem key={category.name} onSelect={() => onSelect(category)}>

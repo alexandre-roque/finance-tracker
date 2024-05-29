@@ -68,7 +68,7 @@ type HistoryData = {
 
 async function getYearHistoryData(userId: string, year: number) {
 	const result = await db
-		.select({ expense: sum(yearHistories.expense), income: sum(yearHistories.income), month: yearHistories.month })
+		.select({ expense: yearHistories.expense, income: yearHistories.income, month: yearHistories.month })
 		.from(yearHistories)
 		.where(and(eq(yearHistories.userId, userId), eq(yearHistories.year, year)))
 		.orderBy(asc(yearHistories.month));
@@ -83,8 +83,8 @@ async function getYearHistoryData(userId: string, year: number) {
 
 		const month = result.find((row) => row.month === i);
 		if (month) {
-			expense = parseFloat(month.expense || '0') || 0;
-			income = parseFloat(month.income || '0') || 0;
+			expense = month.expense || 0;
+			income = month.income || 0;
 		}
 
 		history.push({

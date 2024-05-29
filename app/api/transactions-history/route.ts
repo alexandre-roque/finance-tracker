@@ -6,14 +6,19 @@ import { OverviewQuerySchema } from '@/schemas';
 import { and, eq, gte, lte } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 
-export const GET = auth(async (req) => {
+interface RequestBody {
+	from: Date;
+	to: Date;
+}
+
+export const POST = auth(async (req) => {
 	if (!req.auth?.user?.id) {
 		redirect('/sign-in');
 	}
 
-	const { searchParams } = new URL(req.url);
-	const from = searchParams.get('from');
-	const to = searchParams.get('to');
+	const body: RequestBody = await req.json();
+	const from = body.from;
+	const to = body.to;
 
 	const queryParams = OverviewQuerySchema.safeParse({
 		from,

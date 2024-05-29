@@ -256,3 +256,93 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 		}
 	});
 }
+
+export async function DeleteTransaction({
+	transactionId,
+	installmentId,
+}: {
+	transactionId: string;
+	installmentId?: string;
+}) {
+	const session = await auth();
+	if (!session || !session.user || !session.user.id) {
+		redirect('/sign-in');
+	}
+
+	const userId = session.user.id;
+	const query = installmentId
+		? and(eq(transactions.userId, userId), eq(transactions.installmentId, installmentId))
+		: and(eq(transactions.userId, userId), eq(transactions.id, transactionId));
+	const transactionsResult = await db.select().from(transactions).where(query);
+
+	if (!transactionsResult?.length) {
+		throw new Error('Bad request');
+	}
+
+	for (const transaction of transactionsResult) {
+		const { date, amount, type } = transaction;
+
+		await db.transaction(async (trx) => {
+			await trx
+				.delete(transactions)
+				.where(and(eq(transactions.userId, userId), eq(transactions.id, transaction.id)));
+			// Atualiza monthHistory
+			const [existingMonthHistory] = await trx
+				.select()
+				.from(monthHistories)
+				.where(
+					and(
+						eq(monthHistories.userId, userId),
+						eq(monthHistories.day, date.getUTCDate()),
+						eq(monthHistories.month, date.getUTCMonth()),
+						eq(monthHistories.year, date.getUTCFullYear())
+					)
+				);
+
+			if (existingMonthHistory) {
+				await trx
+					.update(monthHistories)
+					.set({
+						expense: (existingMonthHistory.expense ?? 0) - (type === 'expense' ? amount : 0),
+						income: (existingMonthHistory.income ?? 0) - (type === 'income' ? amount : 0),
+					})
+					.where(
+						and(
+							eq(monthHistories.userId, userId),
+							eq(monthHistories.day, date.getUTCDate()),
+							eq(monthHistories.month, date.getUTCMonth()),
+							eq(monthHistories.year, date.getUTCFullYear())
+						)
+					);
+			}
+
+			// Atualiza yearHistory
+			const [existingYearHistory] = await trx
+				.select()
+				.from(yearHistories)
+				.where(
+					and(
+						eq(yearHistories.userId, userId),
+						eq(yearHistories.month, date.getUTCMonth()),
+						eq(yearHistories.year, date.getUTCFullYear())
+					)
+				);
+
+			if (existingYearHistory) {
+				await trx
+					.update(yearHistories)
+					.set({
+						expense: (existingYearHistory.expense ?? 0) - (type === 'expense' ? amount : 0),
+						income: (existingYearHistory.income ?? 0) - (type === 'income' ? amount : 0),
+					})
+					.where(
+						and(
+							eq(yearHistories.userId, userId),
+							eq(yearHistories.month, date.getUTCMonth()),
+							eq(yearHistories.year, date.getUTCFullYear())
+						)
+					);
+			}
+		});
+	}
+}

@@ -26,8 +26,8 @@ function HistoryPeriodSelector({ period, setPeriod, timeframe, setTimeframe }: P
 			<SkeletonWrapper isLoading={historyPeriods.isFetching} fullWidth={false}>
 				<Tabs value={timeframe} onValueChange={(value) => setTimeframe(value as Timeframe)}>
 					<TabsList>
-						<TabsTrigger value='year'>Ano</TabsTrigger>
 						<TabsTrigger value='month'>Mês</TabsTrigger>
+						<TabsTrigger value='year'>Ano</TabsTrigger>
 					</TabsList>
 				</Tabs>
 			</SkeletonWrapper>

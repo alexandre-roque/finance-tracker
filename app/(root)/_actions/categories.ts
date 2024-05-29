@@ -56,5 +56,6 @@ export async function DeleteCategory(form: deleteCategorySchemaType) {
 				eq(categories.name, parsedBody.data.name),
 				eq(categories.type, parsedBody.data.type)
 			)
-		);
+		)
+		.returning();
 }

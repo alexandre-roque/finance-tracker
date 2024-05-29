@@ -76,6 +76,8 @@ const PRESETS: Preset[] = [
 	{ name: 'lastMonth', label: 'Último mês' },
 	{ name: 'nextMonth', label: 'Próximo mês' },
 	{ name: 'next2Months', label: 'Próximos 2 meses' },
+	{ name: 'next30', label: 'Próximos 30 dias' },
+	{ name: 'next60', label: 'Próximos 60 dias' },
 ];
 
 /** The DateRangePicker component allows a user to select a range of dates */
@@ -194,6 +196,16 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 				from.setHours(0, 0, 0, 0);
 				to.setMonth(to.getMonth() + 3);
 				to.setDate(0);
+				to.setHours(23, 59, 59, 999);
+				break;
+			case 'next30':
+				from.setHours(0, 0, 0, 0);
+				to.setMonth(to.getMonth() + 1);
+				to.setHours(23, 59, 59, 999);
+				break;
+			case 'next60':
+				from.setHours(0, 0, 0, 0);
+				to.setMonth(to.getMonth() + 2);
 				to.setHours(23, 59, 59, 999);
 				break;
 		}

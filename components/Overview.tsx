@@ -3,7 +3,7 @@
 // import CategoriesStats from '@/app/(dashboard)/_components/CategoriesStats';
 // import StatsCards from '@/app/(dashboard)/_components/StatsCards';
 import { UserSettingsType } from '@/db/schema/finance';
-import { differenceInDays, startOfMonth } from 'date-fns';
+import { differenceInDays, endOfDay, startOfMonth } from 'date-fns';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { DateRangePicker } from './ui/date-range-picker';
@@ -14,7 +14,7 @@ import CategoriesStats from './CategoriesStats';
 function Overview({ userSettings }: { userSettings: UserSettingsType }) {
 	const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
 		from: startOfMonth(new Date()),
-		to: new Date(),
+		to: endOfDay(new Date()),
 	});
 
 	return (

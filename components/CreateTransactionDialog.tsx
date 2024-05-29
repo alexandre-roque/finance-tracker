@@ -171,7 +171,9 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 														<SelectValue placeholder='Parcelas' />
 													</SelectTrigger>
 													<SelectContent>
-														{Array.from({ length: amount > 1000 ? 20 : 10 }).map((_, i) => {
+														{Array.from({
+															length: amount <= 100 ? 5 : amount <= 1000 ? 12 : 24,
+														}).map((_, i) => {
 															const currentValue = i + 1;
 															return (
 																<SelectItem

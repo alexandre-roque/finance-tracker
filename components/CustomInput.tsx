@@ -38,6 +38,7 @@ const CustomInput = ({
 								type={type}
 								maxLength={name === 'cardNumber' ? 4 : undefined}
 								disabled={disabled}
+								step={name === 'amount' ? '0.1' : undefined}
 								{...field}
 							/>
 						</FormControl>

@@ -283,18 +283,13 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 		isSelected: boolean;
 	}): JSX.Element => (
 		<Button
-			className={cn(isSelected && 'pointer-events-none')}
+			className={cn(isSelected && 'pointer-events-none relative bg-muted/50')}
 			variant='ghost'
 			onClick={() => {
 				setPreset(preset);
 			}}
 		>
-			<>
-				<span className={cn('pr-2 opacity-0', isSelected && 'opacity-70')}>
-					<CheckIcon width={18} height={18} />
-				</span>
-				{label}
-			</>
+			{label}
 		</Button>
 	);
 
@@ -494,8 +489,8 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 						</div>
 					</div>
 					{!isSmallScreen && (
-						<div className='flex flex-col items-end gap-1 pr-2 pl-6 pb-6'>
-							<div className='flex w-full flex-col items-end gap-1 pr-2 pl-6 pb-6'>
+						<div className='flex flex-col items-end gap-1'>
+							<div className='grid grid-cols-2 ml-2'>
 								{PRESETS.map((preset) => (
 									<PresetButton
 										key={preset.name}

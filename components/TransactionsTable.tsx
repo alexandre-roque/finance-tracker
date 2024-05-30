@@ -78,6 +78,11 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
 		cell: ({ row }) => <div className='capitalize'>{row.original.description}</div>,
 	},
 	{
+		accessorKey: 'teamId',
+		header: ({ column }) => <DataTableColumnHeader column={column} title='Time' />,
+		cell: ({ row }) => <div className='capitalize'>{row.original.teamId}</div>,
+	},
+	{
 		accessorKey: 'type',
 		header: ({ column }) => <DataTableColumnHeader column={column} title='Tipo' />,
 		filterFn: (row, id, value) => {

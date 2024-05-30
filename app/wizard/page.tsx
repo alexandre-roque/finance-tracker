@@ -13,6 +13,12 @@ import { eq } from 'drizzle-orm';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import React from 'react';
+import { revalidatePath } from 'next/cache';
+
+async function submit() {
+	'use server';
+	revalidatePath('/');
+}
 
 const Wizard = async () => {
 	const session = await auth();
@@ -76,7 +82,7 @@ const Wizard = async () => {
 				</CardContent>
 			</Card>
 
-			<Button className='w-full' asChild>
+			<Button formAction={submit} className='w-full' asChild>
 				<Link href={'/'}>Tudo certo! Leve-me para página inicial</Link>
 			</Button>
 			<div className='mt-8'>

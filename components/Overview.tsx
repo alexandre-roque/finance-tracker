@@ -8,6 +8,7 @@ import { DateRangePicker } from './ui/date-range-picker';
 import { MAX_DATE_RANGE_DAYS } from '@/constants';
 import StatsCards from './StatsCards';
 import CategoriesStats from './CategoriesStats';
+import TeamsComboBox from './TeamsComboBox';
 
 function Overview({ userSettings }: { userSettings: userSettingsType }) {
 	const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
@@ -20,6 +21,7 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 			<div className='container flex flex-wrap items-end justify-between gap-2 py-6'>
 				<h2 className='text-3xl font-bold'>Visão geral</h2>
 				<div className='flex items-center gap-3'>
+					<TeamsComboBox userSettings={userSettings} />
 					<DateRangePicker
 						locale='pt-BR'
 						initialDateFrom={dateRange.from}

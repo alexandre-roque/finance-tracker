@@ -32,6 +32,7 @@ import { userSettingsType } from '@/db/schema/finance';
 import CardComboBox from './CardComboBox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { GetFormatterForCurrency } from '@/lib/currencies';
+import TeamsComboBox from './TeamsComboBox';
 
 interface Props {
 	trigger: ReactNode;
@@ -72,6 +73,13 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 	const handleCategoryChange = useCallback(
 		(value: string) => {
 			form.setValue('category', value);
+		},
+		[form]
+	);
+
+	const handleTeamChange = useCallback(
+		(value: string) => {
+			form.setValue('teamId', value);
 		},
 		[form]
 	);
@@ -149,7 +157,20 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 							label='Descrição'
 							placeholder='Digite a descrição da transação'
 						/>
-						<div className='flex gap-2 items-center'>
+						<FormField
+							control={form.control}
+							name='teamId'
+							render={() => (
+								<FormItem className='flex flex-col'>
+									<FormLabel>Time</FormLabel>
+									<FormControl>
+										<TeamsComboBox userSettings={userSettings} onChange={handleTeamChange} />
+									</FormControl>
+									<FormDescription>Selecione o time para a transação</FormDescription>
+								</FormItem>
+							)}
+						/>
+						<div className='flex items-center gap-2'>
 							<CustomInput
 								fullWidth={type !== 'expense' || isRecurringValue}
 								control={form.control}

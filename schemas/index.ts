@@ -28,6 +28,8 @@ export const createCardSchema = z.object({
 	name: z.string(),
 });
 
+export type createCardSchemaType = z.infer<typeof createCardSchema>;
+
 export const createTransactionSchema = z.object({
 	amount: z.coerce.number().positive().multipleOf(0.01),
 	description: z.string().optional(),
@@ -71,3 +73,10 @@ export const OverviewQuerySchema = z
 		const isValidRange = days >= 0 && days <= MAX_DATE_RANGE_DAYS;
 		return isValidRange;
 	});
+
+export const createTeamSchema = z.object({
+	name: z.string().min(3).max(20),
+	description: z.string().max(40),
+});
+
+export type createTeamSchemaType = z.infer<typeof createTeamSchema>;

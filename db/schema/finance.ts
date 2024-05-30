@@ -15,6 +15,7 @@ export const userSettings = sqliteTable('userSetting', {
 	mainIncomeCategory: text('mainIncomeCategory'),
 	mainExpenseCategory: text('mainExpenseCategory'),
 	mainCard: text('mainCard').references(() => cards.id, { onDelete: 'set null' }),
+	mainTeam: text('mainTeam').references(() => teams.id, { onDelete: 'set null' }),
 });
 
 export type userSettingsType = typeof userSettings.$inferSelect;
@@ -135,7 +136,9 @@ export const yearHistories = sqliteTable(
 export type yearHistoryType = typeof yearHistories.$inferSelect;
 
 export const teams = sqliteTable('team', {
-	id: text('id').primaryKey(),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => ulid()),
 	name: text('name').notNull(),
 	description: text('description'),
 	ownerId: text('ownerId')
@@ -146,7 +149,9 @@ export const teams = sqliteTable('team', {
 export type teamsType = typeof teams.$inferSelect;
 
 export const teamMembers = sqliteTable('teamMember', {
-	id: text('id').primaryKey(),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => ulid()),
 	userId: text('userId')
 		.notNull()
 		.references(() => users.id, { onDelete: 'cascade' }),
@@ -201,6 +206,10 @@ export const userSettingsRelations = relations(userSettings, ({ one }) => ({
 	mainCard: one(cards, {
 		fields: [userSettings.mainCard],
 		references: [cards.id],
+	}),
+	mainTeam: one(teams, {
+		fields: [userSettings.mainTeam],
+		references: [teams.id],
 	}),
 }));
 

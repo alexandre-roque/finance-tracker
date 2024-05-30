@@ -4,6 +4,7 @@ import React, { ReactNode, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
+	DialogClose,
 	DialogContent,
 	DialogDescription,
 	DialogFooter,
@@ -105,8 +106,20 @@ const CardCreationDialog = ({ trigger }: { trigger?: ReactNode }) => {
 					</form>
 				</Form>
 				<DialogFooter>
-					<Button disabled={isLoading} onClick={form.handleSubmit(onSubmit)} className='w-full mt-6'>
-						{isLoading ? <Loader2 className='animate-spin' /> : 'Cadastrar'}
+					<DialogClose asChild>
+						<Button
+							type='button'
+							variant={'ghost'}
+							onClick={() => {
+								form.reset();
+							}}
+						>
+							Cancelar
+						</Button>
+					</DialogClose>
+					<Button onClick={form.handleSubmit(onSubmit)} disabled={isLoading}>
+						{!isLoading && 'Criar'}
+						{isLoading && <Loader2 className='animate-spin' />}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

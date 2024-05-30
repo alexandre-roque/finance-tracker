@@ -58,3 +58,18 @@ export async function UpdateUserCategory({ categoryId, type }: { categoryId?: st
 
 	return userSettingsResult;
 }
+
+export async function UpdateUserTeam(teamId: string | null) {
+	const session = await auth();
+	if (!session || !session.user || !session.user.id) {
+		redirect('/sign-in');
+	}
+
+	const [userSettingsResult] = await db
+		.update(userSettings)
+		.set({ mainTeam: teamId })
+		.where(eq(userSettings.userId, session.user.id))
+		.returning();
+
+	return userSettingsResult;
+}

@@ -16,7 +16,6 @@ const Home = async () => {
 	}
 
 	const [currentUserSettings] = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id));
-
 	if (!currentUserSettings) {
 		redirect('/wizard');
 	}

@@ -20,9 +20,10 @@ export const GET = auth(async (req) => {
 				userId: req.auth.user.id,
 				currency: 'BRL',
 			});
+			
+			revalidatePath('/');
 		}
 
-		revalidatePath('/');
 		return Response.json(result, { status: 200 });
 	} else {
 		redirect('/sign-in');

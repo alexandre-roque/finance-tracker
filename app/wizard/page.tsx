@@ -4,6 +4,7 @@ import CategoryPicker from '@/components/CategoryPicker';
 import { TransactionTitle } from '@/components/CreateTransactionDialog';
 import CurrencyComboBox from '@/components/CurrencyComboBox';
 import Logo from '@/components/Logo';
+import RevalidateAndRedirect from '@/components/RevalidateAndRedirect';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -13,12 +14,6 @@ import { eq } from 'drizzle-orm';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import React from 'react';
-import { revalidatePath } from 'next/cache';
-
-async function submit() {
-	'use server';
-	revalidatePath('/');
-}
 
 const Wizard = async () => {
 	const session = await auth();
@@ -82,9 +77,7 @@ const Wizard = async () => {
 				</CardContent>
 			</Card>
 
-			<Button formAction={submit} className='w-full' asChild>
-				<Link href={'/'}>Tudo certo! Leve-me para página inicial</Link>
-			</Button>
+			<RevalidateAndRedirect />
 			<div className='mt-8'>
 				<Logo />
 			</div>

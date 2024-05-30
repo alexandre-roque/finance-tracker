@@ -6,6 +6,7 @@ import { auth } from '@/auth';
 import { updateUserCurrencySchema } from '@/schemas';
 import { userSettings } from '@/db/schema/finance';
 import { db } from '@/db';
+import { revalidatePath } from 'next/cache';
 
 export async function UpdateUserCurrency(currency: string) {
 	const parsedBody = updateUserCurrencySchema.safeParse({
@@ -27,6 +28,8 @@ export async function UpdateUserCurrency(currency: string) {
 		.where(eq(userSettings.userId, session.user.id!))
 		.returning();
 
+	revalidatePath('/');
+
 	return userSettingsResult;
 }
 export async function UpdateUserCard(cardId: string | null) {
@@ -40,6 +43,8 @@ export async function UpdateUserCard(cardId: string | null) {
 		.set({ mainCard: cardId })
 		.where(eq(userSettings.userId, session.user.id))
 		.returning();
+
+	revalidatePath('/');
 
 	return userSettingsResult;
 }
@@ -56,6 +61,8 @@ export async function UpdateUserCategory({ categoryId, type }: { categoryId?: st
 		.where(eq(userSettings.userId, session.user.id))
 		.returning();
 
+	revalidatePath('/');
+	
 	return userSettingsResult;
 }
 
@@ -70,6 +77,8 @@ export async function UpdateUserTeam(teamId: string | null) {
 		.set({ mainTeam: teamId })
 		.where(eq(userSettings.userId, session.user.id))
 		.returning();
+
+	revalidatePath('/');
 
 	return userSettingsResult;
 }

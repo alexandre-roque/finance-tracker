@@ -28,7 +28,7 @@ import CustomInput from './CustomInput';
 import { Switch } from './ui/switch';
 import CategoryPicker from './CategoryPicker';
 import { CreateTransaction } from '@/app/(root)/_actions/transactions';
-import { UserSettingsType } from '@/db/schema/finance';
+import { userSettingsType } from '@/db/schema/finance';
 import CardComboBox from './CardComboBox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { GetFormatterForCurrency } from '@/lib/currencies';
@@ -36,7 +36,7 @@ import { GetFormatterForCurrency } from '@/lib/currencies';
 interface Props {
 	trigger: ReactNode;
 	type: TransactionType;
-	userSettings: UserSettingsType;
+	userSettings: userSettingsType;
 	isSelected?: boolean;
 }
 

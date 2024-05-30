@@ -124,13 +124,9 @@ function TransactionTable({ from, to }: Props) {
 	const history = useQuery<GetTransactionHistoryResponseType>({
 		queryKey: ['transactions', 'history', from, to],
 		queryFn: () =>
-			fetch('/api/transactions-history', {
-				method: 'POST',
-				body: JSON.stringify({
-					from: DateToUTCDate(from),
-					to: DateToUTCDate(to),
-				}),
-			}).then((res) => res.json()),
+			fetch(`/api/transactions-history?from=${DateToUTCDate(from)}&to=${DateToUTCDate(to)}`).then((res) =>
+				res.json()
+			),
 	});
 
 	const handleExportCSV = (data: any[]) => {

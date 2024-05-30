@@ -7,7 +7,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CardsType, UserSettingsType } from '@/db/schema/finance';
+import { cardsType, userSettingsType } from '@/db/schema/finance';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { toast } from 'sonner';
 import { UpdateUserCard } from '@/app/wizard/_actions/userSettings';
@@ -17,23 +17,23 @@ import CardCreationDialog from './CardCreationDialog';
 interface Props {
 	onChange?: (value: string) => void;
 	isConfiguring?: boolean;
-	userSettings?: UserSettingsType;
+	userSettings?: userSettingsType;
 }
 
 const CardComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
 	const [open, setOpen] = useState(false);
 	const isDesktop = useMediaQuery('(min-width: 768px)');
-	const [selectedOption, setSelectedOption] = useState<CardsType | null>(null);
+	const [selectedOption, setSelectedOption] = useState<cardsType | null>(null);
 	const queryClient = useQueryClient();
 
-	const cardsQuery = useQuery<CardsType[]>({
+	const cardsQuery = useQuery<cardsType[]>({
 		queryKey: ['cards'],
 		queryFn: () => fetch('/api/cards').then((res) => res.json()),
 	});
 
 	const mutation = useMutation({
 		mutationFn: UpdateUserCard,
-		onSuccess: (data: UserSettingsType) => {
+		onSuccess: (data: userSettingsType) => {
 			toast.success('Cartão principal configurado com sucesso 🎉', {
 				id: 'update-card',
 			});
@@ -52,7 +52,7 @@ const CardComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
 	});
 
 	const selectOption = useCallback(
-		(card: CardsType | null) => {
+		(card: cardsType | null) => {
 			if (isConfiguring) {
 				if (!card) {
 					toast.loading('Retirando cartão...', {
@@ -130,9 +130,9 @@ function OptionList({
 	setOpen,
 	setSelectedOption,
 }: {
-	cards?: CardsType[];
+	cards?: cardsType[];
 	setOpen: (open: boolean) => void;
-	setSelectedOption: (status: CardsType | null) => void;
+	setSelectedOption: (status: cardsType | null) => void;
 }) {
 	return (
 		<Command>

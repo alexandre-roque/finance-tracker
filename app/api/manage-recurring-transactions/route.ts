@@ -1,3 +1,5 @@
+export const revalidate = 0;
+
 import { CreateTransaction } from '@/app/(root)/_actions/transactions';
 import { db } from '@/db';
 import { dailyRecurrenceCheckers, recurringTransactions } from '@/db/schema/finance';

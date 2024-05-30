@@ -1,3 +1,5 @@
+export const revalidate = 0;
+
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';

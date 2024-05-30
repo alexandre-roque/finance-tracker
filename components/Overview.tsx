@@ -1,8 +1,6 @@
 'use client';
 
-// import CategoriesStats from '@/app/(dashboard)/_components/CategoriesStats';
-// import StatsCards from '@/app/(dashboard)/_components/StatsCards';
-import { UserSettingsType } from '@/db/schema/finance';
+import { userSettingsType } from '@/db/schema/finance';
 import { differenceInDays, endOfDay, startOfMonth } from 'date-fns';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
@@ -11,7 +9,7 @@ import { MAX_DATE_RANGE_DAYS } from '@/constants';
 import StatsCards from './StatsCards';
 import CategoriesStats from './CategoriesStats';
 
-function Overview({ userSettings }: { userSettings: UserSettingsType }) {
+function Overview({ userSettings }: { userSettings: userSettingsType }) {
 	const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
 		from: startOfMonth(new Date()),
 		to: endOfDay(new Date()),

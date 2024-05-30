@@ -1,3 +1,5 @@
+export const revalidate = 0;
+
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { monthHistories, yearHistories, yearHistoryType } from '@/db/schema/finance';
@@ -13,19 +15,15 @@ const getHistoryDataSchema = z.object({
 	year: z.coerce.number().min(2000).max(3000),
 });
 
-interface RequestBody {
-	timeframe: 'month' | 'year';
-	year: number;
-	month: number;
-}
-
-export const POST = auth(async (req) => {
+export const GET = auth(async (req) => {
 	if (!req.auth?.user?.id) {
 		redirect('/sign-in');
 	}
 
-	const body: RequestBody = await req.json();
-	const { timeframe, year, month } = body;
+	const { searchParams } = new URL(req.url);
+	const timeframe = searchParams.get('timeframe');
+	const year = searchParams.get('year');
+	const month = searchParams.get('month');
 
 	const queryParams = getHistoryDataSchema.safeParse({
 		timeframe,

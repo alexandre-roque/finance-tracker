@@ -3,7 +3,7 @@
 import { GetBalanceStatsResponseType } from '@/app/api/stats/balance/route';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { Card } from '@/components/ui/card';
-import { UserSettingsType } from '@/db/schema/finance';
+import { userSettingsType } from '@/db/schema/finance';
 import { GetFormatterForCurrency } from '@/lib/currencies';
 import { DateToUTCDate } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -14,20 +14,14 @@ import CountUp from 'react-countup';
 interface Props {
 	from: Date;
 	to: Date;
-	userSettings: UserSettingsType;
+	userSettings: userSettingsType;
 }
 
 function StatsCards({ from, to, userSettings }: Props) {
 	const statsQuery = useQuery<GetBalanceStatsResponseType>({
 		queryKey: ['overview', 'stats', from, to],
 		queryFn: () =>
-			fetch('/api/stats/balance', {
-				method: 'POST',
-				body: JSON.stringify({
-					from: DateToUTCDate(from),
-					to: DateToUTCDate(to),
-				}),
-			}).then((res) => res.json()),
+			fetch(`/api/stats/balance?from=${DateToUTCDate(from)}&to=${DateToUTCDate(to)}`).then((res) => res.json()),
 	});
 
 	const formatter = useMemo(() => {

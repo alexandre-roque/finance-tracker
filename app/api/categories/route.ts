@@ -1,22 +1,19 @@
+export const revalidate = 0;
+
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { categories } from '@/db/schema/finance';
-import { TransactionType } from '@/lib/utils';
 import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
-interface RequestBody {
-	type: TransactionType;
-}
-
-export const POST = auth(async (req) => {
+export const GET = auth(async (req) => {
 	if (!req.auth?.user?.id) {
 		redirect('/sign-in');
 	}
 
-	const body: RequestBody = await req.json();
-	const { type } = body;
+	const { searchParams } = new URL(req.url);
+	const type = searchParams.get('type');
 
 	const validator = z.enum(['expense', 'income']).nullable();
 

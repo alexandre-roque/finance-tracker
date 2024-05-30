@@ -5,7 +5,7 @@ import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { UserSettingsType } from '@/db/schema/finance';
+import { userSettingsType } from '@/db/schema/finance';
 import { GetFormatterForCurrency } from '@/lib/currencies';
 import { DateToUTCDate, TransactionType } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -13,7 +13,7 @@ import React, { useMemo } from 'react';
 import { TransactionTitle } from './CreateTransactionDialog';
 
 interface Props {
-	userSettings: UserSettingsType;
+	userSettings: userSettingsType;
 	from: Date;
 	to: Date;
 }
@@ -22,13 +22,9 @@ function CategoriesStats({ userSettings, from, to }: Props) {
 	const statsQuery = useQuery<GetCategoriesStatsResponseType>({
 		queryKey: ['overview', 'stats', 'categories', from, to],
 		queryFn: () =>
-			fetch('/api/stats/categories', {
-				method: 'POST',
-				body: JSON.stringify({
-					from: DateToUTCDate(from),
-					to: DateToUTCDate(to),
-				}),
-			}).then((res) => res.json()),
+			fetch(`/api/stats/categories?from=${DateToUTCDate(from)}&to=${DateToUTCDate(to)}`).then((res) =>
+				res.json()
+			),
 	});
 
 	const formatter = useMemo(() => {

@@ -3,7 +3,7 @@
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UserSettingsType } from '@/db/schema/finance';
+import { userSettingsType } from '@/db/schema/finance';
 import { GetFormatterForCurrency } from '@/lib/currencies';
 import { Period, Timeframe, cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -12,7 +12,7 @@ import CountUp from 'react-countup';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import HistoryPeriodSelector from './HistoryPeriodSelector';
 
-function History({ userSettings }: { userSettings: UserSettingsType }) {
+function History({ userSettings }: { userSettings: userSettingsType }) {
 	const [timeframe, setTimeframe] = useState<Timeframe>('month');
 	const [period, setPeriod] = useState<Period>({
 		month: new Date().getMonth(),
@@ -26,14 +26,9 @@ function History({ userSettings }: { userSettings: UserSettingsType }) {
 	const historyDataQuery = useQuery({
 		queryKey: ['overview', 'history', timeframe, period],
 		queryFn: () =>
-			fetch('/api/history-data', {
-				method: 'POST',
-				body: JSON.stringify({
-					timeframe,
-					year: period.year,
-					month: period.month,
-				}),
-			}).then((res) => res.json()),
+			fetch(`/api/history-data?timeframe=${timeframe}&year=${period.year}&month=${period.month}`).then((res) =>
+				res.json()
+			),
 	});
 
 	const dataAvailable = historyDataQuery.data && historyDataQuery.data.length > 0;

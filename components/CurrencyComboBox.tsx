@@ -8,7 +8,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Currencies, Currency } from '@/lib/currencies';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { UserSettingsType } from '@/db/schema/finance';
+import { userSettingsType } from '@/db/schema/finance';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { toast } from 'sonner';
 import { UpdateUserCurrency } from '@/app/wizard/_actions/userSettings';
@@ -19,7 +19,7 @@ const CurrencyComboBox = () => {
 	const [selectedOption, setSelectedOption] = useState<Currency | null>(null);
 	const queryClient = useQueryClient();
 
-	const userSettings = useQuery<UserSettingsType>({
+	const userSettings = useQuery<userSettingsType>({
 		queryKey: ['userSettings'],
 		queryFn: () => fetch('/api/user-settings').then((res) => res.json()),
 	});
@@ -32,7 +32,7 @@ const CurrencyComboBox = () => {
 
 	const mutation = useMutation({
 		mutationFn: UpdateUserCurrency,
-		onSuccess: (data: UserSettingsType) => {
+		onSuccess: (data: userSettingsType) => {
 			toast.success(`Moeda atualizada com sucesso 🎉`, {
 				id: 'update-currency',
 			});

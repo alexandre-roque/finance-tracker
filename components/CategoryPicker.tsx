@@ -7,7 +7,7 @@ import { TransactionType, cn } from '@/lib/utils';
 import { UseQueryResult, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { categoriesType as Category, UserSettingsType } from '@/db/schema/finance';
+import { categoriesType as Category, userSettingsType } from '@/db/schema/finance';
 import CreateCategoryDialog from './CreateCategoryDialog';
 import { toast } from 'sonner';
 import { UpdateUserCategory } from '@/app/wizard/_actions/userSettings';
@@ -19,7 +19,7 @@ interface Props {
 	type: TransactionType;
 	onChange?: (value: string) => void;
 	isConfiguring?: boolean;
-	userSettings?: UserSettingsType;
+	userSettings?: userSettingsType;
 }
 
 function CategoryPicker({ type, onChange, isConfiguring, userSettings }: Props) {
@@ -32,18 +32,12 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings }: Props) 
 
 	const categoriesQuery = useQuery({
 		queryKey: ['categories', type],
-		queryFn: () =>
-			fetch('/api/categories', {
-				method: 'POST',
-				body: JSON.stringify({
-					type,
-				}),
-			}).then((res) => res.json()),
+		queryFn: () => fetch(`/api/categories?type=${type}`).then((res) => res.json()),
 	});
 
 	const { mutate } = useMutation({
 		mutationFn: UpdateUserCategory,
-		onSuccess: (data: UserSettingsType) => {
+		onSuccess: (data: userSettingsType) => {
 			toast.success('Categoria padrão atualizada com sucesso 🎉', {
 				id: 'update-category',
 			});

@@ -9,7 +9,7 @@ import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { UserSettingsType, categoriesType } from '@/db/schema/finance';
+import { userSettingsType, categoriesType } from '@/db/schema/finance';
 import { TransactionType, cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { PlusSquare, TrashIcon, TrendingDown, TrendingUp } from 'lucide-react';
@@ -69,16 +69,10 @@ function Manage() {
 
 export default Manage;
 
-function CategoryList({ type, userSettings }: { type: TransactionType; userSettings?: UserSettingsType }) {
+function CategoryList({ type, userSettings }: { type: TransactionType; userSettings?: userSettingsType }) {
 	const categoriesQuery = useQuery({
 		queryKey: ['categories', type],
-		queryFn: () =>
-			fetch('/api/categories', {
-				method: 'POST',
-				body: JSON.stringify({
-					type,
-				}),
-			}).then((res) => res.json()),
+		queryFn: () => fetch(`/api/categories?type=${type}`).then((res) => res.json()),
 	});
 
 	const dataAvailable = categoriesQuery.data && categoriesQuery.data.length > 0;

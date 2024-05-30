@@ -1,3 +1,5 @@
+export const revalidate = 0;
+
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { transactions, transactionsType, userSettings } from '@/db/schema/finance';
@@ -6,19 +8,14 @@ import { OverviewQuerySchema } from '@/schemas';
 import { and, eq, gte, lte } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 
-interface RequestBody {
-	from: Date;
-	to: Date;
-}
-
-export const POST = auth(async (req) => {
+export const GET = auth(async (req) => {
 	if (!req.auth?.user?.id) {
 		redirect('/sign-in');
 	}
 
-	const body: RequestBody = await req.json();
-	const from = body.from;
-	const to = body.to;
+	const { searchParams } = new URL(req.url);
+	const from = searchParams.get('from');
+	const to = searchParams.get('to');
 
 	const queryParams = OverviewQuerySchema.safeParse({
 		from,

@@ -18,9 +18,10 @@ interface Props {
 	onChange?: (value: string) => void;
 	isConfiguring?: boolean;
 	userSettings?: userSettingsType;
+	firstSelectedValue?: string | null;
 }
 
-const CardComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
+const CardComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedValue }: Props) => {
 	const [open, setOpen] = useState(false);
 	const isDesktop = useMediaQuery('(min-width: 768px)');
 	const [selectedOption, setSelectedOption] = useState<cardsType | null>(null);
@@ -82,6 +83,13 @@ const CardComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
 		const currentCard = cardsQuery.data.find((card) => card.id === userSettings.mainCard);
 		if (currentCard) setSelectedOption(currentCard);
 	}, [cardsQuery.data, userSettings]);
+
+	useEffect(() => {
+		if (!firstSelectedValue) return;
+		if (!cardsQuery.data) return;
+		const currentCard = cardsQuery.data.find((card) => card.id === firstSelectedValue);
+		if (currentCard) setSelectedOption(currentCard);
+	}, [cardsQuery.data, firstSelectedValue]);
 
 	useEffect(() => {
 		if (!selectedOption) return;

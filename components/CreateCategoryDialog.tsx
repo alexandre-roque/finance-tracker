@@ -30,6 +30,7 @@ import { useTheme } from 'next-themes';
 import { CreateCategory } from '@/app/(root)/_actions/categories';
 import { TransactionTitle } from './CreateTransactionDialog';
 import CustomInput from './CustomInput';
+import { Switch } from './ui/switch';
 
 interface Props {
 	type: TransactionType;
@@ -71,8 +72,8 @@ function CreateCategoryDialog({ type, successCallback, trigger }: Props) {
 
 			setOpen((prev) => !prev);
 		},
-		onError: () => {
-			toast.error('Algo deu errado', {
+		onError: (e) => {
+			toast.error(`Algo deu errado: ${e.message}`, {
 				id: 'create-category',
 			});
 		},
@@ -159,6 +160,24 @@ function CreateCategoryDialog({ type, successCallback, trigger }: Props) {
 												/>
 											</PopoverContent>
 										</Popover>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+
+<FormField
+							control={form.control}
+							name='sharable'
+							render={({ field }) => (
+								<FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+									<div className='space-y-0.5'>
+										<FormLabel className='text-base'>É compartilhável?</FormLabel>
+										<FormDescription>
+											Pode ser usada pelos membros dos times que faz parte
+										</FormDescription>
+									</div>
+									<FormControl>
+										<Switch checked={field.value} onCheckedChange={field.onChange} />
 									</FormControl>
 								</FormItem>
 							)}

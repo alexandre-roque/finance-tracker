@@ -11,14 +11,16 @@ import { DateToUTCDate, TransactionType } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import React, { useMemo } from 'react';
 import { TransactionTitle } from './CreateTransactionDialog';
+import { Option } from './ui/multiple-selector';
 
 interface Props {
 	userSettings: userSettingsType;
 	from: Date;
 	to: Date;
+	selectedTeams?: Option[];
 }
 
-function CategoriesStats({ userSettings, from, to }: Props) {
+function CategoriesStats({ userSettings, from, to, selectedTeams }: Props) {
 	const statsQuery = useQuery<GetCategoriesStatsResponseType>({
 		queryKey: ['overview', 'stats', 'categories', from, to],
 		queryFn: () =>
@@ -34,10 +36,10 @@ function CategoriesStats({ userSettings, from, to }: Props) {
 	return (
 		<div className='flex w-full flex-wrap gap-2 md:flex-nowrap'>
 			<SkeletonWrapper isLoading={statsQuery.isFetching}>
-				<CategoriesCard formatter={formatter} type='income' data={statsQuery.data || []} />
+				<CategoriesCard selectedTeams={selectedTeams} formatter={formatter} type='income' data={statsQuery.data || []} />
 			</SkeletonWrapper>
 			<SkeletonWrapper isLoading={statsQuery.isFetching}>
-				<CategoriesCard formatter={formatter} type='expense' data={statsQuery.data || []} />
+				<CategoriesCard selectedTeams={selectedTeams} formatter={formatter} type='expense' data={statsQuery.data || []} />
 			</SkeletonWrapper>
 		</div>
 	);
@@ -49,12 +51,18 @@ function CategoriesCard({
 	data,
 	type,
 	formatter,
+	selectedTeams,
 }: {
 	type: TransactionType;
 	formatter: Intl.NumberFormat;
 	data: GetCategoriesStatsResponseType;
+	selectedTeams?: Option[];
 }) {
-	const filteredData = data.filter((el) => el.type === type);
+	const filteredData = data.filter((el) => {
+		if (el.type === type && (!el.teamId || selectedTeams?.some(t => t.value === el.teamId))) {
+			return true;
+		}
+	});
 	const total = filteredData.reduce((acc, el) => acc + (el.value || 0), 0);
 
 	return (

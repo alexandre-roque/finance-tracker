@@ -33,6 +33,7 @@ import CardComboBox from './CardComboBox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { GetFormatterForCurrency } from '@/lib/currencies';
 import TeamsComboBox from './TeamsComboBox';
+import { ScrollArea } from './ui/scroll-area';
 
 interface Props {
 	trigger: ReactNode;
@@ -142,218 +143,218 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>{trigger}</DialogTrigger>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>
-						Criar nova <TransactionTitle type={type} />
-					</DialogTitle>
-				</DialogHeader>
+			<DialogContent className='overflow-y-auto max-h-screen'>
+					<DialogHeader>
+						<DialogTitle>
+							Criar nova <TransactionTitle type={type} />
+						</DialogTitle>
+					</DialogHeader>
 
-				<Form {...form}>
-					<form className='space-y-4' onSubmit={form.handleSubmit(onSubmit)}>
-						<CustomInput
-							control={form.control}
-							name='description'
-							label='Descrição'
-							placeholder='Digite a descrição da transação'
-						/>
-						<FormField
-							control={form.control}
-							name='teamId'
-							render={() => (
-								<FormItem className='flex flex-col'>
-									<FormLabel>Time</FormLabel>
-									<FormControl>
-										<TeamsComboBox userSettings={userSettings} onChange={handleTeamChange} />
-									</FormControl>
-									<FormDescription>Selecione o time para a transação</FormDescription>
-								</FormItem>
-							)}
-						/>
-						<div className='flex items-center gap-2'>
+					<Form {...form}>
+						<form className='space-y-4' onSubmit={form.handleSubmit(onSubmit)}>
 							<CustomInput
-								fullWidth={type !== 'expense' || isRecurringValue}
 								control={form.control}
-								name='amount'
-								label='Valor'
-								type='number'
+								name='description'
+								label='Descrição'
+								placeholder='Digite a descrição da transação'
 							/>
-							{type === 'expense' && !isRecurringValue && (
+							<FormField
+								control={form.control}
+								name='teamId'
+								render={() => (
+									<FormItem className='flex flex-col'>
+										<FormLabel>Time</FormLabel>
+										<FormControl>
+											<TeamsComboBox userSettings={userSettings} onChange={handleTeamChange} />
+										</FormControl>
+										<FormDescription>Selecione o time para a transação</FormDescription>
+									</FormItem>
+								)}
+							/>
+							<div className='flex items-center gap-2'>
+								<CustomInput
+									fullWidth={type !== 'expense' || isRecurringValue}
+									control={form.control}
+									name='amount'
+									label='Valor'
+									type='number'
+								/>
+								{type === 'expense' && !isRecurringValue && (
+									<FormField
+										control={form.control}
+										name='category'
+										render={() => (
+											<FormItem className='flex flex-col w-1/2'>
+												<FormLabel className='pb-2'>Quantidade de parcelas</FormLabel>
+												<FormControl>
+													<Select
+														onValueChange={(value) => {
+															form.setValue('installments', parseInt(value));
+														}}
+													>
+														<SelectTrigger className='w-full'>
+															<SelectValue placeholder='Parcelas' />
+														</SelectTrigger>
+														<SelectContent>
+															{Array.from({
+																length: amount <= 100 ? 5 : amount <= 1000 ? 12 : 24,
+															}).map((_, i) => {
+																const currentValue = i + 1;
+																return (
+																	<SelectItem
+																		key={currentValue}
+																		value={currentValue.toString()}
+																	>
+																		{i + 1} x{' '}
+																		{currencyFormatter.format(amount / currentValue)}
+																	</SelectItem>
+																);
+															})}
+														</SelectContent>
+													</Select>
+												</FormControl>
+											</FormItem>
+										)}
+									/>
+								)}
+							</div>
+
+							<div className='flex items-center gap-2'>
 								<FormField
 									control={form.control}
 									name='category'
 									render={() => (
 										<FormItem className='flex flex-col w-1/2'>
-											<FormLabel className='pb-2'>Quantidade de parcelas</FormLabel>
+											<FormLabel>Categoria</FormLabel>
 											<FormControl>
-												<Select
-													onValueChange={(value) => {
-														form.setValue('installments', parseInt(value));
-													}}
-												>
-													<SelectTrigger className='w-full'>
-														<SelectValue placeholder='Parcelas' />
-													</SelectTrigger>
-													<SelectContent>
-														{Array.from({
-															length: amount <= 100 ? 5 : amount <= 1000 ? 12 : 24,
-														}).map((_, i) => {
-															const currentValue = i + 1;
-															return (
-																<SelectItem
-																	key={currentValue}
-																	value={currentValue.toString()}
-																>
-																	{i + 1} x{' '}
-																	{currencyFormatter.format(amount / currentValue)}
-																</SelectItem>
-															);
-														})}
-													</SelectContent>
-												</Select>
+												<CategoryPicker
+													userSettings={userSettings}
+													type={type}
+													onChange={handleCategoryChange}
+												/>
 											</FormControl>
+											<FormDescription>Selecione a categoria da sua transação</FormDescription>
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name='category'
+									render={() => (
+										<FormItem className='flex flex-col'>
+											<FormLabel>Cartão</FormLabel>
+											<FormControl>
+												<CardComboBox userSettings={userSettings} onChange={handleCardChange} />
+											</FormControl>
+											<FormDescription>Selecione o cartão da sua transação</FormDescription>
+										</FormItem>
+									)}
+								/>
+							</div>
+
+							<FormField
+								control={form.control}
+								name='isRecurring'
+								render={({ field }) => (
+									<FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+										<div className='space-y-0.5'>
+											<FormLabel className='text-base'>É recorrente?</FormLabel>
+											<FormDescription>
+												Selecione caso sua <TransactionTitle type={type} /> for recorrente{' '}
+											</FormDescription>
+										</div>
+										<FormControl>
+											<Switch checked={field.value} onCheckedChange={field.onChange} />
+										</FormControl>
+									</FormItem>
+								)}
+							/>
+
+							{!isRecurringValue && (
+								<FormField
+									control={form.control}
+									name='date'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel className='form-label'>Data da transação</FormLabel>
+											<div className='flex w-full flex-col'>
+												<FormControl>
+													<Popover>
+														<PopoverTrigger asChild>
+															<FormControl>
+																<Button
+																	variant={'outline'}
+																	className={cn(
+																		'w-[200px] pl-3 text-left font-normal',
+																		!dateValue && 'text-muted-foreground'
+																	)}
+																>
+																	{dateValue ? (
+																		format(dateValue, 'PPP', { locale: ptBR })
+																	) : (
+																		<span>Selecione uma data</span>
+																	)}
+																	<CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+																</Button>
+															</FormControl>
+														</PopoverTrigger>
+														<PopoverContent className='w-auto p-0'>
+															<Calendar
+																locale={ptBR}
+																mode='single'
+																selected={dateValue}
+																onSelect={(value) => {
+																	if (!value) return;
+																	field.onChange(value);
+																}}
+																initialFocus
+															/>
+														</PopoverContent>
+													</Popover>
+												</FormControl>
+												<FormMessage className='form-message mt-2' />
+											</div>
 										</FormItem>
 									)}
 								/>
 							)}
-						</div>
 
-						<div className='flex items-center gap-2'>
-							<FormField
-								control={form.control}
-								name='category'
-								render={() => (
-									<FormItem className='flex flex-col w-1/2'>
-										<FormLabel>Categoria</FormLabel>
-										<FormControl>
-											<CategoryPicker
-												userSettings={userSettings}
-												type={type}
-												onChange={handleCategoryChange}
-											/>
-										</FormControl>
-										<FormDescription>Selecione a categoria da sua transação</FormDescription>
-									</FormItem>
-								)}
-							/>
+							{isRecurringValue && (
+								<div className='flex gap-3'>
+									<CustomInput
+										control={form.control}
+										type='number'
+										label='Dia do mês'
+										name='dayOfTheMonth'
+										placeholder='Digite o dia fixo do mês'
+										disabled={Boolean(businessDay)}
+									/>
 
-							<FormField
-								control={form.control}
-								name='category'
-								render={() => (
-									<FormItem className='flex flex-col'>
-										<FormLabel>Cartão</FormLabel>
-										<FormControl>
-											<CardComboBox userSettings={userSettings} onChange={handleCardChange} />
-										</FormControl>
-										<FormDescription>Selecione o cartão da sua transação</FormDescription>
-									</FormItem>
-								)}
-							/>
-						</div>
-
-						<FormField
-							control={form.control}
-							name='isRecurring'
-							render={({ field }) => (
-								<FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-									<div className='space-y-0.5'>
-										<FormLabel className='text-base'>É recorrente?</FormLabel>
-										<FormDescription>
-											Selecione caso sua <TransactionTitle type={type} /> for recorrente{' '}
-										</FormDescription>
-									</div>
-									<FormControl>
-										<Switch checked={field.value} onCheckedChange={field.onChange} />
-									</FormControl>
-								</FormItem>
+									<CustomInput
+										control={form.control}
+										type='number'
+										label='Dia do útil do mês'
+										name='businessDay'
+										placeholder='Digite o dia útil'
+										disabled={Boolean(dayOfTheMonth)}
+									/>
+								</div>
 							)}
-						/>
+						</form>
+					</Form>
 
-						{!isRecurringValue && (
-							<FormField
-								control={form.control}
-								name='date'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel className='form-label'>Data da transação</FormLabel>
-										<div className='flex w-full flex-col'>
-											<FormControl>
-												<Popover>
-													<PopoverTrigger asChild>
-														<FormControl>
-															<Button
-																variant={'outline'}
-																className={cn(
-																	'w-[200px] pl-3 text-left font-normal',
-																	!dateValue && 'text-muted-foreground'
-																)}
-															>
-																{dateValue ? (
-																	format(dateValue, 'PPP', { locale: ptBR })
-																) : (
-																	<span>Selecione uma data</span>
-																)}
-																<CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-															</Button>
-														</FormControl>
-													</PopoverTrigger>
-													<PopoverContent className='w-auto p-0'>
-														<Calendar
-															locale={ptBR}
-															mode='single'
-															selected={dateValue}
-															onSelect={(value) => {
-																if (!value) return;
-																field.onChange(value);
-															}}
-															initialFocus
-														/>
-													</PopoverContent>
-												</Popover>
-											</FormControl>
-											<FormMessage className='form-message mt-2' />
-										</div>
-									</FormItem>
-								)}
-							/>
-						)}
-
-						{isRecurringValue && (
-							<div className='flex gap-3'>
-								<CustomInput
-									control={form.control}
-									type='number'
-									label='Dia do mês'
-									name='dayOfTheMonth'
-									placeholder='Digite o dia fixo do mês'
-									disabled={Boolean(businessDay)}
-								/>
-
-								<CustomInput
-									control={form.control}
-									type='number'
-									label='Dia do útil do mês'
-									name='businessDay'
-									placeholder='Digite o dia útil'
-									disabled={Boolean(dayOfTheMonth)}
-								/>
-							</div>
-						)}
-					</form>
-				</Form>
-
-				<DialogFooter>
-					<DialogClose asChild>
-						<Button type='button' variant='ghost' onClick={() => {}}>
-							Cancelar
+					<DialogFooter>
+						<DialogClose asChild>
+							<Button type='button' variant='ghost' onClick={() => {}}>
+								Cancelar
+							</Button>
+						</DialogClose>
+						<Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
+							{!isPending && 'Criar'}
+							{isPending && <Loader2 className='animate-spin' />}
 						</Button>
-					</DialogClose>
-					<Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
-						{!isPending && 'Criar'}
-						{isPending && <Loader2 className='animate-spin' />}
-					</Button>
-				</DialogFooter>
+					</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	);

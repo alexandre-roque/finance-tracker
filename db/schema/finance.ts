@@ -36,6 +36,7 @@ export type cardsType = typeof cards.$inferSelect;
 export const categories = sqliteTable(
 	'category',
 	{
+		id: text('id').primaryKey().$defaultFn(() => ulid()),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
 		userId: text('userId')
 			.notNull()
@@ -43,7 +44,7 @@ export const categories = sqliteTable(
 		name: text('name').notNull(),
 		icon: text('icon').notNull(),
 		type: text('type').default('income').notNull(),
-		teamId: text('teamId'),
+		sharable: integer('sharable', { mode: 'boolean' }),
 	},
 	(table) => ({
 		unq: unique().on(table.name, table.userId, table.type),
@@ -198,7 +199,13 @@ export const dailyRecurrenceCheckers = sqliteTable(
 
 export type dailyRecurrenceCheckersType = typeof dailyRecurrenceCheckers.$inferSelect;
 
-export const userSettingsRelations = relations(userSettings, ({ one }) => ({
+export const usersRelations = relations(users, ({ many }) => ({
+	transactions: many(transactions),
+    teams: many(teamMembers),
+    ownedTeams: many(teams),
+}));
+
+export const userSettingsRelations = relations(userSettings, ({ one, many }) => ({
 	user: one(users, {
 		fields: [userSettings.userId],
 		references: [users.id],
@@ -279,11 +286,12 @@ export const yearHistoryRelations = relations(yearHistories, ({ one }) => ({
 	}),
 }));
 
-export const teamRelations = relations(teams, ({ one }) => ({
+export const teamRelations = relations(teams, ({ one, many }) => ({
 	owner: one(users, {
 		fields: [teams.ownerId],
 		references: [users.id],
 	}),
+    members: many(teamMembers),
 }));
 
 export const teamMemberRelations = relations(teamMembers, ({ one }) => ({

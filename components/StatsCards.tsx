@@ -10,14 +10,16 @@ import { useQuery } from '@tanstack/react-query';
 import { TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import CountUp from 'react-countup';
+import { Option } from './ui/multiple-selector';
 
 interface Props {
 	from: Date;
 	to: Date;
 	userSettings: userSettingsType;
+	selectedTeams?: Option[];
 }
 
-function StatsCards({ from, to, userSettings }: Props) {
+function StatsCards({ from, to, userSettings, selectedTeams }: Props) {
 	const statsQuery = useQuery<GetBalanceStatsResponseType>({
 		queryKey: ['overview', 'stats', from, to],
 		queryFn: () =>
@@ -28,8 +30,20 @@ function StatsCards({ from, to, userSettings }: Props) {
 		return GetFormatterForCurrency(userSettings.currency || 'BRL');
 	}, [userSettings.currency]);
 
-	const income = statsQuery.data?.income || 0;
-	const expense = statsQuery.data?.expense || 0;
+	const { income, expense } = statsQuery.data
+		? statsQuery.data.reduce((acc, stats) => {
+			if (!stats.teamId || selectedTeams?.some(t => t.value === stats.teamId)) {
+				acc[stats.type as 'income' | 'expense'] += parseFloat(stats.value ?? '0');
+			}
+		return acc;
+	}, {
+		income: 0,
+		expense: 0,
+	}) : {
+		income: 0,
+		expense: 0,
+	};
+
 	const balance = income - expense;
 
 	return (

@@ -23,7 +23,7 @@ export async function CreateCategory(form: createCategorySchemaType) {
 		redirect('/sign-in');
 	}
 
-	const { name, icon, type } = parsedBody.data;
+	const { name, icon, type, sharable } = parsedBody.data;
 	const [category] = await db
 		.insert(categories)
 		.values({
@@ -31,6 +31,7 @@ export async function CreateCategory(form: createCategorySchemaType) {
 			name,
 			icon,
 			type,
+			sharable,
 		})
 		.returning();
 

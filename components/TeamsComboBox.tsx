@@ -18,6 +18,7 @@ interface Props {
 	onChange?: (value: string) => void;
 	isConfiguring?: boolean;
 	userSettings?: userSettingsType;
+    firstSelectedValue?: string | null;
 }
 
 export type teamsQueryType = {
@@ -34,7 +35,7 @@ export type teamsQueryType = {
 	};
 };
 
-const TeamsComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
+const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedValue}: Props) => {
 	const [open, setOpen] = useState(false);
 	const isDesktop = useMediaQuery('(min-width: 768px)');
 	const [selectedOption, setSelectedOption] = useState<teamsQueryType | null>(null);
@@ -94,6 +95,14 @@ const TeamsComboBox = ({ userSettings, onChange, isConfiguring }: Props) => {
 	}, [teamsQuery.data, userSettings]);
 
 	useEffect(() => {
+		if (!firstSelectedValue) return;
+		if (!teamsQuery.data) return;
+		if (selectedOption != null) return;
+		const currentTeam = teamsQuery.data.find((teamMember) => teamMember.team.id === firstSelectedValue);
+		if (currentTeam) setSelectedOption(currentTeam);
+	}, [teamsQuery.data, firstSelectedValue, selectedOption]);
+
+	useEffect(() => {
 		if (!selectedOption) return;
 		if (onChange) onChange(selectedOption.team.id);
 	}, [onChange, selectedOption]);
@@ -150,7 +159,7 @@ function OptionList({
 }) {
 	return (
 		<Command>
-			<CommandInput placeholder='Filtrar cartões...' />
+			<CommandInput placeholder='Filtrar times...' />
 			<TeamCreationDialog />
 			<CommandList>
 				<CommandEmpty>Nenhum resultado encontrado</CommandEmpty>

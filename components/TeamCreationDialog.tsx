@@ -53,7 +53,7 @@ function CreateCategoryDialog({ trigger }: Props) {
 			});
 
 			await queryClient.invalidateQueries({
-				queryKey: ['teams'],
+				queryKey: ['teams-members'],
 			});
 
 			setOpen((prev) => !prev);

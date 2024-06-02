@@ -36,7 +36,9 @@ export type cardsType = typeof cards.$inferSelect;
 export const categories = sqliteTable(
 	'category',
 	{
-		id: text('id').primaryKey().$defaultFn(() => ulid()),
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => ulid()),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
 		userId: text('userId')
 			.notNull()
@@ -97,42 +99,32 @@ export const recurringTransactions = sqliteTable('recurringTransaction', {
 	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
 });
 
-export const monthHistories = sqliteTable(
-	'monthHistory',
-	{
-		userId: text('userId')
-			.notNull()
-			.references(() => users.id, { onDelete: 'cascade' }),
-		day: integer('day'),
-		month: integer('month'),
-		year: integer('year'),
-		income: integer('income'),
-		expense: integer('expense'),
-		teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
-	},
-	(table) => ({
-		pk: primaryKey({ columns: [table.day, table.month, table.year, table.userId] }),
-	})
-);
+export const monthHistories = sqliteTable('monthHistory', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => ulid()),
+	userId: text('userId').references(() => users.id, { onDelete: 'cascade' }),
+	day: integer('day'),
+	month: integer('month'),
+	year: integer('year'),
+	income: integer('income'),
+	expense: integer('expense'),
+	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
+});
 
 export type monthHistoryType = typeof monthHistories.$inferSelect;
 
-export const yearHistories = sqliteTable(
-	'yearHistory',
-	{
-		userId: text('userId')
-			.notNull()
-			.references(() => users.id, { onDelete: 'cascade' }),
-		month: integer('month'),
-		year: integer('year'),
-		income: integer('income'),
-		expense: integer('expense'),
-		teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
-	},
-	(table) => ({
-		pk: primaryKey({ columns: [table.month, table.year, table.userId] }),
-	})
-);
+export const yearHistories = sqliteTable('yearHistory', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => ulid()),
+	userId: text('userId').references(() => users.id, { onDelete: 'cascade' }),
+	month: integer('month'),
+	year: integer('year'),
+	income: integer('income'),
+	expense: integer('expense'),
+	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
+});
 
 export type yearHistoryType = typeof yearHistories.$inferSelect;
 
@@ -179,7 +171,7 @@ export const pendingTeamAprovals = sqliteTable(
 			.references(() => teams.id, { onDelete: 'cascade' }),
 	},
 	(table) => ({
-		pk: primaryKey({ columns: [table.inviterId, table.guestId, table.teamId] }),
+		pk: primaryKey({ columns: [table.guestId, table.teamId] }),
 	})
 );
 
@@ -201,8 +193,8 @@ export type dailyRecurrenceCheckersType = typeof dailyRecurrenceCheckers.$inferS
 
 export const usersRelations = relations(users, ({ many }) => ({
 	transactions: many(transactions),
-    teams: many(teamMembers),
-    ownedTeams: many(teams),
+	teams: many(teamMembers),
+	ownedTeams: many(teams),
 }));
 
 export const userSettingsRelations = relations(userSettings, ({ one, many }) => ({
@@ -223,13 +215,6 @@ export const userSettingsRelations = relations(userSettings, ({ one, many }) => 
 export const cardRelations = relations(cards, ({ one }) => ({
 	user: one(users, {
 		fields: [cards.userId],
-		references: [users.id],
-	}),
-}));
-
-export const categoryRelations = relations(categories, ({ one }) => ({
-	user: one(users, {
-		fields: [categories.userId],
 		references: [users.id],
 	}),
 }));
@@ -291,7 +276,7 @@ export const teamRelations = relations(teams, ({ one, many }) => ({
 		fields: [teams.ownerId],
 		references: [users.id],
 	}),
-    members: many(teamMembers),
+	members: many(teamMembers),
 }));
 
 export const teamMemberRelations = relations(teamMembers, ({ one }) => ({

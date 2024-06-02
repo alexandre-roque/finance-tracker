@@ -21,6 +21,7 @@ import { db } from '@/db';
 import { userSettings } from '@/db/schema/finance';
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
+import NotificationsPopOver from './NotificationsPopOver';
 
 const Header = async () => {
 	const session = await auth();
@@ -73,8 +74,7 @@ const Header = async () => {
 
 				<ThemeSwitcherButton />
 				<Button variant='secondary' size='icon'>
-					<Bell className='h-4 w-4' />
-					<span className='sr-only'>Toggle notifications</span>
+					<NotificationsPopOver />
 				</Button>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>

@@ -101,6 +101,7 @@ function History({ userSettings }: { userSettings: userSettingsType }) {
 										fill='url(#incomeBar)'
 										radius={4}
 										className='cursor-pointer'
+										stackId={'income'}
 									/>
 									<Bar
 										dataKey={'expense'}
@@ -108,7 +109,32 @@ function History({ userSettings }: { userSettings: userSettingsType }) {
 										fill='url(#expenseBar)'
 										radius={4}
 										className='cursor-pointer'
+										stackId={'expense'}
 									/>
+									{Object.keys(historyDataQuery.data)
+										.reduce((acc, entry) => {
+											return acc.concat(
+												Object.keys(historyDataQuery.data[entry]).filter(
+													(key) => key.includes('expense_') || key.includes('income_')
+												)
+											);
+										}, [] as string[])
+										.map((key: string) => {
+											const [type, teamName, color] = key.split('_');
+											return (
+												<Bar
+													key={key}
+													dataKey={key}
+													label={`${
+														type === 'income' ? 'Receita' : 'Despesa'
+													} de ${teamName}`}
+													fill={color}
+													radius={4}
+													className='cursor-pointer'
+													stackId={type}
+												/>
+											);
+										})}
 									<Tooltip
 										cursor={{ opacity: 0.1 }}
 										content={(props) => <CustomTooltip formatter={formatter} {...props} />}
@@ -136,47 +162,45 @@ export default History;
 function CustomTooltip({ active, payload, formatter }: any) {
 	if (!active || !payload || payload.length === 0) return null;
 
-	const data = payload[0].payload;
-	const { expense, income } = data;
+	const data = payload[0].payload as Record<string, string>;
+	const objectsArray = data
+		? Object.entries(data).reduce((acc: Record<string, any>, entry) => {
+				if (entry[0].includes('expense') || entry[0].includes('income')) {
+					const [type, teamName] = entry[0].split('_');
+					if (acc[teamName ?? 'Você']) {
+						acc[teamName ?? 'Você'][`${type}Value`] = entry[1];
+					} else {
+						acc[teamName ?? 'Você'] = { [`${type}Value`]: entry[1] };
+					}
+				}
+				return acc;
+		  }, {})
+		: {};
 
 	return (
 		<div className='min-w-[300px] rounded border bg-background p-4'>
-			<TooltipRow
-				formatter={formatter}
-				label='Expense'
-				value={expense}
-				bgColor='bg-red-500'
-				textColor='text-red-500'
-			/>
-			<TooltipRow
-				formatter={formatter}
-				label='Income'
-				value={income}
-				bgColor='bg-emerald-500'
-				textColor='text-emerald-500'
-			/>
-			<TooltipRow
-				formatter={formatter}
-				label='Média'
-				value={income - expense}
-				bgColor='bg-gray-100'
-				textColor='text-foreground'
-			/>
+			{Object.entries(objectsArray).map((entry, key) => (
+				<TooltipRow
+					key={key}
+					formatter={formatter}
+					label={entry[0]}
+					incomeValue={entry[1].incomeValue}
+					expenseValue={entry[1].expenseValue}
+				/>
+			))}
 		</div>
 	);
 }
 
 function TooltipRow({
 	label,
-	value,
-	bgColor,
-	textColor,
+	incomeValue,
+	expenseValue,
 	formatter,
 }: {
 	label: string;
-	textColor: string;
-	bgColor: string;
-	value: number;
+	incomeValue: number;
+	expenseValue: number;
 	formatter: Intl.NumberFormat;
 }) {
 	const formattingFn = useCallback(
@@ -188,17 +212,24 @@ function TooltipRow({
 
 	return (
 		<div className='flex items-center gap-2'>
-			<div className={cn('h-4 w-4 rounded-full', bgColor)} />
 			<div className='flex w-full justify-between'>
 				<p className='text-sm text-muted-foreground'>{label}</p>
-				<div className={cn('text-sm font-bold', textColor)}>
+				<div className={'text-sm font-bold flex gap-2'}>
 					<CountUp
 						duration={0.5}
 						preserveValue
-						end={value}
+						end={expenseValue}
 						decimals={2}
 						formattingFn={formattingFn}
-						className='text-sm'
+						className='text-sm text-expense-foreground'
+					/>
+					<CountUp
+						duration={0.5}
+						preserveValue
+						end={incomeValue}
+						decimals={2}
+						formattingFn={formattingFn}
+						className='text-sm text-income-foreground'
 					/>
 				</div>
 			</div>

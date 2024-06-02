@@ -2,6 +2,9 @@ export const revalidate = 0;
 
 import { auth } from '@/auth';
 import { db } from '@/db';
+import { yearHistories } from '@/db/schema/finance';
+import { and, eq, asc } from 'drizzle-orm';
+import { year } from 'drizzle-orm/mysql-core';
 import { redirect } from 'next/navigation';
 
 export const GET = auth(async (req) => {
@@ -9,17 +12,16 @@ export const GET = auth(async (req) => {
 		redirect('/sign-in');
 	}
 
-	const userId = req.auth.user.id;
+	const result = await db
+		.select({
+			expense: yearHistories.expense,
+			income: yearHistories.income,
+			month: yearHistories.month,
+			teamId: yearHistories.teamId,
+		})
+		.from(yearHistories)
+		.groupBy(yearHistories.teamId)
+		.orderBy(asc(yearHistories.month));
 
-	// const result = await db.query.teams.findMany({
-	// 	with:{
-	// 		members: {
-	// 			where: 
-	// 		}
-	// 	},
-    //     where:
-	// });
-	
-	return Response.json([]);
+	return Response.json(result);
 });
-

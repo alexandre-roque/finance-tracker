@@ -44,6 +44,7 @@ function DeleteCategoryDialog({ category, trigger }: Props) {
 			});
 		},
 	});
+
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>

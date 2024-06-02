@@ -81,3 +81,10 @@ export const createTeamSchema = z.object({
 });
 
 export type createTeamSchemaType = z.infer<typeof createTeamSchema>;
+
+export const inviteToTeamSchema = z.object({
+	email: z.string().email(),
+	teamId: z.string(),
+});
+
+export type inviteToTeamSchemaType = z.infer<typeof inviteToTeamSchema>;

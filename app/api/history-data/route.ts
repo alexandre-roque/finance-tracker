@@ -2,10 +2,10 @@ export const revalidate = 0;
 
 import { auth } from '@/auth';
 import { db } from '@/db';
-import { monthHistories, yearHistories, yearHistoryType } from '@/db/schema/finance';
-import { Period, Timeframe } from '@/lib/utils';
+import { teamMembers } from '@/db/schema/finance';
+import { Period, Timeframe, hashStringToHSL, orangeHSLToGreenHSL } from '@/lib/utils';
 import { getDaysInMonth } from 'date-fns';
-import { and, asc, eq, sum } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
@@ -65,31 +65,62 @@ type HistoryData = {
 };
 
 async function getYearHistoryData(userId: string, year: number) {
-	const result = await db
-		.select({ expense: yearHistories.expense, income: yearHistories.income, month: yearHistories.month })
-		.from(yearHistories)
-		.where(and(eq(yearHistories.userId, userId), eq(yearHistories.year, year)))
-		.orderBy(asc(yearHistories.month));
+	const teams = (
+		await db.select({ teamId: teamMembers.teamId }).from(teamMembers).where(eq(teamMembers.userId, userId))
+	).map((obj) => obj.teamId);
+
+	const result = await db.query.yearHistories.findMany({
+		columns: {
+			expense: true,
+			income: true,
+			month: true,
+			teamId: true,
+		},
+		with: {
+			team: {
+				columns: {
+					name: true,
+					id: true,
+				},
+			},
+		},
+		where: (yearHistories, { and, or, inArray, eq }) =>
+			and(
+				or(inArray(yearHistories.teamId, teams.concat('any')), eq(yearHistories.userId, userId)),
+				eq(yearHistories.year, year)
+			),
+		orderBy: (yearHistories, { asc }) => asc(yearHistories.month),
+	});
 
 	if (!result || result.length === 0) return [];
 
-	const history: HistoryData[] = [];
+	const history = [];
 
 	for (let i = 0; i < 12; i++) {
-		let expense = 0;
-		let income = 0;
+		const obj: any = {
+			income: 0,
+			expense: 0,
+		};
 
-		const month = result.find((row) => row.month === i);
-		if (month) {
-			expense = month.expense || 0;
-			income = month.income || 0;
-		}
+		const months = result.filter((row) => row.month === i);
+		months.forEach((month) => {
+			if (month.team) {
+				const expenseColor = hashStringToHSL(month.team.name);
+				const expenseKey = `expense_${month.team.name}_${expenseColor}`;
+				const incomeKey = `income_${month.team.name}_${orangeHSLToGreenHSL(expenseColor)}`;
+
+				obj[expenseKey] = (obj[expenseKey] ?? 0) + (month.expense ?? 0);
+				obj[incomeKey] = (obj[incomeKey] ?? 0) + (month.income ?? 0);
+			} else {
+				obj.income += month.income ?? 0;
+				obj.expense += month.expense ?? 0;
+			}
+		});
 
 		history.push({
 			year,
 			month: i,
-			expense,
-			income,
+			...obj,
 		});
 	}
 
@@ -97,33 +128,64 @@ async function getYearHistoryData(userId: string, year: number) {
 }
 
 async function getMonthHistoryData(userId: string, year: number, month: number) {
-	const result = await db
-		.select({ expense: sum(monthHistories.expense), income: sum(monthHistories.income), day: monthHistories.day })
-		.from(monthHistories)
-		.where(and(eq(monthHistories.userId, userId), eq(monthHistories.year, year), eq(monthHistories.month, month)))
-		.groupBy(monthHistories.day)
-		.orderBy(asc(monthHistories.day));
+	const teams = (
+		await db.select({ teamId: teamMembers.teamId }).from(teamMembers).where(eq(teamMembers.userId, userId))
+	).map((obj) => obj.teamId);
+
+	const result = await db.query.monthHistories.findMany({
+		columns: {
+			expense: true,
+			income: true,
+			month: true,
+			day: true,
+			teamId: true,
+		},
+		with: {
+			team: {
+				columns: {
+					name: true,
+					id: true,
+				},
+			},
+		},
+		where: (monthHistories, { and, or, inArray, eq }) =>
+			and(
+				or(inArray(monthHistories.teamId, teams.concat('any')), eq(monthHistories.userId, userId)),
+				eq(monthHistories.month, month)
+			),
+		orderBy: (monthHistories, { asc }) => asc(monthHistories.day),
+	});
 
 	if (!result || result.length === 0) return [];
 
-	const history: HistoryData[] = [];
+	const history = [];
 	const daysInMonth = getDaysInMonth(new Date(year, month));
 	for (let i = 1; i <= daysInMonth; i++) {
-		let expense = 0;
-		let income = 0;
+		const obj: any = {
+			income: 0,
+			expense: 0,
+		};
 
-		const day = result.find((row) => row.day === i);
-		if (day) {
-			expense = parseFloat(day.expense || '0') || 0;
-			income = parseFloat(day.income || '0') || 0;
-		}
+		const days = result.filter((row) => row.day === i);
+		days.forEach((day) => {
+			if (day.team) {
+				const expenseColor = hashStringToHSL(day.team.name);
+				const expenseKey = `expense_${day.team.name}_${expenseColor}`;
+				const incomeKey = `income_${day.team.name}_${orangeHSLToGreenHSL(expenseColor)}`;
+
+				obj[expenseKey] = (obj[expenseKey] ?? 0) + (day.expense ?? 0);
+				obj[incomeKey] = (obj[incomeKey] ?? 0) + (day.income ?? 0);
+			} else {
+				obj.income += day.income ?? 0;
+				obj.expense += day.expense ?? 0;
+			}
+		});
 
 		history.push({
-			expense,
-			income,
 			year,
 			month,
 			day: i,
+			...obj,
 		});
 	}
 

@@ -26,33 +26,32 @@ export const GET = auth(async (req) => {
 	}
 
 	const teams = await db.query.teamMembers.findMany({
-        with: {
-            team: {
-                with: {
-                    members: {
-                        columns: {
-                            userId: true,
-                        },
-                    },
-                },
-            },
-        },
-        where: (teamMembers, { eq }) => eq(teamMembers.userId, userId),
-    });
+		with: {
+			team: {
+				with: {
+					members: {
+						columns: {
+							userId: true,
+						},
+					},
+				},
+			},
+		},
+		where: (teamMembers, { eq }) => eq(teamMembers.userId, userId),
+	});
 
-    const userIdConstraint = or(
-        and(
-            inArray(categories.userId, [userId].concat(
-                teams.flatMap((team) => team.team.members.map(member => member.userId))
-            )),
-            eq(categories.sharable, true)
-        ),
-        eq(categories.userId, userId)
-    )
+	const userIdConstraint = or(
+		and(
+			inArray(
+				categories.userId,
+				[userId].concat(teams.flatMap((team) => team.team.members.map((member) => member.userId)))
+			),
+			eq(categories.sharable, true)
+		),
+		eq(categories.userId, userId)
+	);
 
-    const constraint = type
-        ? and(userIdConstraint, eq(categories.type, type))
-        : userIdConstraint;
+	const constraint = type ? and(userIdConstraint, eq(categories.type, type)) : userIdConstraint;
 
 	const resultCategories = await db.select().from(categories).where(constraint);
 	return Response.json(resultCategories);

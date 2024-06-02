@@ -17,9 +17,6 @@ import {
 import HeaderCommandBox from './HeaderCommandBox';
 import LogoutDropdownItem from './LogoutDropdownItem';
 import { auth } from '@/auth';
-import { db } from '@/db';
-import { userSettings } from '@/db/schema/finance';
-import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import NotificationsPopOver from './NotificationsPopOver';
 

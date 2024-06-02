@@ -3,15 +3,15 @@
 
 import React, { type FC, useState, useEffect, useRef } from 'react';
 import { Button } from './button';
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { Calendar } from './calendar';
 import { ptBR } from 'date-fns/locale';
 import { DateInput } from './date-input';
 import { Label } from './label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import { Switch } from './switch';
-import { ChevronUpIcon, ChevronDownIcon, CheckIcon } from '@radix-ui/react-icons';
+import { ChevronUpIcon, ChevronDownIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './dialog';
 
 export interface DateRangePickerProps {
 	/** Click handler for applying the updates from DateRangePicker. */
@@ -79,6 +79,7 @@ const PRESETS: Preset[] = [
 	{ name: 'next30', label: 'Próximos 30 dias' },
 	{ name: 'next60', label: 'Próximos 60 dias' },
 ];
+const BREAK_POINT_VALUE = 1024;
 
 /** The DateRangePicker component allows a user to select a range of dates */
 export const DateRangePicker: FC<DateRangePickerProps> & {
@@ -89,7 +90,6 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 	initialCompareFrom,
 	initialCompareTo,
 	onUpdate,
-	align = 'end',
 	locale = 'en-US',
 	showCompare = true,
 }): JSX.Element => {
@@ -116,11 +116,13 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 
 	const [selectedPreset, setSelectedPreset] = useState<string | undefined>(undefined);
 
-	const [isSmallScreen, setIsSmallScreen] = useState(typeof window !== 'undefined' ? window.innerWidth < 960 : false);
+	const [isSmallScreen, setIsSmallScreen] = useState(
+		typeof window !== 'undefined' ? window.innerWidth < BREAK_POINT_VALUE : false
+	);
 
 	useEffect(() => {
 		const handleResize = (): void => {
-			setIsSmallScreen(window.innerWidth < 960);
+			setIsSmallScreen(window.innerWidth < BREAK_POINT_VALUE);
 		};
 
 		window.addEventListener('resize', handleResize);
@@ -319,7 +321,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 	}, [isOpen]);
 
 	return (
-		<Popover
+		<Dialog
 			modal={true}
 			open={isOpen}
 			onOpenChange={(open: boolean) => {
@@ -329,7 +331,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 				setIsOpen(open);
 			}}
 		>
-			<PopoverTrigger asChild>
+			<DialogTrigger asChild>
 				<Button size={'lg'} variant='outline'>
 					<div className='text-right'>
 						<div className='py-1'>
@@ -350,9 +352,13 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 						{isOpen ? <ChevronUpIcon width={24} /> : <ChevronDownIcon width={24} />}
 					</div>
 				</Button>
-			</PopoverTrigger>
-			<PopoverContent align={align} className='w-auto'>
-				<div className='flex py-2'>
+			</DialogTrigger>
+			<DialogContent className='max-w-md lg:max-w-4xl'>
+				<DialogHeader>
+					<DialogTitle>Escolha o período que deseja</DialogTitle>
+					<DialogDescription>Você pode usar opções facilitadoras para selecionar o período</DialogDescription>
+				</DialogHeader>
+				<div className='flex py-2 items-center justify-center'>
 					<div className='flex'>
 						<div className='flex flex-col'>
 							<div className='flex flex-col lg:flex-row gap-2 px-3 justify-end items-center lg:items-start pb-4 lg:pb-0'>
@@ -539,8 +545,8 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 						Atualizar
 					</Button>
 				</div>
-			</PopoverContent>
-		</Popover>
+			</DialogContent>
+		</Dialog>
 	);
 };
 

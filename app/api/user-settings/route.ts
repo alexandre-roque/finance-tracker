@@ -16,11 +16,14 @@ export const GET = auth(async (req) => {
 		if (userSetting) {
 			result = userSetting;
 		} else {
-			result = await db.insert(userSettings).values({
-				userId: req.auth.user.id,
-				currency: 'BRL',
-			});
-			
+			[result] = await db
+				.insert(userSettings)
+				.values({
+					userId: req.auth.user.id,
+					currency: 'BRL',
+				})
+				.returning();
+
 			revalidatePath('/');
 		}
 

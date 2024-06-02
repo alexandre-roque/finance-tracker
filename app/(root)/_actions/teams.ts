@@ -40,7 +40,6 @@ export async function CreateTeam(form: createTeamSchemaType) {
 }
 
 export async function CreateTeamInvitation(form: inviteToTeamSchemaType) {
-	console.log('entrou aqui', form);
 	const parsedBody = inviteToTeamSchema.safeParse(form);
 	if (!parsedBody.success) {
 		throw new Error('bad request');

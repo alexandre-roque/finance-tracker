@@ -12,11 +12,15 @@ import {
 	yearHistories,
 } from '@/db/schema/finance';
 import { DateToUTCDate, TransactionType, getBusinessDayOfMonth } from '@/lib/utils';
-import { createTransactionSchema, createTransactionSchemaType } from '@/schemas';
+import {
+	createTransactionSchema,
+	createTransactionSchemaType,
+	editTransactionSchema,
+	editTransactionSchemaType,
+} from '@/schemas';
 import { and, eq, or } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { ulid } from 'ulid';
-import { SQLiteTransaction } from 'drizzle-orm/sqlite-core';
 
 export async function CreateTransaction(form: createTransactionSchemaType) {
 	const parsedBody = createTransactionSchema.safeParse(form);
@@ -66,6 +70,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 					description: description || '',
 					category: categoryRow.name,
 					categoryIcon: categoryRow.icon,
+					categoryId: category,
 				})
 				.returning();
 
@@ -85,6 +90,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 						description: description || '',
 						category: categoryRow.name,
 						categoryIcon: categoryRow.icon,
+						categoryId: category,
 					});
 
 					await CreateOrUpdateHistories({
@@ -117,6 +123,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 					(description || '') + (howManyInstallments > 1 ? ` (${i + 1}/${howManyInstallments})` : ''),
 				category: categoryRow.name,
 				categoryIcon: categoryRow.icon,
+				categoryId: category,
 			});
 
 			await CreateOrUpdateHistories({ trx, date, type, amount, userId, teamId });
@@ -212,6 +219,122 @@ export async function DeleteTransaction({
 			}
 		});
 	}
+}
+
+export async function EditTransaction(form: editTransactionSchemaType) {
+	const parsedBody = editTransactionSchema.safeParse(form);
+	if (!parsedBody.success) {
+		throw new Error(parsedBody.error.message);
+	}
+
+	const session = await auth();
+	if (!session || !session.user || !session.user.id) {
+		redirect('/sign-in');
+	}
+
+	const userId = session.user.id;
+
+	const { amount, category, date, description, type, teamId, card: cardId, transactionId } = parsedBody.data;
+
+	const [categoryRow] = await db.select().from(categories).where(eq(categories.id, category));
+
+	if (!categoryRow) {
+		throw new Error('category not found');
+	}
+
+	const transactionsResult = await db.query.transactions.findFirst({
+		where: (transactions, { eq }) => eq(transactions.id, transactionId),
+	});
+
+	if (!transactionsResult) {
+		throw new Error('Bad request');
+	}
+
+	const oldAmount = transactionsResult.amount;
+	const oldDate = transactionsResult.date;
+	const oldTeamId = transactionsResult.teamId;
+
+	await db.transaction(async (trx) => {
+		await trx
+			.update(transactions)
+			.set({
+				userId,
+				amount,
+				date,
+				type,
+				teamId,
+				cardId: cardId ?? null,
+				description: description || '',
+				category: categoryRow.name,
+				categoryIcon: categoryRow.icon,
+			})
+			.where(eq(transactions.id, transactionId));
+
+		if (oldAmount !== amount) {
+			// Atualiza monthHistory
+			const [existingMonthHistory] = await trx
+				.select()
+				.from(monthHistories)
+				.where(
+					and(
+						or(eq(monthHistories.teamId, oldTeamId || 'NOT_EXISTING'), eq(monthHistories.userId, userId)),
+						eq(monthHistories.day, oldDate.getUTCDate()),
+						eq(monthHistories.month, oldDate.getUTCMonth()),
+						eq(monthHistories.year, oldDate.getUTCFullYear())
+					)
+				);
+
+			if (existingMonthHistory) {
+				await trx
+					.update(monthHistories)
+					.set({
+						expense: (existingMonthHistory.expense ?? 0) - (type === 'expense' ? oldAmount : 0),
+						income: (existingMonthHistory.income ?? 0) - (type === 'income' ? oldAmount : 0),
+					})
+					.where(
+						and(
+							or(
+								eq(monthHistories.teamId, oldTeamId || 'NOT_EXISTING'),
+								eq(monthHistories.userId, userId)
+							),
+							eq(monthHistories.day, oldDate.getUTCDate()),
+							eq(monthHistories.month, oldDate.getUTCMonth()),
+							eq(monthHistories.year, oldDate.getUTCFullYear())
+						)
+					);
+			}
+
+			// Atualiza yearHistory
+			const [existingYearHistory] = await trx
+				.select()
+				.from(yearHistories)
+				.where(
+					and(
+						or(eq(yearHistories.teamId, oldTeamId || 'NOT_EXISTING'), eq(yearHistories.userId, userId)),
+						eq(yearHistories.month, oldDate.getUTCMonth()),
+						eq(yearHistories.year, oldDate.getUTCFullYear())
+					)
+				);
+
+			if (existingYearHistory) {
+				await trx
+					.update(yearHistories)
+					.set({
+						expense: (existingYearHistory.expense ?? 0) - (type === 'expense' ? oldAmount : 0),
+						income: (existingYearHistory.income ?? 0) - (type === 'income' ? oldAmount : 0),
+					})
+					.where(
+						and(
+							or(eq(yearHistories.teamId, oldTeamId || 'NOT_EXISTING'), eq(yearHistories.userId, userId)),
+							eq(yearHistories.month, oldDate.getUTCMonth()),
+							eq(yearHistories.year, oldDate.getUTCFullYear())
+						)
+					);
+			}
+
+			await CreateOrUpdateHistories({ trx, date, type, amount, userId, teamId });
+		}
+	});
 }
 
 async function CreateOrUpdateHistories({

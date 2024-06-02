@@ -73,6 +73,7 @@ export const transactions = sqliteTable('transaction', {
 	cardId: text('cardId'),
 	category: text('category'),
 	categoryIcon: text('categoryIcon'),
+	categoryId: text('categoryId'),
 	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
 	installmentId: text('installmentId'),
 });
@@ -96,6 +97,7 @@ export const recurringTransactions = sqliteTable('recurringTransaction', {
 	cardId: text('cardId').references(() => cards.id, { onDelete: 'set null' }),
 	category: text('category'),
 	categoryIcon: text('categoryIcon'),
+	categoryId: text('categoryId'),
 	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
 });
 

@@ -88,3 +88,16 @@ export const inviteToTeamSchema = z.object({
 });
 
 export type inviteToTeamSchemaType = z.infer<typeof inviteToTeamSchema>;
+
+export const editTransactionSchema = z.object({
+	transactionId: z.string(),
+	amount: z.coerce.number().positive().multipleOf(0.01),
+	description: z.string().optional(),
+	date: z.coerce.date(),
+	category: z.string(),
+	card: z.string().optional(),
+	type: z.union([z.literal('income'), z.literal('expense')]),
+	teamId: z.string().optional(),
+});
+
+export type editTransactionSchemaType = z.infer<typeof editTransactionSchema>;

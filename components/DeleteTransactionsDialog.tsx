@@ -33,7 +33,7 @@ function DeleteTransactionDialog({ open, setOpen, transactionId, installmentId }
 			});
 
 			await queryClient.invalidateQueries({
-				queryKey: ['transactions'],
+				queryKey: ['overview', 'transactions'],
 			});
 		},
 		onError: () => {

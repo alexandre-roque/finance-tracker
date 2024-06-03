@@ -18,7 +18,7 @@ interface Props {
 	onChange?: (value: string) => void;
 	isConfiguring?: boolean;
 	userSettings?: userSettingsType;
-    firstSelectedValue?: string | null;
+	firstSelectedValue?: string | null;
 }
 
 export type teamsQueryType = {
@@ -35,7 +35,7 @@ export type teamsQueryType = {
 	};
 };
 
-const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedValue}: Props) => {
+const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedValue }: Props) => {
 	const [open, setOpen] = useState(false);
 	const isDesktop = useMediaQuery('(min-width: 768px)');
 	const [selectedOption, setSelectedOption] = useState<teamsQueryType | null>(null);
@@ -159,7 +159,7 @@ function OptionList({
 }) {
 	return (
 		<Command>
-			<CommandInput placeholder='Filtrar times...' />
+			<CommandInput placeholder='Pesquisar times...' />
 			<TeamCreationDialog />
 			<CommandList>
 				<CommandEmpty>Nenhum resultado encontrado</CommandEmpty>

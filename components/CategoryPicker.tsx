@@ -180,21 +180,36 @@ function OptionsList({
 				e.preventDefault();
 			}}
 		>
-			<CommandInput placeholder='Pesquisar categoria...' />
+			<CommandInput placeholder='Pesquisar categorias...' />
 			<CreateCategoryDialog type={type} successCallback={successCallback} />
+			{isConfiguring && (!categoriesQuery.data || !categoriesQuery.data.length) && (
+				<p className='text-xs text-muted-foreground mt-1 text-center md:max-w-[243px] p-2'>
+					Dica: Crie uma nova categoria, por exemplo:
+					{type === 'income'
+						? ' Salário, pensão, herança, PL ou dinheiro do velho rico'
+						: ' Mercado, transporte, aluguel, lazer ou RP'}{' '}
+				</p>
+			)}
 			<CommandEmpty>
 				<p>Não encontrada</p>
-				<p className='text-xs text-muted-foreground mt-1'>Dica: Cria uma nova categoria</p>
+				<p className='text-xs text-muted-foreground mt-1 text-center lg:max-w-[243px] p-2'>
+					Dica: Crie uma nova categoria, por exemplo:
+					{type === 'income'
+						? ' Salário, pensão, herança, PL ou dinheiro do velho rico'
+						: ' Mercado, transporte, aluguel, lazer ou RP'}{' '}
+				</p>
 			</CommandEmpty>
 			<CommandGroup>
 				<CommandList>
 					{isConfiguring && (
 						<CommandItem
+							className='justify-between'
 							onSelect={() => {
 								onSelect(null);
 							}}
 						>
 							Nenhuma categoria padrão
+							<Check className={cn('mr-2 w-4 h-4 opacity-0', !value && 'opacity-100')} />
 						</CommandItem>
 					)}
 					{categoriesQuery.data &&

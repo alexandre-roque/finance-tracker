@@ -126,7 +126,7 @@ function CategoryList({ type, userSettings }: { type: TransactionType; userSetti
 							ainda
 						</p>
 
-						<p className='text-sm text-muted-foreground'>Create one to get started</p>
+						<p className='text-sm text-muted-foreground'>Crie uma para começar!</p>
 					</div>
 				)}
 				{dataAvailable && (

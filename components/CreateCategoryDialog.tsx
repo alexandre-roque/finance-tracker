@@ -152,6 +152,7 @@ function CreateCategoryDialog({ type, successCallback, trigger }: Props) {
 											</PopoverTrigger>
 											<PopoverContent className='w-full'>
 												<Picker
+													locale='pt'
 													data={data}
 													theme={theme.resolvedTheme}
 													onEmojiSelect={(emoji: { native: string }) => {
@@ -165,7 +166,7 @@ function CreateCategoryDialog({ type, successCallback, trigger }: Props) {
 							)}
 						/>
 
-<FormField
+						<FormField
 							control={form.control}
 							name='sharable'
 							render={({ field }) => (

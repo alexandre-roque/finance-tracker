@@ -5,13 +5,11 @@ import { TransactionTitle } from '@/components/CreateTransactionDialog';
 import CurrencyComboBox from '@/components/CurrencyComboBox';
 import Logo from '@/components/Logo';
 import RevalidateAndRedirect from '@/components/RevalidateAndRedirect';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { db } from '@/db';
 import { userSettings } from '@/db/schema/finance';
 import { eq } from 'drizzle-orm';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import React from 'react';
 
@@ -50,7 +48,10 @@ const Wizard = async () => {
 					<CardTitle>
 						Categoria principal para <TransactionTitle type='income' />
 					</CardTitle>
-					<CardDescription>Selecione qual será sua categoria principal para receita</CardDescription>
+					<CardDescription>
+						Selecione qual será sua categoria principal para receitas. Quando criar uma transação, ela irá
+						ser preenchida automaticamente. Você pode selecionar isso depois
+					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<CategoryPicker userSettings={currentUserSettings} type='income' isConfiguring />
@@ -61,7 +62,10 @@ const Wizard = async () => {
 					<CardTitle>
 						Categoria principal para <TransactionTitle type='expense' />
 					</CardTitle>
-					<CardDescription>Selecione qual será sua categoria principal para despesa</CardDescription>
+					<CardDescription>
+						Selecione qual será sua categoria principal para despesas. Quando criar uma transação, ela irá
+						ser preenchida automaticamente. Você pode selecionar isso depois
+					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<CategoryPicker userSettings={currentUserSettings} type='expense' isConfiguring />

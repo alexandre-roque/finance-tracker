@@ -144,7 +144,7 @@ function OptionList({
 }) {
 	return (
 		<Command>
-			<CommandInput placeholder='Filtrar cartões...' />
+			<CommandInput placeholder='Pesquisar cartões...' />
 			<CardCreationDialog />
 			<CommandList>
 				<CommandEmpty>Nenhum resultado encontrado</CommandEmpty>

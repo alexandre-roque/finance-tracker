@@ -98,7 +98,14 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 
 	const { mutate, isPending } = useMutation({
 		mutationFn: CreateTransaction,
-		onSuccess: () => {
+		onSuccess: (obj) => {
+			if (obj && 'error' in obj) {
+				toast.error(obj.error, {
+					id: 'create-transaction',
+				});
+				return;
+			}
+
 			toast.success('Transação criada com sucesso 🎉', {
 				id: 'create-transaction',
 			});
@@ -125,7 +132,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 			setOpen((prev) => !prev);
 		},
 		onError: (err) => {
-			toast.error(`Erro ao criar transação ${err.message}`, {
+			toast.error(`Erro ao criar transação`, {
 				id: 'create-transaction',
 			});
 		},

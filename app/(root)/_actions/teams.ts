@@ -55,7 +55,7 @@ export async function CreateTeamInvitation(form: inviteToTeamSchemaType) {
 	const { email, teamId } = parsedBody.data;
 
 	if (email === userEmail) {
-		throw new Error('Não é possível se convidar');
+		return { error: 'Não é possível se convidar' };
 	}
 
 	const invitee = await db.query.users.findFirst({
@@ -66,11 +66,11 @@ export async function CreateTeamInvitation(form: inviteToTeamSchemaType) {
 	});
 
 	if (!invitee) {
-		throw new Error('Usuário não encontrado');
+		return { error: 'Usuário não encontrado' };
 	}
 
 	try {
-		const invite = await db
+		const [invite] = await db
 			.insert(pendingTeamAprovals)
 			.values({
 				guestId: invitee?.id,
@@ -81,7 +81,7 @@ export async function CreateTeamInvitation(form: inviteToTeamSchemaType) {
 
 		return invite;
 	} catch (e) {
-		throw new Error('Usuário já foi convidado');
+		return { error: 'Usuário já foi convidado' };
 	}
 }
 

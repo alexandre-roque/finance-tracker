@@ -78,8 +78,6 @@ const Teams = () => {
 						</CardHeader>
 						<CardContent>
 							<Accordion type='multiple' className='w-full'>
-								<InviteToTeamDialog teamId={'01HZ3RAXV1Q19Q9Q3B3T7KFEPB'} />
-
 								{teamsQuery.data?.map((team) => (
 									<AccordionItem key={team.id} value={team.id}>
 										<AccordionTrigger>
@@ -89,6 +87,8 @@ const Teams = () => {
 											</div>
 										</AccordionTrigger>
 										<AccordionContent>
+											<InviteToTeamDialog teamId={team.id} />
+
 											<div className='flex flex-col gap-4'>
 												<AccordionItem value={`${team.id}_members`}>
 													<AccordionTrigger>

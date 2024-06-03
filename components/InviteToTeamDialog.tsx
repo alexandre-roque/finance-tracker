@@ -35,7 +35,14 @@ function InviteToTeamDialog({ teamId }: { teamId: string }) {
 
 	const { mutate, isPending } = useMutation({
 		mutationFn: CreateTeamInvitation,
-		onSuccess: () => {
+		onSuccess: (obj) => {
+			if ('error' in obj) {
+				toast.error(obj.error, {
+					id: 'create-team-invitation',
+				});
+				return;
+			}
+
 			toast.success('Convite feito com sucesso 🎉', {
 				id: 'create-team-invitation',
 			});
@@ -52,7 +59,7 @@ function InviteToTeamDialog({ teamId }: { teamId: string }) {
 			setOpen((prev) => !prev);
 		},
 		onError: (err) => {
-			toast.error(`Erro ao convidar: ${err.message}`, {
+			toast.error(`Erro ao convidar`, {
 				id: 'create-team-invitation',
 			});
 		},

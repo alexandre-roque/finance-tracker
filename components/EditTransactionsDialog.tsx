@@ -81,7 +81,14 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 
 	const { mutate, isPending } = useMutation({
 		mutationFn: EditTransaction,
-		onSuccess: () => {
+		onSuccess: (obj) => {
+			if (obj && 'error' in obj) {
+				toast.error(obj.error, {
+					id: 'edit-transaction',
+				});
+				return;
+			}
+
 			toast.success('Transação editada com sucesso 🎉', {
 				id: 'edit-transaction',
 			});

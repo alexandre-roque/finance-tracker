@@ -25,7 +25,7 @@ import { ulid } from 'ulid';
 export async function CreateTransaction(form: createTransactionSchemaType) {
 	const parsedBody = createTransactionSchema.safeParse(form);
 	if (!parsedBody.success) {
-		throw new Error(parsedBody.error.message);
+		return { error: parsedBody.error.message };
 	}
 
 	const session = await auth();
@@ -52,7 +52,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 	const [categoryRow] = await db.select().from(categories).where(eq(categories.id, category));
 
 	if (!categoryRow) {
-		throw new Error('category not found');
+		return { error: 'Categoria não encontrada' };
 	}
 
 	await db.transaction(async (trx) => {
@@ -224,7 +224,7 @@ export async function DeleteTransaction({
 export async function EditTransaction(form: editTransactionSchemaType) {
 	const parsedBody = editTransactionSchema.safeParse(form);
 	if (!parsedBody.success) {
-		throw new Error(parsedBody.error.message);
+		return { error: parsedBody.error.message };
 	}
 
 	const session = await auth();
@@ -239,7 +239,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 	const [categoryRow] = await db.select().from(categories).where(eq(categories.id, category));
 
 	if (!categoryRow) {
-		throw new Error('category not found');
+		return { error: 'Categoria não encontrada' };
 	}
 
 	const transactionsResult = await db.query.transactions.findFirst({

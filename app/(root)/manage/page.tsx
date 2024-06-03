@@ -3,6 +3,7 @@
 import CardComboBox from '@/components/CardComboBox';
 import CategoryPicker from '@/components/CategoryPicker';
 import CreateCategoryDialog from '@/components/CreateCategoryDialog';
+import { TransactionTitle } from '@/components/CreateTransactionDialog';
 import CurrencyComboBox from '@/components/CurrencyComboBox';
 import DeleteCategoryDialog from '@/components/DeleteCategoryDialog';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
@@ -109,7 +110,8 @@ function CategoryList({ type, userSettings }: { type: TransactionType; userSetti
 				<Separator />
 				<div className='p-2'>
 					<CardDescription className='mb-1'>
-						Selecione qual será sua categoria principal para receita
+						Selecione qual será sua categoria principal para <TransactionTitle type={type} />. Quando criar
+						uma transação, a categoria irá ser preenchida automaticamente com a que selecionar.
 					</CardDescription>
 
 					<CategoryPicker isConfiguring type={type} userSettings={userSettings} />

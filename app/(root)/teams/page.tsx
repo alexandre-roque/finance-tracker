@@ -87,7 +87,7 @@ const Teams = () => {
 											</div>
 										</AccordionTrigger>
 										<AccordionContent>
-											<InviteToTeamDialog teamId={team.id} />
+											<InviteToTeamDialog teamId={team.team.id} />
 
 											<div className='flex flex-col gap-4'>
 												<AccordionItem value={`${team.id}_members`}>

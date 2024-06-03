@@ -33,6 +33,12 @@ const NotificationsPopOver = () => {
 				queryKey: ['notifications'],
 			});
 
+			if (accepted) {
+				queryClient.invalidateQueries({
+					queryKey: ['teams-members'],
+				});
+			}
+
 			setOpen((prev) => !prev);
 		},
 		onError: () => {

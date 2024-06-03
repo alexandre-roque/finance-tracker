@@ -14,7 +14,6 @@ import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -293,8 +292,8 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 										<FormLabel className='form-label'>Data da transação</FormLabel>
 										<div className='flex w-full flex-col'>
 											<FormControl>
-												<Popover>
-													<PopoverTrigger asChild>
+												<Dialog>
+													<DialogTrigger asChild>
 														<FormControl>
 															<Button
 																variant={'outline'}
@@ -311,8 +310,8 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 																<CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
 															</Button>
 														</FormControl>
-													</PopoverTrigger>
-													<PopoverContent className='w-auto p-0'>
+													</DialogTrigger>
+													<DialogContent className='w-auto p-0'>
 														<Calendar
 															locale={ptBR}
 															mode='single'
@@ -323,8 +322,8 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 															}}
 															initialFocus
 														/>
-													</PopoverContent>
-												</Popover>
+													</DialogContent>
+												</Dialog>
 											</FormControl>
 											<FormMessage className='form-message mt-2' />
 										</div>

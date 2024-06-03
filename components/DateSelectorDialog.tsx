@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
-import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
@@ -13,7 +13,7 @@ import { useState } from 'react';
 
 const DateSelectorDialog = ({ dateValue, control }: { dateValue: Date; control: Control<any> }) => {
     const [open, setOpen] = useState(false);
-    
+
     return (
         <FormField
             control={control}
@@ -42,7 +42,10 @@ const DateSelectorDialog = ({ dateValue, control }: { dateValue: Date; control: 
                                         </Button>
                                     </FormControl>
                                 </DialogTrigger>
-                                <DialogContent className="w-auto p-0">
+                                <DialogContent className="w-auto p-4">
+                                    <DialogHeader>
+                                        <DialogTitle>Data da transação</DialogTitle>
+                                    </DialogHeader>
                                     <Calendar
                                         locale={ptBR}
                                         mode="single"

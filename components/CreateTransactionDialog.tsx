@@ -260,7 +260,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 												onChange={handleBankingAccountChange}
 											/>
 										</FormControl>
-										<FormDescription>Selecione a conta bancária da sua transação</FormDescription>
+										<FormDescription>Selecione a conta da sua transação</FormDescription>
 									</FormItem>
 								)}
 							/>

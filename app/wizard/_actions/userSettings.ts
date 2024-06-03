@@ -32,7 +32,7 @@ export async function UpdateUserCurrency(currency: string) {
 
 	return userSettingsResult;
 }
-export async function UpdateUserCard(cardId: string | null) {
+export async function UpdateUserBankingAccount(bankingAccountId: string | null) {
 	const session = await auth();
 	if (!session || !session.user || !session.user.id) {
 		redirect('/sign-in');
@@ -40,7 +40,7 @@ export async function UpdateUserCard(cardId: string | null) {
 
 	const [userSettingsResult] = await db
 		.update(userSettings)
-		.set({ mainCard: cardId })
+		.set({ mainBankingAccount: bankingAccountId })
 		.where(eq(userSettings.userId, session.user.id))
 		.returning();
 
@@ -62,7 +62,7 @@ export async function UpdateUserCategory({ categoryId, type }: { categoryId?: st
 		.returning();
 
 	revalidatePath('/');
-	
+
 	return userSettingsResult;
 }
 

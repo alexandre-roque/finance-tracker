@@ -45,7 +45,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 		isRecurring,
 		businessDay,
 		dayOfTheMonth,
-		card: cardId,
+		bankingAccountId,
 		installments,
 	} = parsedBody.data;
 
@@ -64,7 +64,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 					amount,
 					type,
 					teamId,
-					cardId: cardId ?? null,
+					bankingAccountId,
 					dayOfTheMonth: dayOfTheMonth ?? null,
 					businessDay: businessDay ?? null,
 					description: description || '',
@@ -85,7 +85,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 						amount,
 						type,
 						teamId,
-						cardId: cardId ?? null,
+						bankingAccountId,
 						date: DateToUTCDate(new Date()),
 						description: description || '',
 						category: categoryRow.name,
@@ -118,7 +118,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 				type,
 				teamId,
 				installmentId,
-				cardId: cardId ?? null,
+				bankingAccountId,
 				description:
 					(description || '') + (howManyInstallments > 1 ? ` (${i + 1}/${howManyInstallments})` : ''),
 				category: categoryRow.name,
@@ -234,7 +234,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 
 	const userId = session.user.id;
 
-	const { amount, category, date, description, type, teamId, card: cardId, transactionId } = parsedBody.data;
+	const { amount, category, date, description, type, teamId, bankingAccountId, transactionId } = parsedBody.data;
 
 	const [categoryRow] = await db.select().from(categories).where(eq(categories.id, category));
 
@@ -263,7 +263,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 				date,
 				type,
 				teamId,
-				cardId: cardId ?? null,
+				bankingAccountId,
 				description: description || '',
 				category: categoryRow.name,
 				categoryIcon: categoryRow.icon,

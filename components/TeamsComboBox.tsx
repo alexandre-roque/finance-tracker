@@ -12,7 +12,7 @@ import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { toast } from 'sonner';
 import { UpdateUserTeam } from '@/app/wizard/_actions/userSettings';
 import { ChevronsUpDown } from 'lucide-react';
-import TeamCreationDialog from './TeamCreationDialog';
+import CreateTeamDialog from './CreateTeamDialog';
 
 interface Props {
 	onChange?: (value: string) => void;
@@ -160,7 +160,7 @@ function OptionList({
 	return (
 		<Command>
 			<CommandInput placeholder='Pesquisar times...' />
-			<TeamCreationDialog />
+			<CreateTeamDialog />
 			<CommandList>
 				<CommandEmpty>Nenhum resultado encontrado</CommandEmpty>
 				<CommandGroup>

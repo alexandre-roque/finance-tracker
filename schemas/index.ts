@@ -23,19 +23,19 @@ export const updateUserCurrencySchema = z.object({
 	}),
 });
 
-export const createCardSchema = z.object({
-	cardNumber: z.string().min(4).max(4),
+export const createBankingAccountSchema = z.object({
 	name: z.string(),
+	description: z.string().optional(),
 });
 
-export type createCardSchemaType = z.infer<typeof createCardSchema>;
+export type createBankingAccountSchemaType = z.infer<typeof createBankingAccountSchema>;
 
 export const createTransactionSchema = z.object({
 	amount: z.coerce.number().positive().multipleOf(0.01),
 	description: z.string().optional(),
 	date: z.coerce.date(),
 	category: z.string(),
-	card: z.string().optional(),
+	bankingAccountId: z.string().optional(),
 	type: z.union([z.literal('income'), z.literal('expense')]),
 	teamId: z.string().optional(),
 	installments: z.coerce.number().default(1),
@@ -95,7 +95,7 @@ export const editTransactionSchema = z.object({
 	description: z.string().optional(),
 	date: z.coerce.date(),
 	category: z.string(),
-	card: z.string().optional(),
+	bankingAccountId: z.string().optional(),
 	type: z.union([z.literal('income'), z.literal('expense')]),
 	teamId: z.string().optional(),
 });

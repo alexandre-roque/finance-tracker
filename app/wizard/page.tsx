@@ -1,15 +1,9 @@
 import { auth } from '@/auth';
-import CardComboBox from '@/components/CardComboBox';
-import CategoryPicker from '@/components/CategoryPicker';
-import { TransactionTitle } from '@/components/CreateTransactionDialog';
 import CurrencyComboBox from '@/components/CurrencyComboBox';
 import Logo from '@/components/Logo';
 import RevalidateAndRedirect from '@/components/RevalidateAndRedirect';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { db } from '@/db';
-import { userSettings } from '@/db/schema/finance';
-import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import React from 'react';
 

@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createCardSchema as formSchema } from '@/schemas';
+import { createBankingAccountSchema as formSchema } from '@/schemas';
 import { z } from 'zod';
 import { Form } from './ui/form';
 import CustomInput from './CustomInput';
@@ -22,7 +22,7 @@ import { Loader2, PlusSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 
-const CardCreationDialog = ({ trigger }: { trigger?: ReactNode }) => {
+const CreateBankingAccountDialog = ({ trigger }: { trigger?: ReactNode }) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [open, setOpen] = useState(false);
 	const queryClient = useQueryClient();
@@ -31,35 +31,35 @@ const CardCreationDialog = ({ trigger }: { trigger?: ReactNode }) => {
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: '',
-			cardNumber: '',
+			description: '',
 		},
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setIsLoading(true);
 
-		toast.loading('Criando cartão', {
-			id: 'creating-card',
+		toast.loading('Criando conta bancária', {
+			id: 'creating-bankingAccount',
 		});
 
-		await fetch('/api/cards', {
+		await fetch('/api/bankingAccounts', {
 			method: 'POST',
 			body: JSON.stringify({
 				name: values.name,
-				number: values.cardNumber,
+				number: values.description,
 			}),
 		}).then((res) => {
 			if (res.status === 200) {
-				toast.success('Cartão criado com sucesso', {
-					id: 'creating-card',
+				toast.success('Conta bancária criada com sucesso', {
+					id: 'creating-bankingAccount',
 				});
 
 				queryClient.invalidateQueries({
-					queryKey: ['cards'],
+					queryKey: ['bankingAccounts'],
 				});
 			} else {
-				toast.error('Erro ao criar cartão', {
-					id: 'creating-card',
+				toast.error('Erro ao criar conta bancária', {
+					id: 'creating-bankingAccount',
 				});
 			}
 		});
@@ -79,14 +79,14 @@ const CardCreationDialog = ({ trigger }: { trigger?: ReactNode }) => {
 						className='flex border-separate items-center justify-start roudned-none border-b px-3 py-3 text-muted-foreground'
 					>
 						<PlusSquare className='mr-2 h-4 w-4' />
-						Criar novo
+						Criar nova
 					</Button>
 				)}
 			</DialogTrigger>
 			<DialogContent className='sm:max-w-[425px]'>
 				<DialogHeader>
-					<DialogTitle>Cadastre seu cartão</DialogTitle>
-					<DialogDescription>Você pode editar/deletar eles nas configurações</DialogDescription>
+					<DialogTitle>Cadastre sua conta bancária</DialogTitle>
+					<DialogDescription>Você pode editar/deletar elas nas configurações</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
 					<form className='space-y-4' onSubmit={form.handleSubmit(onSubmit)}>
@@ -94,14 +94,14 @@ const CardCreationDialog = ({ trigger }: { trigger?: ReactNode }) => {
 							control={form.control}
 							name='name'
 							label='Nome'
-							placeholder='Digite o nome que você quer dar para o cartão'
+							placeholder='Digite o nome que você quer dar'
 						/>
 
 						<CustomInput
 							control={form.control}
-							name='cardNumber'
-							label='Últimos 4 digitos'
-							placeholder='Exemplo: 1234'
+							name='description'
+							label='Descrição'
+							placeholder='Exemplo: Conta da Nubank'
 						/>
 					</form>
 				</Form>
@@ -127,4 +127,4 @@ const CardCreationDialog = ({ trigger }: { trigger?: ReactNode }) => {
 	);
 };
 
-export default CardCreationDialog;
+export default CreateBankingAccountDialog;

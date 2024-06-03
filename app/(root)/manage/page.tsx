@@ -1,6 +1,6 @@
 'use client';
 
-import CardComboBox from '@/components/CardComboBox';
+import BankingAccountComboBox from '@/components/BankingAccountComboBox';
 import CategoryPicker from '@/components/CategoryPicker';
 import CreateCategoryDialog from '@/components/CreateCategoryDialog';
 import { TransactionTitle } from '@/components/CreateTransactionDialog';
@@ -47,12 +47,14 @@ function Manage() {
 
 				<Card className='w-full'>
 					<CardHeader>
-						<CardTitle>Cartões</CardTitle>
-						<CardDescription>Selecione qual será o seu cartão principal</CardDescription>
+						<CardTitle>Conta bancária padrão</CardTitle>
+						<CardDescription>
+							Selecione qual será a sua conta bancária padrão para transações
+						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<SkeletonWrapper isLoading={userSettingsQuery.isFetching}>
-							<CardComboBox isConfiguring userSettings={userSettingsQuery.data} />
+							<BankingAccountComboBox isConfiguring userSettings={userSettingsQuery.data} />
 						</SkeletonWrapper>
 					</CardContent>
 				</Card>

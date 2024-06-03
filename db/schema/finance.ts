@@ -14,13 +14,13 @@ export const userSettings = sqliteTable('userSetting', {
 	currency: text('currency'),
 	mainIncomeCategory: text('mainIncomeCategory'),
 	mainExpenseCategory: text('mainExpenseCategory'),
-	mainCard: text('mainCard').references(() => cards.id, { onDelete: 'set null' }),
+	mainBankingAccount: text('mainBankingAccount').references(() => bankingAccounts.id, { onDelete: 'set null' }),
 	mainTeam: text('mainTeam').references(() => teams.id, { onDelete: 'set null' }),
 });
 
 export type userSettingsType = typeof userSettings.$inferSelect;
 
-export const cards = sqliteTable('card', {
+export const bankingAccounts = sqliteTable('bankingAccount', {
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => ulid()),
@@ -28,10 +28,10 @@ export const cards = sqliteTable('card', {
 		.notNull()
 		.references(() => users.id, { onDelete: 'cascade' }),
 	name: text('name'),
-	number: text('number'),
+	description: text('description'),
 });
 
-export type cardsType = typeof cards.$inferSelect;
+export type bankingAccountsType = typeof bankingAccounts.$inferSelect;
 
 export const categories = sqliteTable(
 	'category',
@@ -70,7 +70,7 @@ export const transactions = sqliteTable('transaction', {
 		.default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`)
 		.notNull(),
 	type: text('type').default('income').notNull(),
-	cardId: text('cardId'),
+	bankingAccountId: text('bankingAccountId'),
 	category: text('category'),
 	categoryIcon: text('categoryIcon'),
 	categoryId: text('categoryId'),
@@ -94,7 +94,7 @@ export const recurringTransactions = sqliteTable('recurringTransaction', {
 	dayOfTheMonth: integer('dayOfTheMonth'),
 	businessDay: integer('businessDay'),
 	type: text('type').default('income'),
-	cardId: text('cardId').references(() => cards.id, { onDelete: 'set null' }),
+	bankingAccountId: text('bankingAccountId'),
 	category: text('category'),
 	categoryIcon: text('categoryIcon'),
 	categoryId: text('categoryId'),
@@ -204,9 +204,9 @@ export const userSettingsRelations = relations(userSettings, ({ one, many }) => 
 		fields: [userSettings.userId],
 		references: [users.id],
 	}),
-	mainCard: one(cards, {
-		fields: [userSettings.mainCard],
-		references: [cards.id],
+	mainBankingAccount: one(bankingAccounts, {
+		fields: [userSettings.mainBankingAccount],
+		references: [bankingAccounts.id],
 	}),
 	mainTeam: one(teams, {
 		fields: [userSettings.mainTeam],
@@ -214,9 +214,9 @@ export const userSettingsRelations = relations(userSettings, ({ one, many }) => 
 	}),
 }));
 
-export const cardRelations = relations(cards, ({ one }) => ({
+export const bankingAccountRelations = relations(bankingAccounts, ({ one }) => ({
 	user: one(users, {
-		fields: [cards.userId],
+		fields: [bankingAccounts.userId],
 		references: [users.id],
 	}),
 }));
@@ -230,9 +230,9 @@ export const transactionRelations = relations(transactions, ({ one }) => ({
 		fields: [transactions.teamId],
 		references: [teams.id],
 	}),
-	card: one(cards, {
-		fields: [transactions.cardId],
-		references: [cards.id],
+	bankingAccount: one(bankingAccounts, {
+		fields: [transactions.bankingAccountId],
+		references: [bankingAccounts.id],
 	}),
 }));
 
@@ -245,9 +245,9 @@ export const recurringTransactionRelations = relations(recurringTransactions, ({
 		fields: [recurringTransactions.teamId],
 		references: [teams.id],
 	}),
-	card: one(cards, {
-		fields: [recurringTransactions.cardId],
-		references: [cards.id],
+	bankingAccount: one(bankingAccounts, {
+		fields: [recurringTransactions.bankingAccountId],
+		references: [bankingAccounts.id],
 	}),
 }));
 

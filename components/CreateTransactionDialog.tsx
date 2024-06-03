@@ -29,7 +29,7 @@ import { Switch } from './ui/switch';
 import CategoryPicker from './CategoryPicker';
 import { CreateTransaction } from '@/app/(root)/_actions/transactions';
 import { userSettingsType } from '@/db/schema/finance';
-import CardComboBox from './CardComboBox';
+import BankingAccountComboBox from './BankingAccountComboBox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { GetFormatterForCurrency } from '@/lib/currencies';
 import TeamsComboBox from './TeamsComboBox';
@@ -52,7 +52,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 		defaultValues: {
 			type,
 			description: '',
-			card: '',
+			bankingAccountId: '',
 			amount: 0,
 			date: new Date(),
 			businessDay: 0,
@@ -87,9 +87,10 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 		[form]
 	);
 
-	const handleCardChange = useCallback(
-		(value: string) => {
-			form.setValue('card', value);
+	const handleBankingAccountChange = useCallback(
+		(value?: string) => {
+			console.log(value);
+			form.setValue('bankingAccountId', value);
 		},
 		[form]
 	);
@@ -113,7 +114,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 			form.reset({
 				type,
 				description: '',
-				card: '',
+				bankingAccountId: '',
 				amount: 0,
 				date: new Date(),
 				businessDay: 0,
@@ -249,14 +250,17 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 
 							<FormField
 								control={form.control}
-								name='category'
+								name='bankingAccountId'
 								render={() => (
 									<FormItem className='flex flex-col'>
-										<FormLabel>Cartão</FormLabel>
+										<FormLabel>Conta bancária</FormLabel>
 										<FormControl>
-											<CardComboBox userSettings={userSettings} onChange={handleCardChange} />
+											<BankingAccountComboBox
+												userSettings={userSettings}
+												onChange={handleBankingAccountChange}
+											/>
 										</FormControl>
-										<FormDescription>Selecione o cartão da sua transação</FormDescription>
+										<FormDescription>Selecione a conta bancária da sua transação</FormDescription>
 									</FormItem>
 								)}
 							/>

@@ -28,7 +28,7 @@ interface Props {
 	trigger?: ReactNode;
 }
 
-function CreateCategoryDialog({ trigger }: Props) {
+function CreateTeamDialog({ trigger }: Props) {
 	const [open, setOpen] = useState(false);
 	const form = useForm<createTeamSchemaType>({
 		resolver: zodResolver(createTeamSchema),
@@ -128,4 +128,4 @@ function CreateCategoryDialog({ trigger }: Props) {
 	);
 }
 
-export default CreateCategoryDialog;
+export default CreateTeamDialog;

@@ -26,13 +26,11 @@ import { TransactionType, DateToUTCDate } from '@/lib/utils';
 import { editTransactionSchema, editTransactionSchemaType } from '@/schemas';
 import CustomInput from './CustomInput';
 import CategoryPicker from './CategoryPicker';
-import { CreateTransaction, EditTransaction } from '@/app/(root)/_actions/transactions';
+import { EditTransaction } from '@/app/(root)/_actions/transactions';
 import { transactionsType, userSettingsType } from '@/db/schema/finance';
-import CardComboBox from './CardComboBox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { GetFormatterForCurrency } from '@/lib/currencies';
 import TeamsComboBox from './TeamsComboBox';
 import { TransactionTitle } from './CreateTransactionDialog';
+import BankingAccountComboBox from './BankingAccountComboBox';
 
 interface Props {
 	open: boolean;
@@ -46,7 +44,7 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 		defaultValues: {
 			type: transaction.type as TransactionType,
 			description: transaction.description || '',
-			card: transaction.cardId || '',
+			bankingAccountId: transaction.bankingAccountId ?? undefined,
 			amount: transaction.amount,
 			date: transaction.date,
 			transactionId: transaction.id,
@@ -71,8 +69,8 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 	);
 
 	const handleCardChange = useCallback(
-		(value: string) => {
-			form.setValue('card', value);
+		(value?: string) => {
+			form.setValue('bankingAccountId', value);
 		},
 		[form]
 	);
@@ -95,7 +93,7 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 
 			form.reset({
 				description: '',
-				card: '',
+				bankingAccountId: '',
 				amount: 0,
 				date: new Date(),
 			});
@@ -186,17 +184,17 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 
 							<FormField
 								control={form.control}
-								name='category'
+								name='bankingAccountId'
 								render={() => (
 									<FormItem className='flex flex-col'>
-										<FormLabel>Cartão</FormLabel>
+										<FormLabel>Conta bancária</FormLabel>
 										<FormControl>
-											<CardComboBox
-												firstSelectedValue={transaction.cardId}
+											<BankingAccountComboBox
+												firstSelectedValue={transaction.bankingAccountId}
 												onChange={handleCardChange}
 											/>
 										</FormControl>
-										<FormDescription>Selecione o cartão da sua transação</FormDescription>
+										<FormDescription>Selecione a conta bancária da sua transação</FormDescription>
 									</FormItem>
 								)}
 							/>

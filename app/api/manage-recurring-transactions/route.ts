@@ -48,11 +48,11 @@ export async function GET() {
 			const { dayOfTheMonth, businessDay, createdAt, updatedAt, ...transaction } = recurringTransaction;
 			await CreateTransaction({
 				...transaction,
-				card: transaction.cardId ?? '',
 				date: new Date(),
 				type: transaction.type === 'income' ? 'income' : 'expense',
 				amount: transaction.amount ?? 0,
 				isRecurring: false,
+				bankingAccountId: transaction.bankingAccountId ?? undefined,
 				category: transaction.category ?? '',
 				description: transaction.description ?? '',
 				teamId: transaction.teamId ?? undefined,

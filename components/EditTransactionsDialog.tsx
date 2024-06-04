@@ -63,13 +63,13 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 	);
 
 	const handleTeamChange = useCallback(
-		(value: string) => {
+		(value?: string) => {
 			form.setValue('teamId', value);
 		},
 		[form]
 	);
 
-	const handleCardChange = useCallback(
+	const handleBankingAccountChange = useCallback(
 		(value?: string) => {
 			form.setValue('bankingAccountId', value);
 		},
@@ -192,7 +192,7 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 										<FormControl>
 											<BankingAccountComboBox
 												firstSelectedValue={transaction.bankingAccountId}
-												onChange={handleCardChange}
+												onChange={handleBankingAccountChange}
 											/>
 										</FormControl>
 										<FormDescription>Selecione a conta bancária da sua transação</FormDescription>

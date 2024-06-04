@@ -89,7 +89,6 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 
 	const handleBankingAccountChange = useCallback(
 		(value?: string) => {
-			console.log(value);
 			form.setValue('bankingAccountId', value);
 		},
 		[form]
@@ -284,9 +283,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 							)}
 						/>
 
-						{!isRecurringValue && (
-							<DateSelectorDialog control={form.control} dateValue={dateValue} />
-						)}
+						{!isRecurringValue && <DateSelectorDialog control={form.control} dateValue={dateValue} />}
 
 						{isRecurringValue && (
 							<div className='flex gap-3'>

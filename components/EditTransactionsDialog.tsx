@@ -18,7 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { CalendarIcon, Edit, Loader2 } from 'lucide-react';
+import { CalendarIcon, Loader2 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -27,10 +27,11 @@ import { editTransactionSchema, editTransactionSchemaType } from '@/schemas';
 import CustomInput from './CustomInput';
 import CategoryPicker from './CategoryPicker';
 import { EditTransaction } from '@/app/(root)/_actions/transactions';
-import { transactionsType, userSettingsType } from '@/db/schema/finance';
+import { transactionsType } from '@/db/schema/finance';
 import TeamsComboBox from './TeamsComboBox';
 import { TransactionTitle } from './CreateTransactionDialog';
 import BankingAccountComboBox from './BankingAccountComboBox';
+import DateSelectorDialog from './DateSelectorDialog';
 
 interface Props {
 	open: boolean;
@@ -199,52 +200,7 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 								)}
 							/>
 						</div>
-						<FormField
-							control={form.control}
-							name='date'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel className='form-label'>Data da transação</FormLabel>
-									<div className='flex w-full flex-col'>
-										<FormControl>
-											<Popover>
-												<PopoverTrigger asChild>
-													<FormControl>
-														<Button
-															variant={'outline'}
-															className={cn(
-																'w-[200px] pl-3 text-left font-normal',
-																!dateValue && 'text-muted-foreground'
-															)}
-														>
-															{dateValue ? (
-																format(dateValue, 'PPP', { locale: ptBR })
-															) : (
-																<span>Selecione uma data</span>
-															)}
-															<CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-														</Button>
-													</FormControl>
-												</PopoverTrigger>
-												<PopoverContent className='w-auto p-0'>
-													<Calendar
-														locale={ptBR}
-														mode='single'
-														selected={dateValue}
-														onSelect={(value) => {
-															if (!value) return;
-															field.onChange(value);
-														}}
-														initialFocus
-													/>
-												</PopoverContent>
-											</Popover>
-										</FormControl>
-										<FormMessage className='form-message mt-2' />
-									</div>
-								</FormItem>
-							)}
-						/>
+						<DateSelectorDialog control={form.control} dateValue={dateValue} />
 					</form>
 				</Form>
 

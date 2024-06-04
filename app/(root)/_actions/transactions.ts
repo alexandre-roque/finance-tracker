@@ -270,7 +270,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 			})
 			.where(eq(transactions.id, transactionId));
 
-		if (oldAmount !== amount) {
+		if (oldAmount !== amount || !moment(date).isSame(oldDate) || oldTeamId !== teamId) {
 			// Atualiza monthHistory
 			const [existingMonthHistory] = await trx
 				.select()

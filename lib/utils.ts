@@ -45,24 +45,25 @@ export function getBusinessDayOfMonth(date: Date) {
 }
 
 export function hashStringToHSL(str: string) {
-	// Cria um hash simples usando a função de hash de string
-	function hashCode(str: string) {
-		let hash = 0;
-		for (let i = 0; i < str.length; i++) {
-			hash = str.charCodeAt(i) + ((hash << 5) - hash);
-		}
-		return hash;
+	// Função para criar um hash a partir da string
+	function hashCode(s: string) {
+		return s.split('').reduce((a, b) => {
+			a = (a << 5) - a + b.charCodeAt(0);
+			return a & a;
+		}, 0);
 	}
 
-	// Converte o hash em valores HSL
-	function intToHSL(hash: number) {
-		let hue = 30 + (hash % 10); // Matiz entre 30° e 40°
-		let saturation = (hash % 100) + 50; // Saturação entre 50% e 149%
-		let lightness = ((hash >> 8) % 40) + 30; // Luminosidade entre 30% e 69%
-		return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-	}
+	const hash = hashCode(str);
 
-	return intToHSL(hashCode(str));
+	// Fixar o matiz em 0 (vermelho)
+	const h = 15 + (hash % 10);
+
+	// Calcular a saturação (s) e a luminosidade (l) a partir do hash
+	// Garantir que os valores estejam dentro dos limites aceitáveis
+	const s = 50 + (hash % 50); // Saturação entre 50% e 100%
+	const l = 40 + (hash % 20); // Luminosidade entre 40% e 60%
+
+	return `hsl(${h}, ${s}%, ${l}%)`;
 }
 
 export function orangeHSLToGreenHSL(hsl: string) {

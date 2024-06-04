@@ -81,7 +81,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 	);
 
 	const handleTeamChange = useCallback(
-		(value: string) => {
+		(value?: string) => {
 			form.setValue('teamId', value);
 		},
 		[form]

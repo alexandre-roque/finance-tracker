@@ -277,7 +277,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 				.from(monthHistories)
 				.where(
 					and(
-						or(eq(monthHistories.teamId, oldTeamId || 'NOT_EXISTING'), eq(monthHistories.userId, userId)),
+						oldTeamId ? eq(monthHistories.teamId, oldTeamId) : eq(monthHistories.userId, userId),
 						eq(monthHistories.day, oldDate.getUTCDate()),
 						eq(monthHistories.month, oldDate.getUTCMonth()),
 						eq(monthHistories.year, oldDate.getUTCFullYear())
@@ -293,10 +293,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 					})
 					.where(
 						and(
-							or(
-								eq(monthHistories.teamId, oldTeamId || 'NOT_EXISTING'),
-								eq(monthHistories.userId, userId)
-							),
+							oldTeamId ? eq(monthHistories.teamId, oldTeamId) : eq(monthHistories.userId, userId),
 							eq(monthHistories.day, oldDate.getUTCDate()),
 							eq(monthHistories.month, oldDate.getUTCMonth()),
 							eq(monthHistories.year, oldDate.getUTCFullYear())
@@ -310,7 +307,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 				.from(yearHistories)
 				.where(
 					and(
-						or(eq(yearHistories.teamId, oldTeamId || 'NOT_EXISTING'), eq(yearHistories.userId, userId)),
+						oldTeamId ? eq(yearHistories.teamId, oldTeamId) : eq(yearHistories.userId, userId),
 						eq(yearHistories.month, oldDate.getUTCMonth()),
 						eq(yearHistories.year, oldDate.getUTCFullYear())
 					)
@@ -325,7 +322,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 					})
 					.where(
 						and(
-							or(eq(yearHistories.teamId, oldTeamId || 'NOT_EXISTING'), eq(yearHistories.userId, userId)),
+							oldTeamId ? eq(yearHistories.teamId, oldTeamId) : eq(yearHistories.userId, userId),
 							eq(yearHistories.month, oldDate.getUTCMonth()),
 							eq(yearHistories.year, oldDate.getUTCFullYear())
 						)
@@ -358,7 +355,7 @@ async function CreateOrUpdateHistories({
 		.from(monthHistories)
 		.where(
 			and(
-				or(eq(monthHistories.teamId, teamId || 'NOT_EXISTING'), eq(monthHistories.userId, userId)),
+				teamId ? eq(monthHistories.teamId, teamId) : eq(monthHistories.userId, userId),
 				eq(monthHistories.day, date.getUTCDate()),
 				eq(monthHistories.month, date.getUTCMonth()),
 				eq(monthHistories.year, date.getUTCFullYear())
@@ -374,7 +371,7 @@ async function CreateOrUpdateHistories({
 			})
 			.where(
 				and(
-					or(eq(monthHistories.teamId, teamId || 'NOT_EXISTING'), eq(monthHistories.userId, userId)),
+					teamId ? eq(monthHistories.teamId, teamId) : eq(monthHistories.userId, userId),
 					eq(monthHistories.day, date.getUTCDate()),
 					eq(monthHistories.month, date.getUTCMonth()),
 					eq(monthHistories.year, date.getUTCFullYear())
@@ -398,7 +395,7 @@ async function CreateOrUpdateHistories({
 		.from(yearHistories)
 		.where(
 			and(
-				or(eq(yearHistories.teamId, teamId || 'NOT_EXISTING'), eq(yearHistories.userId, userId)),
+				teamId ? eq(yearHistories.teamId, teamId) : eq(yearHistories.userId, userId),
 				eq(yearHistories.month, date.getUTCMonth()),
 				eq(yearHistories.year, date.getUTCFullYear())
 			)
@@ -413,7 +410,7 @@ async function CreateOrUpdateHistories({
 			})
 			.where(
 				and(
-					or(eq(yearHistories.teamId, teamId || 'NOT_EXISTING'), eq(yearHistories.userId, userId)),
+					teamId ? eq(yearHistories.teamId, teamId) : eq(yearHistories.userId, userId),
 					eq(yearHistories.month, date.getUTCMonth()),
 					eq(yearHistories.year, date.getUTCFullYear())
 				)

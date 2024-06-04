@@ -15,7 +15,7 @@ import { ChevronsUpDown } from 'lucide-react';
 import CreateTeamDialog from './CreateTeamDialog';
 
 interface Props {
-	onChange?: (value: string) => void;
+	onChange?: (value?: string) => void;
 	isConfiguring?: boolean;
 	userSettings?: userSettingsType;
 	firstSelectedValue?: string | null;
@@ -103,8 +103,7 @@ const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedVal
 	}, [teamsQuery.data, firstSelectedValue, selectedOption]);
 
 	useEffect(() => {
-		if (!selectedOption) return;
-		if (onChange) onChange(selectedOption.team.id);
+		if (onChange) onChange(selectedOption?.team?.id);
 	}, [onChange, selectedOption]);
 
 	if (isDesktop) {

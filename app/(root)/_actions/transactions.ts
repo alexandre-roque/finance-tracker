@@ -260,6 +260,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 				description: description || '',
 				category: categoryRow.name,
 				categoryIcon: categoryRow.icon,
+				categoryId: category,
 			})
 			.where(eq(transactions.id, transactionId));
 

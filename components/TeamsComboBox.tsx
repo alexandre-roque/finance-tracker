@@ -11,8 +11,9 @@ import { userSettingsType } from '@/db/schema/finance';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { toast } from 'sonner';
 import { UpdateUserTeam } from '@/app/wizard/_actions/userSettings';
-import { ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import CreateTeamDialog from './CreateTeamDialog';
+import { cn } from '@/lib/utils';
 
 interface Props {
 	onChange?: (value?: string) => void;
@@ -97,10 +98,9 @@ const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedVal
 	useEffect(() => {
 		if (!firstSelectedValue) return;
 		if (!teamsQuery.data) return;
-		if (selectedOption != null) return;
 		const currentTeam = teamsQuery.data.find((teamMember) => teamMember.team.id === firstSelectedValue);
 		if (currentTeam) setSelectedOption(currentTeam);
-	}, [teamsQuery.data, firstSelectedValue, selectedOption]);
+	}, [teamsQuery.data, firstSelectedValue]);
 
 	useEffect(() => {
 		if (onChange) onChange(selectedOption?.team?.id);
@@ -121,7 +121,12 @@ const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedVal
 						</Button>
 					</PopoverTrigger>
 					<PopoverContent className='w-[200px] p-0' align='start'>
-						<OptionList setOpen={setOpen} setSelectedOption={selectOption} teams={teamsQuery.data} />
+						<OptionList
+							setOpen={setOpen}
+							setSelectedOption={selectOption}
+							teams={teamsQuery.data}
+							selectedOption={selectedOption}
+						/>
 					</PopoverContent>
 				</Popover>
 			</SkeletonWrapper>
@@ -139,7 +144,12 @@ const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedVal
 				</DrawerTrigger>
 				<DrawerContent>
 					<div className='mt-4 border-t'>
-						<OptionList setOpen={setOpen} setSelectedOption={selectOption} teams={teamsQuery.data} />
+						<OptionList
+							setOpen={setOpen}
+							setSelectedOption={selectOption}
+							teams={teamsQuery.data}
+							selectedOption={selectedOption}
+						/>
 					</div>
 				</DrawerContent>
 			</Drawer>
@@ -151,10 +161,12 @@ function OptionList({
 	teams,
 	setOpen,
 	setSelectedOption,
+	selectedOption,
 }: {
 	teams?: teamsQueryType[];
 	setOpen: (open: boolean) => void;
 	setSelectedOption: (status: teamsQueryType | null) => void;
+	selectedOption?: teamsQueryType | null;
 }) {
 	return (
 		<Command>
@@ -164,15 +176,18 @@ function OptionList({
 				<CommandEmpty>Nenhum resultado encontrado</CommandEmpty>
 				<CommandGroup>
 					<CommandItem
+						className='justify-between'
 						onSelect={() => {
 							setSelectedOption(null);
 							setOpen(false);
 						}}
 					>
 						Nenhum time
+						<Check className={cn('mr-2 w-4 h-4 opacity-0', !selectedOption && 'opacity-100')} />
 					</CommandItem>
 					{teams?.map((team) => (
 						<CommandItem
+							className='justify-between'
 							key={team.id}
 							value={team.id || ''}
 							onSelect={(value) => {
@@ -181,6 +196,12 @@ function OptionList({
 							}}
 						>
 							{team.team.name}
+							<Check
+								className={cn(
+									'mr-2 w-4 h-4 opacity-0',
+									selectedOption?.id === team.id && 'opacity-100'
+								)}
+							/>
 						</CommandItem>
 					))}
 				</CommandGroup>

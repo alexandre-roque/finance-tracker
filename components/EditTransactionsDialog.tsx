@@ -40,6 +40,7 @@ interface Props {
 }
 
 function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
+	const date = new Date(transaction.date);
 	const form = useForm<editTransactionSchemaType>({
 		resolver: zodResolver(editTransactionSchema),
 		defaultValues: {
@@ -47,7 +48,7 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 			description: transaction.description || '',
 			bankingAccountId: transaction.bankingAccountId ?? undefined,
 			amount: transaction.amount,
-			date: transaction.date,
+			date: new Date((date.getTime() + date.getTime()) / 2),
 			transactionId: transaction.id,
 			category: transaction.categoryId || undefined,
 		},

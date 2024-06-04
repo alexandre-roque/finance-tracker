@@ -82,19 +82,19 @@ const BankingAccountComboBox = ({ userSettings, onChange, isConfiguring, firstSe
 	useEffect(() => {
 		if (!userSettings) return;
 		if (!bankingAccountsQuery.data) return;
-		const currentCard = bankingAccountsQuery.data.find(
+		const currentBankingAccount = bankingAccountsQuery.data.find(
 			(bankingAccount) => bankingAccount.id === userSettings.mainBankingAccount
 		);
-		if (currentCard) setSelectedOption(currentCard);
+		if (currentBankingAccount) setSelectedOption(currentBankingAccount);
 	}, [bankingAccountsQuery.data, userSettings]);
 
 	useEffect(() => {
 		if (!firstSelectedValue) return;
 		if (!bankingAccountsQuery.data) return;
-		const currentCard = bankingAccountsQuery.data.find(
+		const currentBankingAccount = bankingAccountsQuery.data.find(
 			(bankingAccount) => bankingAccount.id === firstSelectedValue
 		);
-		if (currentCard) setSelectedOption(currentCard);
+		if (currentBankingAccount) setSelectedOption(currentBankingAccount);
 	}, [bankingAccountsQuery.data, firstSelectedValue]);
 
 	useEffect(() => {

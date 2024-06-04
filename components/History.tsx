@@ -166,11 +166,13 @@ function CustomTooltip({ active, payload, formatter }: any) {
 	const objectsArray = data
 		? Object.entries(data).reduce((acc: Record<string, any>, entry) => {
 				if (entry[0].includes('expense') || entry[0].includes('income')) {
-					const [type, teamName] = entry[0].split('_');
+					const [type, teamName, color] = entry[0].split('_');
 					if (acc[teamName ?? 'Você']) {
 						acc[teamName ?? 'Você'][`${type}Value`] = entry[1];
+						acc[teamName ?? 'Você'][`${type}Color`] = color;
 					} else {
 						acc[teamName ?? 'Você'] = { [`${type}Value`]: entry[1] };
+						acc[teamName ?? 'Você'][`${type}Color`] = color;
 					}
 				}
 				return acc;
@@ -185,7 +187,9 @@ function CustomTooltip({ active, payload, formatter }: any) {
 					formatter={formatter}
 					label={entry[0]}
 					incomeValue={entry[1].incomeValue}
+					incomeColor={entry[1].incomeColor ?? 'var(--income-foreground)'}
 					expenseValue={entry[1].expenseValue}
+					expenseColor={entry[1].expenseColor ?? 'var(--expense-foreground)'}
 				/>
 			))}
 		</div>
@@ -197,11 +201,15 @@ function TooltipRow({
 	incomeValue,
 	expenseValue,
 	formatter,
+	expenseColor,
+	incomeColor,
 }: {
 	label: string;
 	incomeValue: number;
 	expenseValue: number;
 	formatter: Intl.NumberFormat;
+	expenseColor?: string;
+	incomeColor?: string;
 }) {
 	const formattingFn = useCallback(
 		(value: number) => {
@@ -222,6 +230,9 @@ function TooltipRow({
 						decimals={2}
 						formattingFn={formattingFn}
 						className='text-sm text-expense-foreground'
+						style={{
+							color: expenseColor,
+						}}
 					/>
 					<CountUp
 						duration={0.5}

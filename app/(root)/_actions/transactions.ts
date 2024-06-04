@@ -3,14 +3,7 @@
 import moment from 'moment';
 import { auth } from '@/auth';
 import { db } from '@/db';
-import {
-	categories,
-	monthHistories,
-	recurringTransactions,
-	transactions,
-	transactionsType,
-	yearHistories,
-} from '@/db/schema/finance';
+import { categories, monthHistories, recurringTransactions, transactions, yearHistories } from '@/db/schema/finance';
 import { DateToUTCDate, TransactionType, getBusinessDayOfMonth } from '@/lib/utils';
 import {
 	createTransactionSchema,
@@ -154,7 +147,7 @@ export async function DeleteTransaction({
 	}
 
 	for (const transaction of transactionsResult) {
-		const { date, amount, type } = transaction;
+		const { date, amount, type, teamId } = transaction;
 
 		await db.transaction(async (trx) => {
 			await trx
@@ -166,7 +159,7 @@ export async function DeleteTransaction({
 				.from(monthHistories)
 				.where(
 					and(
-						eq(monthHistories.userId, userId),
+						teamId ? eq(monthHistories.teamId, teamId) : eq(monthHistories.userId, userId),
 						eq(monthHistories.day, date.getUTCDate()),
 						eq(monthHistories.month, date.getUTCMonth()),
 						eq(monthHistories.year, date.getUTCFullYear())
@@ -182,7 +175,7 @@ export async function DeleteTransaction({
 					})
 					.where(
 						and(
-							eq(monthHistories.userId, userId),
+							teamId ? eq(monthHistories.teamId, teamId) : eq(monthHistories.userId, userId),
 							eq(monthHistories.day, date.getUTCDate()),
 							eq(monthHistories.month, date.getUTCMonth()),
 							eq(monthHistories.year, date.getUTCFullYear())
@@ -196,7 +189,7 @@ export async function DeleteTransaction({
 				.from(yearHistories)
 				.where(
 					and(
-						eq(yearHistories.userId, userId),
+						teamId ? eq(yearHistories.teamId, teamId) : eq(yearHistories.userId, userId),
 						eq(yearHistories.month, date.getUTCMonth()),
 						eq(yearHistories.year, date.getUTCFullYear())
 					)
@@ -211,7 +204,7 @@ export async function DeleteTransaction({
 					})
 					.where(
 						and(
-							eq(yearHistories.userId, userId),
+							teamId ? eq(yearHistories.teamId, teamId) : eq(yearHistories.userId, userId),
 							eq(yearHistories.month, date.getUTCMonth()),
 							eq(yearHistories.year, date.getUTCFullYear())
 						)

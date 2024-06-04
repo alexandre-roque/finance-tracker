@@ -153,63 +153,8 @@ export async function DeleteTransaction({
 			await trx
 				.delete(transactions)
 				.where(and(eq(transactions.userId, userId), eq(transactions.id, transaction.id)));
-			// Atualiza monthHistory
-			const [existingMonthHistory] = await trx
-				.select()
-				.from(monthHistories)
-				.where(
-					and(
-						teamId ? eq(monthHistories.teamId, teamId) : eq(monthHistories.userId, userId),
-						eq(monthHistories.day, date.getUTCDate()),
-						eq(monthHistories.month, date.getUTCMonth()),
-						eq(monthHistories.year, date.getUTCFullYear())
-					)
-				);
 
-			if (existingMonthHistory) {
-				await trx
-					.update(monthHistories)
-					.set({
-						expense: (existingMonthHistory.expense ?? 0) - (type === 'expense' ? amount : 0),
-						income: (existingMonthHistory.income ?? 0) - (type === 'income' ? amount : 0),
-					})
-					.where(
-						and(
-							teamId ? eq(monthHistories.teamId, teamId) : eq(monthHistories.userId, userId),
-							eq(monthHistories.day, date.getUTCDate()),
-							eq(monthHistories.month, date.getUTCMonth()),
-							eq(monthHistories.year, date.getUTCFullYear())
-						)
-					);
-			}
-
-			// Atualiza yearHistory
-			const [existingYearHistory] = await trx
-				.select()
-				.from(yearHistories)
-				.where(
-					and(
-						teamId ? eq(yearHistories.teamId, teamId) : eq(yearHistories.userId, userId),
-						eq(yearHistories.month, date.getUTCMonth()),
-						eq(yearHistories.year, date.getUTCFullYear())
-					)
-				);
-
-			if (existingYearHistory) {
-				await trx
-					.update(yearHistories)
-					.set({
-						expense: (existingYearHistory.expense ?? 0) - (type === 'expense' ? amount : 0),
-						income: (existingYearHistory.income ?? 0) - (type === 'income' ? amount : 0),
-					})
-					.where(
-						and(
-							teamId ? eq(yearHistories.teamId, teamId) : eq(yearHistories.userId, userId),
-							eq(yearHistories.month, date.getUTCMonth()),
-							eq(yearHistories.year, date.getUTCFullYear())
-						)
-					);
-			}
+			await SubtractFromHistories({ trx, date, type, amount, userId, teamId });
 		});
 	}
 }
@@ -255,9 +200,9 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 				amount,
 				date,
 				type,
-				teamId,
-				bankingAccountId,
-				description: description || '',
+				teamId: teamId ?? null,
+				bankingAccountId: bankingAccountId ?? null,
+				description: description ?? '',
 				category: categoryRow.name,
 				categoryIcon: categoryRow.icon,
 				categoryId: category,
@@ -265,67 +210,57 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 			.where(eq(transactions.id, transactionId));
 
 		if (oldAmount !== amount || !moment(date).isSame(oldDate) || oldTeamId !== teamId) {
-			// Atualiza monthHistory
-			const [existingMonthHistory] = await trx
-				.select()
-				.from(monthHistories)
-				.where(
-					and(
-						oldTeamId ? eq(monthHistories.teamId, oldTeamId) : eq(monthHistories.userId, userId),
-						eq(monthHistories.day, oldDate.getUTCDate()),
-						eq(monthHistories.month, oldDate.getUTCMonth()),
-						eq(monthHistories.year, oldDate.getUTCFullYear())
-					)
-				);
-
-			if (existingMonthHistory) {
-				await trx
-					.update(monthHistories)
-					.set({
-						expense: (existingMonthHistory.expense ?? 0) - (type === 'expense' ? oldAmount : 0),
-						income: (existingMonthHistory.income ?? 0) - (type === 'income' ? oldAmount : 0),
-					})
-					.where(
-						and(
-							oldTeamId ? eq(monthHistories.teamId, oldTeamId) : eq(monthHistories.userId, userId),
-							eq(monthHistories.day, oldDate.getUTCDate()),
-							eq(monthHistories.month, oldDate.getUTCMonth()),
-							eq(monthHistories.year, oldDate.getUTCFullYear())
-						)
-					);
-			}
-
-			// Atualiza yearHistory
-			const [existingYearHistory] = await trx
-				.select()
-				.from(yearHistories)
-				.where(
-					and(
-						oldTeamId ? eq(yearHistories.teamId, oldTeamId) : eq(yearHistories.userId, userId),
-						eq(yearHistories.month, oldDate.getUTCMonth()),
-						eq(yearHistories.year, oldDate.getUTCFullYear())
-					)
-				);
-
-			if (existingYearHistory) {
-				await trx
-					.update(yearHistories)
-					.set({
-						expense: (existingYearHistory.expense ?? 0) - (type === 'expense' ? oldAmount : 0),
-						income: (existingYearHistory.income ?? 0) - (type === 'income' ? oldAmount : 0),
-					})
-					.where(
-						and(
-							oldTeamId ? eq(yearHistories.teamId, oldTeamId) : eq(yearHistories.userId, userId),
-							eq(yearHistories.month, oldDate.getUTCMonth()),
-							eq(yearHistories.year, oldDate.getUTCFullYear())
-						)
-					);
-			}
-
+			await SubtractFromHistories({ trx, date: oldDate, type, amount: oldAmount, userId, teamId: oldTeamId });
 			await CreateOrUpdateHistories({ trx, date, type, amount, userId, teamId });
 		}
 	});
+}
+
+async function SubtractFromHistories({ trx, date, type, amount, userId, teamId }: any) {
+	// Atualiza monthHistory
+	const [existingMonthHistory] = await trx
+		.select()
+		.from(monthHistories)
+		.where(
+			and(
+				teamId ? eq(monthHistories.teamId, teamId) : eq(monthHistories.userId, userId),
+				eq(monthHistories.day, date.getUTCDate()),
+				eq(monthHistories.month, date.getUTCMonth()),
+				eq(monthHistories.year, date.getUTCFullYear())
+			)
+		);
+
+	if (existingMonthHistory) {
+		await trx
+			.update(monthHistories)
+			.set({
+				expense: (existingMonthHistory.expense ?? 0) - (type === 'expense' ? amount : 0),
+				income: (existingMonthHistory.income ?? 0) - (type === 'income' ? amount : 0),
+			})
+			.where(eq(monthHistories.id, existingMonthHistory.id));
+	}
+
+	// Atualiza yearHistory
+	const [existingYearHistory] = await trx
+		.select()
+		.from(yearHistories)
+		.where(
+			and(
+				teamId ? eq(yearHistories.teamId, teamId) : eq(yearHistories.userId, userId),
+				eq(yearHistories.month, date.getUTCMonth()),
+				eq(yearHistories.year, date.getUTCFullYear())
+			)
+		);
+
+	if (existingYearHistory) {
+		await trx
+			.update(yearHistories)
+			.set({
+				expense: (existingYearHistory.expense ?? 0) - (type === 'expense' ? amount : 0),
+				income: (existingYearHistory.income ?? 0) - (type === 'income' ? amount : 0),
+			})
+			.where(eq(yearHistories.id, existingYearHistory.id));
+	}
 }
 
 async function CreateOrUpdateHistories({
@@ -363,14 +298,7 @@ async function CreateOrUpdateHistories({
 				expense: (existingMonthHistory.expense ?? 0) + (type === 'expense' ? amount : 0),
 				income: (existingMonthHistory.income ?? 0) + (type === 'income' ? amount : 0),
 			})
-			.where(
-				and(
-					teamId ? eq(monthHistories.teamId, teamId) : eq(monthHistories.userId, userId),
-					eq(monthHistories.day, date.getUTCDate()),
-					eq(monthHistories.month, date.getUTCMonth()),
-					eq(monthHistories.year, date.getUTCFullYear())
-				)
-			);
+			.where(eq(monthHistories.id, existingMonthHistory.id));
 	} else {
 		await trx.insert(monthHistories).values({
 			userId: teamId ? null : userId,
@@ -402,13 +330,7 @@ async function CreateOrUpdateHistories({
 				expense: (existingYearHistory.expense ?? 0) + (type === 'expense' ? amount : 0),
 				income: (existingYearHistory.income ?? 0) + (type === 'income' ? amount : 0),
 			})
-			.where(
-				and(
-					teamId ? eq(yearHistories.teamId, teamId) : eq(yearHistories.userId, userId),
-					eq(yearHistories.month, date.getUTCMonth()),
-					eq(yearHistories.year, date.getUTCFullYear())
-				)
-			);
+			.where(eq(yearHistories.id, existingYearHistory.id));
 	} else {
 		await trx.insert(yearHistories).values({
 			userId: teamId ? null : userId,

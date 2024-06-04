@@ -1,25 +1,12 @@
 'use client';
-import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 
-import {
-	Dialog,
-	DialogClose,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { CalendarIcon, Loader2 } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar';
+import { Loader2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { TransactionType, DateToUTCDate } from '@/lib/utils';
@@ -32,6 +19,7 @@ import TeamsComboBox from './TeamsComboBox';
 import { TransactionTitle } from './CreateTransactionDialog';
 import BankingAccountComboBox from './BankingAccountComboBox';
 import DateSelectorDialog from './DateSelectorDialog';
+import moment from 'moment';
 
 interface Props {
 	open: boolean;
@@ -40,17 +28,17 @@ interface Props {
 }
 
 function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
-	const date = new Date(transaction.date);
 	const form = useForm<editTransactionSchemaType>({
 		resolver: zodResolver(editTransactionSchema),
 		defaultValues: {
 			type: transaction.type as TransactionType,
 			description: transaction.description || '',
-			bankingAccountId: transaction.bankingAccountId ?? undefined,
+			teamId: transaction.teamId || undefined,
 			amount: transaction.amount,
-			date: new Date((date.getTime() + date.getTime()) / 2),
-			transactionId: transaction.id,
 			category: transaction.categoryId || undefined,
+			bankingAccountId: transaction.bankingAccountId ?? undefined,
+			date: moment(transaction.date).add(3, 'hours').toDate(),
+			transactionId: transaction.id,
 		},
 	});
 

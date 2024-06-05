@@ -8,6 +8,8 @@ import {
 	createCategorySchemaType,
 	deleteCategorySchema,
 	deleteCategorySchemaType,
+	editCategorySchema,
+	editCategorySchemaType,
 } from '@/schemas';
 import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
@@ -59,4 +61,32 @@ export async function DeleteCategory(form: deleteCategorySchemaType) {
 			)
 		)
 		.returning();
+}
+
+export async function EditCategory(form: editCategorySchemaType) {
+	const parsedBody = editCategorySchema.safeParse(form);
+	if (!parsedBody.success) {
+		throw new Error('bad request');
+	}
+
+	const session = await auth();
+	if (!session || !session.user || !session.user.id) {
+		redirect('/sign-in');
+	}
+
+	const { name, icon, type, sharable, id } = parsedBody.data;
+
+	const [editedCategory] = await db
+		.update(categories)
+		.set({
+			userId: session.user.id,
+			name,
+			icon,
+			type,
+			sharable,
+		})
+		.where(eq(categories.id, id))
+		.returning();
+
+	return editedCategory;
 }

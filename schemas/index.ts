@@ -62,6 +62,16 @@ export const deleteCategorySchema = z.object({
 
 export type deleteCategorySchemaType = z.infer<typeof deleteCategorySchema>;
 
+export const editCategorySchema = z.object({
+	name: z.string().min(3).max(20),
+	icon: z.string().max(20),
+	type: z.enum(['income', 'expense']),
+	sharable: z.boolean().default(false),
+	id: z.string(),
+});
+
+export type editCategorySchemaType = z.infer<typeof editCategorySchema>;
+
 export const OverviewQuerySchema = z
 	.object({
 		from: z.coerce.date(),

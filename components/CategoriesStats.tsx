@@ -36,10 +36,20 @@ function CategoriesStats({ userSettings, from, to, selectedTeams }: Props) {
 	return (
 		<div className='flex w-full flex-wrap gap-2 md:flex-nowrap'>
 			<SkeletonWrapper isLoading={statsQuery.isFetching}>
-				<CategoriesCard selectedTeams={selectedTeams} formatter={formatter} type='income' data={statsQuery.data || []} />
+				<CategoriesCard
+					selectedTeams={selectedTeams}
+					formatter={formatter}
+					type='income'
+					data={statsQuery.data || []}
+				/>
 			</SkeletonWrapper>
 			<SkeletonWrapper isLoading={statsQuery.isFetching}>
-				<CategoriesCard selectedTeams={selectedTeams} formatter={formatter} type='expense' data={statsQuery.data || []} />
+				<CategoriesCard
+					selectedTeams={selectedTeams}
+					formatter={formatter}
+					type='expense'
+					data={statsQuery.data || []}
+				/>
 			</SkeletonWrapper>
 		</div>
 	);
@@ -59,14 +69,18 @@ function CategoriesCard({
 	selectedTeams?: Option[];
 }) {
 	const filteredData = data.filter((el) => {
-		if (el.type === type && (!el.teamId || selectedTeams?.some(t => t.value === el.teamId))) {
+		if (
+			el.type === type &&
+			((!el.teamId && selectedTeams?.some((t) => t.value === 'me')) ||
+				selectedTeams?.some((t) => t.value === el.teamId))
+		) {
 			return true;
 		}
 	});
 	const total = filteredData.reduce((acc, el) => acc + (el.value || 0), 0);
 
 	return (
-		<Card className='h-80 w-full col-span-6'>
+		<Card className='h-96 w-full col-span-6'>
 			<CardHeader>
 				<CardTitle className='grid grid-flow-row justify-between gap-2 text-muted-foreground md:grid-flow-col'>
 					{type === 'income' ? 'Receitas' : 'Despesas'} por categoria
@@ -75,7 +89,7 @@ function CategoriesCard({
 
 			<div className='flex items-center justify-between gap-2'>
 				{filteredData.length === 0 && (
-					<div className='flex h-60 w-full flex-col items-center justify-center px-4'>
+					<div className='flex h-72 w-full flex-col items-center justify-center px-4'>
 						Sem dados para o período selecionado
 						<p className='text-sm text-muted-foreground text-center'>
 							Tente selecionar um período diferente ou adicionar uma nova <TransactionTitle type={type} />
@@ -84,7 +98,7 @@ function CategoriesCard({
 				)}
 
 				{filteredData.length > 0 && (
-					<ScrollArea className='h-60 w-full px-4'>
+					<ScrollArea className='w-full px-4 h-72'>
 						<div className='flex w-full flex-col gap-4 p-4'>
 							{filteredData.map((item) => {
 								const amount = item.value || 0;

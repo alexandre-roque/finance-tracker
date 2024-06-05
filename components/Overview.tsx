@@ -18,8 +18,8 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 		to: endOfDay(new Date()),
 	});
 
-	const [selectedTeams, setSelectedTeams] = useState<Option[]>([]);
-	const [defaultOptions, setDefaultOptions] = useState<Option[]>([]);
+	const [selectedTeams, setSelectedTeams] = useState<Option[]>([{ label: 'Sem time', value: 'me' }]);
+	const [defaultOptions, setDefaultOptions] = useState<Option[]>([{ label: 'Sem time', value: 'me' }]);
 
 	const teamsQuery = useQuery({
 		queryKey: ['teams-members'],
@@ -33,8 +33,22 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 				value: teamMember.team.id,
 			}));
 
-			setSelectedTeams(data);
-			setDefaultOptions(data);
+			setSelectedTeams((prev) => {
+				data.forEach((op: Option) => {
+					if (!prev.some((t) => t.value === op.value)) {
+						prev.push(op);
+					}
+				});
+				return prev;
+			});
+			setDefaultOptions((prev) => {
+				data.forEach((op: Option) => {
+					if (!prev.some((t) => t.value === op.value)) {
+						prev.push(op);
+					}
+				});
+				return prev;
+			});
 		}
 	}, [teamsQuery.data]);
 

@@ -6,6 +6,7 @@ import CreateCategoryDialog from '@/components/CreateCategoryDialog';
 import { TransactionTitle } from '@/components/CreateTransactionDialog';
 import CurrencyComboBox from '@/components/CurrencyComboBox';
 import DeleteCategoryDialog from '@/components/DeleteCategoryDialog';
+import EditCategoryDialog from '@/components/EditCategoryDialog';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { userSettingsType, categoriesType } from '@/db/schema/finance';
 import { TransactionType, cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
-import { PlusSquare, TrashIcon, TrendingDown, TrendingUp } from 'lucide-react';
+import { Pencil, PlusSquare, TrashIcon, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 
 function Manage() {
@@ -147,13 +148,26 @@ function CategoryList({ type, userSettings }: { type: TransactionType; userSetti
 
 function CategoryCard({ category }: { category: categoriesType }) {
 	return (
-		<div className='flex border-separate flex-col justify-between rounded-md border shadow-md shadow-black/[0.1] dark:shadow-white/[0.1]'>
+		<div className='flex border-separate flex-col justify-between rounded-lg border shadow-md shadow-black/[0.1] dark:shadow-white/[0.1]'>
 			<div className='flex flex-col items-center gap-2 p-4'>
 				<span className='text-3xl' role='img'>
 					{category.icon}
 				</span>
 				<span>{category.name}</span>
 			</div>
+			<EditCategoryDialog
+				category={category}
+				trigger={
+					<Button
+						className='flex rounded-none w-full items-center gap-2 text-muted-foreground dark:hover:bg-red-500/20 hover:bg-red-500/70 hover:text-white'
+						variant={'secondary'}
+					>
+						<Pencil className='size-4' />
+						Editar
+					</Button>
+				}
+			/>
+			<Separator className='bg-background' />
 			<DeleteCategoryDialog
 				category={category}
 				trigger={
@@ -161,7 +175,7 @@ function CategoryCard({ category }: { category: categoriesType }) {
 						className='flex w-full border-separate items-center gap-2 rounded-t-none text-muted-foreground dark:hover:bg-red-500/20 hover:bg-red-500/70 hover:text-white'
 						variant={'secondary'}
 					>
-						<TrashIcon className='h-4 w-4' />
+						<TrashIcon className='size-4' />
 						Remover
 					</Button>
 				}

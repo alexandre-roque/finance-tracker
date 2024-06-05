@@ -51,16 +51,16 @@ const NotificationsPopOver = () => {
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
-				<div className='relative'>
+				<Button variant='secondary' size='icon'>
 					<Bell className='size-4' />
 					{notificationsQuery.data && notificationsQuery.data.length > 0 && (
 						<Badge className='absolute bottom-2 left-2 flex size-6 items-center justify-center rounded-full'>
 							{notificationsQuery.data.length}
 						</Badge>
 					)}
-				</div>
+				</Button>
 			</PopoverTrigger>
-			<PopoverContent sideOffset={12} align='end'>
+			<PopoverContent align='end'>
 				<div className='text-sm'>
 					{notificationsQuery.data?.map((pendingTeamAproval, index) => (
 						<div key={index}>

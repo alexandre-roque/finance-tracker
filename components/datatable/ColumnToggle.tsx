@@ -18,6 +18,15 @@ interface DataTableViewOptionsProps<TData> {
 }
 
 export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps<TData>) {
+	const COLUMN_MAP = {
+		category: 'Categoria',
+		date: 'Data',
+		description: 'Descrição',
+		teamId: 'Time',
+		userId: 'Usuário',
+		type: 'Tipo',
+		amount: 'Valor',
+	};
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -40,7 +49,7 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
 								checked={column.getIsVisible()}
 								onCheckedChange={(value) => column.toggleVisibility(!!value)}
 							>
-								{column.id}
+								{COLUMN_MAP[column.id as keyof typeof COLUMN_MAP]}
 							</DropdownMenuCheckboxItem>
 						);
 					})}

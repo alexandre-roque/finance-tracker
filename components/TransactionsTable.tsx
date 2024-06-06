@@ -84,6 +84,13 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
 		accessorKey: 'teamId',
 		header: ({ column }) => <DataTableColumnHeader column={column} title='Time' />,
 		cell: ({ row }) => <div className='capitalize'>{row.original.team?.name}</div>,
+		filterFn: (row, id, value) => {
+			let flag = value.includes(row.getValue(id));
+			if (value.includes('Eu')) {
+				flag = flag || !row.getValue(id);
+			}
+			return flag;
+		},
 	},
 	{
 		accessorKey: 'userId',
@@ -137,7 +144,7 @@ const csvConfig = mkConfig({
 });
 
 function TransactionTable({ from, to }: Props) {
-	const [sorting, setSorting] = useState<SortingState>([]);
+	const [sorting, setSorting] = useState<SortingState>([{ id: 'date', desc: true }]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
 		userId: false,
@@ -187,6 +194,18 @@ function TransactionTable({ from, to }: Props) {
 		return Array.from(uniqueCategories);
 	}, [history.data]);
 
+	const teamsOptions = useMemo(() => {
+		const teamsOptions = new Map();
+		history.data?.forEach((transaction) => {
+			teamsOptions.set(transaction.teamId ?? 'Eu', {
+				value: transaction.teamId ?? 'Eu',
+				label: `${transaction.team?.name ?? 'Eu'}`,
+			});
+		});
+		const uniqueTeams = new Set(teamsOptions.values());
+		return Array.from(uniqueTeams);
+	}, [history.data]);
+
 	return (
 		<div className='w-full'>
 			<div className='flex flex-wrap items-end justify-between gap-2 py-4'>
@@ -206,6 +225,13 @@ function TransactionTable({ from, to }: Props) {
 								{ label: 'Receita', value: 'income' },
 								{ label: 'Despesa', value: 'expense' },
 							]}
+						/>
+					)}
+					{table.getColumn('teamId') && (
+						<DataTableFacetedFilter
+							title='Time'
+							column={table.getColumn('teamId')}
+							options={teamsOptions}
 						/>
 					)}
 				</div>

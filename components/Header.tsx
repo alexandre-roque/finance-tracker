@@ -70,9 +70,7 @@ const Header = async () => {
 				/>
 
 				<ThemeSwitcherButton />
-				<Button variant='secondary' size='icon'>
-					<NotificationsPopOver />
-				</Button>
+				<NotificationsPopOver />
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button variant='secondary' size='icon' className='rounded-full'>

@@ -26,6 +26,7 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
 		userId: 'Usuário',
 		type: 'Tipo',
 		amount: 'Valor',
+		bankingAccountId: 'Conta',
 	};
 	return (
 		<DropdownMenu>

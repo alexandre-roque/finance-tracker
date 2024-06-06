@@ -93,6 +93,18 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
 		},
 	},
 	{
+		accessorKey: 'bankingAccountId',
+		header: ({ column }) => <DataTableColumnHeader column={column} title='Conta' />,
+		cell: ({ row }) => <div className='capitalize'>{row.original.bankingAccount?.name}</div>,
+		filterFn: (row, id, value) => {
+			let flag = value.includes(row.getValue(id));
+			if (value.includes('Nenhuma')) {
+				flag = flag || !row.getValue(id);
+			}
+			return flag;
+		},
+	},
+	{
 		accessorKey: 'userId',
 		header: ({ column }) => <DataTableColumnHeader column={column} title='Usuário' />,
 		cell: ({ row }) => <div className='capitalize'>{row.original.user?.name}</div>,
@@ -147,9 +159,10 @@ function TransactionTable({ from, to }: Props) {
 	const [sorting, setSorting] = useState<SortingState>([{ id: 'date', desc: true }]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+		type: false,
 		userId: false,
 		teamId: false,
-		type: false,
+		bankingAccountId: false,
 	});
 
 	const history = useQuery<GetTransactionHistoryResponseType>({
@@ -169,6 +182,11 @@ function TransactionTable({ from, to }: Props) {
 		data: history.data || emptyData,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
+		initialState: {
+			pagination: {
+				pageSize: 20,
+			},
+		},
 		state: {
 			sorting,
 			columnFilters,
@@ -206,6 +224,18 @@ function TransactionTable({ from, to }: Props) {
 		return Array.from(uniqueTeams);
 	}, [history.data]);
 
+	const bankingAccountsOptions = useMemo(() => {
+		const bankingAccountsOptions = new Map();
+		history.data?.forEach((transaction) => {
+			bankingAccountsOptions.set(transaction.bankingAccountId ?? 'Nenhuma', {
+				value: transaction.bankingAccountId ?? 'Nenhuma',
+				label: `${transaction.bankingAccount?.name ?? 'Nenhuma'}`,
+			});
+		});
+		const uniquebankingAccounts = new Set(bankingAccountsOptions.values());
+		return Array.from(uniquebankingAccounts);
+	}, [history.data]);
+
 	return (
 		<div className='w-full'>
 			<div className='flex flex-wrap items-end justify-between gap-2 py-4'>
@@ -232,6 +262,13 @@ function TransactionTable({ from, to }: Props) {
 							title='Time'
 							column={table.getColumn('teamId')}
 							options={teamsOptions}
+						/>
+					)}
+					{table.getColumn('bankingAccountId') && (
+						<DataTableFacetedFilter
+							title='Conta'
+							column={table.getColumn('bankingAccountId')}
+							options={bankingAccountsOptions}
 						/>
 					)}
 				</div>

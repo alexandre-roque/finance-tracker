@@ -55,6 +55,11 @@ async function getTransactionsHistory(userId: string, from: Date, to: Date) {
 					name: true,
 				},
 			},
+			bankingAccount: {
+				columns: {
+					name: true,
+				},
+			},
 			user: {
 				columns: {
 					id: true,

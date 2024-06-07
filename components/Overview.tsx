@@ -11,8 +11,12 @@ import CategoriesStats from './CategoriesStats';
 import MultipleSelector, { Option } from './ui/multiple-selector';
 import { useQuery } from '@tanstack/react-query';
 import SkeletonWrapper from './SkeletonWrapper';
+import { usePathname } from 'next/navigation';
+import AccountsStats from './AccountsStats';
+import TeamsStats from './TeamStats';
 
 function Overview({ userSettings }: { userSettings: userSettingsType }) {
+	const pathname = usePathname();
 	const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
 		from: startOfMonth(new Date()),
 		to: endOfDay(new Date()),
@@ -101,12 +105,35 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 						to={dateRange.to}
 					/>
 				</SkeletonWrapper>
-				<CategoriesStats
-					selectedTeams={selectedTeams}
-					userSettings={userSettings}
-					from={dateRange.from}
-					to={dateRange.to}
-				/>
+				<SkeletonWrapper isLoading={teamsQuery.isFetching}>
+					<CategoriesStats
+						selectedTeams={selectedTeams}
+						userSettings={userSettings}
+						from={dateRange.from}
+						to={dateRange.to}
+					/>
+				</SkeletonWrapper>
+				{pathname === '/analytics' && (
+					<SkeletonWrapper isLoading={teamsQuery.isFetching}>
+						<AccountsStats
+							selectedTeams={selectedTeams}
+							userSettings={userSettings}
+							from={dateRange.from}
+							to={dateRange.to}
+						/>
+					</SkeletonWrapper>
+				)}
+
+				{pathname === '/analytics' && (
+					<SkeletonWrapper isLoading={teamsQuery.isFetching}>
+						<TeamsStats
+							selectedTeams={selectedTeams}
+							userSettings={userSettings}
+							from={dateRange.from}
+							to={dateRange.to}
+						/>
+					</SkeletonWrapper>
+				)}
 			</div>
 		</>
 	);

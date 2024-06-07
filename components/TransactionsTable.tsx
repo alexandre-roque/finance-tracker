@@ -279,13 +279,14 @@ function TransactionTable({ from, to }: Props) {
 						className='ml-auto h-8 lg:flex'
 						onClick={() => {
 							const data = table.getFilteredRowModel().rows.map((row) => ({
-								category: row.original.category,
-								categoryIcon: row.original.categoryIcon,
-								description: row.original.description,
-								type: row.original.type,
-								amount: row.original.amount,
-								formattedAmount: row.original.formattedAmount,
-								date: row.original.date,
+								Categoria: `${row.original.categoryIcon} ${row.original.category}`,
+								Data: row.original.date,
+								Descrição: row.original.description,
+								Time: row.original.team?.name ?? 'Eu',
+								Conta: row.original.bankingAccount?.name ?? 'Nenhuma',
+								Usuário: row.original.user?.name,
+								Tipo: row.original.type === 'income' ? 'Receita' : 'Despesa',
+								Valor: row.original.formattedAmount,
 							}));
 							handleExportCSV(data);
 						}}

@@ -39,8 +39,8 @@ export const createTransactionSchema = z.object({
 	type: z.union([z.literal('income'), z.literal('expense')]),
 	teamId: z.string().optional(),
 	installments: z.coerce.number().default(1),
-	dayOfTheMonth: z.coerce.number().positive().max(31).or(z.literal(0)).optional(),
-	businessDay: z.coerce.number().positive().max(31).or(z.literal(0)).optional(),
+	dayOfTheMonth: z.coerce.number().gte(0).max(31).or(z.literal(0)).optional(),
+	businessDay: z.coerce.number().gte(0).max(31).or(z.literal(0)).optional(),
 	isRecurring: z.coerce.boolean(),
 });
 
@@ -111,3 +111,17 @@ export const editTransactionSchema = z.object({
 });
 
 export type editTransactionSchemaType = z.infer<typeof editTransactionSchema>;
+
+export const editRecurrentTransactionSchema = z.object({
+	transactionId: z.string(),
+	amount: z.coerce.number().positive().multipleOf(0.01),
+	description: z.string().optional(),
+	category: z.string(),
+	bankingAccountId: z.string().optional(),
+	type: z.union([z.literal('income'), z.literal('expense')]),
+	teamId: z.string().optional(),
+	dayOfTheMonth: z.coerce.number().gte(0).max(31).or(z.literal(0)).optional(),
+	businessDay: z.coerce.number().gte(0).max(31).or(z.literal(0)).optional(),
+});
+
+export type editRecurrentTransactionSchemaType = z.infer<typeof editRecurrentTransactionSchema>;

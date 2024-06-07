@@ -89,17 +89,19 @@ export const recurringTransactions = sqliteTable('recurringTransaction', {
 	userId: text('userId')
 		.notNull()
 		.references(() => users.id, { onDelete: 'cascade' }),
-	amount: integer('amount'),
+	amount: integer('amount').notNull(),
 	description: text('description'),
 	dayOfTheMonth: integer('dayOfTheMonth'),
 	businessDay: integer('businessDay'),
-	type: text('type').default('income'),
+	type: text('type').default('income').notNull(),
 	bankingAccountId: text('bankingAccountId'),
 	category: text('category'),
 	categoryIcon: text('categoryIcon'),
 	categoryId: text('categoryId'),
 	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
 });
+
+export type recurringTransactionsType = typeof recurringTransactions.$inferSelect;
 
 export const monthHistories = sqliteTable('monthHistory', {
 	id: text('id')

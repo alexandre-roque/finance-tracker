@@ -27,11 +27,13 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
 		type: 'Tipo',
 		amount: 'Valor',
 		bankingAccountId: 'Conta',
+		dayOfTheMonth: 'Dia do mês',
+		businessDay: 'Dia útil',
 	};
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant='outline' size='sm' className='ml-auto hidden h-8 lg:flex'>
+				<Button variant='outline' size='sm' className='ml-auto h-8 flex'>
 					<MixerHorizontalIcon className='mr-2 h-4 w-4' />
 					Colunas
 				</Button>

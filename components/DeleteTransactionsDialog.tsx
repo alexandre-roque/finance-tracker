@@ -20,9 +20,10 @@ interface Props {
 	setOpen: (open: boolean) => void;
 	transactionId: string;
 	installmentId?: string | null;
+	isRecurrent?: boolean;
 }
 
-function DeleteTransactionDialog({ open, setOpen, transactionId, installmentId }: Props) {
+function DeleteTransactionDialog({ open, setOpen, transactionId, installmentId, isRecurrent }: Props) {
 	const queryClient = useQueryClient();
 
 	const deleteMutation = useMutation({
@@ -32,13 +33,19 @@ function DeleteTransactionDialog({ open, setOpen, transactionId, installmentId }
 				id: transactionId,
 			});
 
-			queryClient.invalidateQueries({
-				queryKey: ['overview'],
-			});
+			if (isRecurrent) {
+				queryClient.invalidateQueries({
+					queryKey: ['recurrent-transactions'],
+				});
+			} else {
+				queryClient.invalidateQueries({
+					queryKey: ['overview'],
+				});
 
-			queryClient.invalidateQueries({
-				queryKey: ['transactions'],
-			});
+				queryClient.invalidateQueries({
+					queryKey: ['transactions'],
+				});
+			}
 		},
 		onError: () => {
 			toast.error('Algo deu errado', {
@@ -74,7 +81,7 @@ function DeleteTransactionDialog({ open, setOpen, transactionId, installmentId }
 							toast.loading('Deletando transação...', {
 								id: transactionId,
 							});
-							deleteMutation.mutate({ transactionId });
+							deleteMutation.mutate({ transactionId, isRecurrent });
 						}}
 					>
 						Continuar

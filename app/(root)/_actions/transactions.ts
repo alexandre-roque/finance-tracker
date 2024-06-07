@@ -8,6 +8,8 @@ import { DateToUTCDate, TransactionType, getBusinessDayOfMonth } from '@/lib/uti
 import {
 	createTransactionSchema,
 	createTransactionSchemaType,
+	editRecurrentTransactionSchema,
+	editRecurrentTransactionSchemaType,
 	editTransactionSchema,
 	editTransactionSchemaType,
 } from '@/schemas';
@@ -124,12 +126,62 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 	});
 }
 
+export async function EditRecurrentTransaction(form: editRecurrentTransactionSchemaType) {
+	const parsedBody = editRecurrentTransactionSchema.safeParse(form);
+	if (!parsedBody.success) {
+		return { error: parsedBody.error.message };
+	}
+
+	const session = await auth();
+	if (!session || !session.user || !session.user.id) {
+		redirect('/sign-in');
+	}
+
+	const userId = session.user.id;
+
+	const { amount, category, description, type, teamId, bankingAccountId, transactionId, businessDay, dayOfTheMonth } =
+		parsedBody.data;
+
+	const [categoryRow] = await db.select().from(categories).where(eq(categories.id, category));
+
+	if (!categoryRow) {
+		return { error: 'Categoria não encontrada' };
+	}
+
+	const transactionsResult = await db.query.recurringTransactions.findFirst({
+		where: (recurringTransactions, { eq }) => eq(recurringTransactions.id, transactionId),
+	});
+
+	if (!transactionsResult) {
+		throw new Error('Bad request');
+	}
+
+	await db
+		.update(recurringTransactions)
+		.set({
+			userId,
+			amount,
+			type,
+			businessDay,
+			dayOfTheMonth,
+			teamId: teamId ?? null,
+			bankingAccountId: bankingAccountId ?? null,
+			description: description ?? '',
+			category: categoryRow.name,
+			categoryIcon: categoryRow.icon,
+			categoryId: category,
+		})
+		.where(eq(recurringTransactions.id, transactionId));
+}
+
 export async function DeleteTransaction({
 	transactionId,
 	installmentId,
+	isRecurrent,
 }: {
 	transactionId: string;
 	installmentId?: string;
+	isRecurrent?: boolean;
 }) {
 	const session = await auth();
 	if (!session || !session.user || !session.user.id) {
@@ -137,6 +189,22 @@ export async function DeleteTransaction({
 	}
 
 	const userId = session.user.id;
+
+	if (isRecurrent) {
+		const recurrentTransaction = await db.query.recurringTransactions.findFirst({
+			where: (recurringTransactions, { eq, and }) =>
+				and(eq(recurringTransactions.userId, userId), eq(recurringTransactions.id, transactionId)),
+		});
+
+		if (recurrentTransaction) {
+			await db
+				.delete(recurringTransactions)
+				.where(and(eq(recurringTransactions.userId, userId), eq(recurringTransactions.id, transactionId)));
+		}
+
+		return;
+	}
+
 	const query = installmentId
 		? and(eq(transactions.userId, userId), eq(transactions.installmentId, installmentId))
 		: and(eq(transactions.userId, userId), eq(transactions.id, transactionId));

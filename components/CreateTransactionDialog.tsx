@@ -129,6 +129,10 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 				queryKey: ['transactions'],
 			});
 
+			queryClient.invalidateQueries({
+				queryKey: ['recurrent-transactions'],
+			});
+
 			setOpen((prev) => !prev);
 		},
 		onError: (err) => {
@@ -293,7 +297,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 									label='Dia do mês'
 									name='dayOfTheMonth'
 									placeholder='Digite o dia fixo do mês'
-									disabled={Boolean(businessDay)}
+									disabled={Boolean(businessDay && businessDay > 0)}
 								/>
 
 								<CustomInput
@@ -302,7 +306,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 									label='Dia do útil do mês'
 									name='businessDay'
 									placeholder='Digite o dia útil'
-									disabled={Boolean(dayOfTheMonth)}
+									disabled={Boolean(dayOfTheMonth && dayOfTheMonth > 0)}
 								/>
 							</div>
 						)}

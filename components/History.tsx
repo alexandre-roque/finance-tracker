@@ -13,7 +13,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import HistoryPeriodSelector from './HistoryPeriodSelector';
 
 function History({ userSettings }: { userSettings: userSettingsType }) {
-	const [timeframe, setTimeframe] = useState<Timeframe>('month');
+	const [timeframe, setTimeframe] = useState<Timeframe>('year');
 	const [period, setPeriod] = useState<Period>({
 		month: new Date().getMonth(),
 		year: new Date().getFullYear(),

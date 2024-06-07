@@ -53,10 +53,11 @@ export async function GET() {
 				amount: transaction.amount ?? 0,
 				isRecurring: false,
 				bankingAccountId: transaction.bankingAccountId ?? undefined,
-				category: transaction.category ?? '',
+				category: transaction.categoryId ?? '',
 				description: transaction.description ?? '',
 				teamId: transaction.teamId ?? undefined,
 				installments: 1,
+				userId: transaction.userId,
 			});
 		}
 	}

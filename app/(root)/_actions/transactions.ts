@@ -19,16 +19,19 @@ import { ulid } from 'ulid';
 
 export async function CreateTransaction(form: createTransactionSchemaType) {
 	const parsedBody = createTransactionSchema.safeParse(form);
+
 	if (!parsedBody.success) {
 		return { error: parsedBody.error.message };
 	}
 
 	const session = await auth();
-	if (!session || !session.user || !session.user.id) {
-		redirect('/sign-in');
+	let userId = parsedBody.data.userId;
+	if (!userId) {
+		if (!session || !session.user || !session.user.id) {
+			redirect('/sign-in');
+		}
+		userId = session.user.id;
 	}
-
-	const userId = session.user.id;
 
 	const {
 		amount,

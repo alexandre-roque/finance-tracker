@@ -42,6 +42,7 @@ export const createTransactionSchema = z.object({
 	dayOfTheMonth: z.coerce.number().gte(0).max(31).or(z.literal(0)).optional(),
 	businessDay: z.coerce.number().gte(0).max(31).or(z.literal(0)).optional(),
 	isRecurring: z.coerce.boolean(),
+	userId: z.string().optional(),
 });
 
 export type createTransactionSchemaType = z.infer<typeof createTransactionSchema>;

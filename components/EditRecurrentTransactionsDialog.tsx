@@ -89,11 +89,6 @@ function EditRecurrentTransactionsDialog({ open, setOpen, transaction }: Props) 
 				amount: 0,
 			});
 
-			// After creating a transaction, we need to invalidate the overview query which will refetch data in the homepage
-			queryClient.invalidateQueries({
-				queryKey: ['overview'],
-			});
-
 			queryClient.invalidateQueries({
 				queryKey: ['recurrent-transactions'],
 			});

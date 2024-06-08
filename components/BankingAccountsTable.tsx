@@ -44,7 +44,7 @@ const columns: ColumnDef<bankingAccountsType>[] = [
 
 			return (
 				<div className='flex items-center space-x-2'>
-					<div className='capitalize'>{name}</div>
+					<div>{name}</div>
 				</div>
 			);
 		},
@@ -52,7 +52,7 @@ const columns: ColumnDef<bankingAccountsType>[] = [
 	{
 		accessorKey: 'description',
 		header: ({ column }) => <DataTableColumnHeader column={column} title='Descrição' />,
-		cell: ({ row }) => <div className='capitalize max-w-80 truncate'>{row.getValue('description')}</div>,
+		cell: ({ row }) => <div className='max-w-80 truncate'>{row.getValue('description')}</div>,
 	},
 	{
 		id: 'actions',
@@ -172,7 +172,10 @@ function DataTableRowActions<TData extends WithId<string>>({ row }: DataTableRow
 	return (
 		<>
 			<ResponsiveDialog isOpen={isEditOpen} setIsOpen={setIsEditOpen} title='Editar conta bancária'>
-				<EditBankingAccountForm bankingAccountId={row.original.id as string} setIsOpen={setIsEditOpen} />
+				<EditBankingAccountForm
+					bankingAccount={row.original as unknown as bankingAccountsType}
+					setIsOpen={setIsEditOpen}
+				/>
 			</ResponsiveDialog>
 			<ResponsiveDialog
 				isOpen={isDeleteOpen}

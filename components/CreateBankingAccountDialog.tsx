@@ -46,7 +46,7 @@ const CreateBankingAccountDialog = ({ trigger }: { trigger?: ReactNode }) => {
 			method: 'POST',
 			body: JSON.stringify({
 				name: values.name,
-				number: values.description,
+				description: values.description,
 			}),
 		}).then((res) => {
 			if (res.status === 200) {

@@ -11,13 +11,14 @@ import CustomInput from './CustomInput';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { bankingAccountsType } from '@/db/schema/finance';
 
 const EditBankingAccountForm = ({
 	setIsOpen,
-	bankingAccountId,
+	bankingAccount,
 }: {
 	setIsOpen: Dispatch<SetStateAction<boolean>>;
-	bankingAccountId: string;
+	bankingAccount: bankingAccountsType;
 }) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const queryClient = useQueryClient();
@@ -25,9 +26,9 @@ const EditBankingAccountForm = ({
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			name: '',
-			description: '',
-			bankingAccountId,
+			name: bankingAccount.name || '',
+			description: bankingAccount.description || '',
+			bankingAccountId: bankingAccount.id,
 		},
 	});
 
@@ -42,8 +43,8 @@ const EditBankingAccountForm = ({
 			method: 'POST',
 			body: JSON.stringify({
 				name: values.name,
-				number: values.description,
-				bankingAccountId,
+				description: values.description,
+				bankingAccountId: bankingAccount.id,
 			}),
 		}).then((res) => {
 			if (res.status === 200) {

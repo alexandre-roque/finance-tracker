@@ -3,7 +3,7 @@ export const revalidate = 0;
 import { CreateTransaction } from '@/app/(root)/_actions/transactions';
 import { db } from '@/db';
 import { dailyRecurrenceCheckers, recurringTransactions } from '@/db/schema/finance';
-import { getBusinessDayOfMonth } from '@/lib/utils';
+import { getBusinessDayOfMonth, isWeekday } from '@/lib/utils';
 import { and, eq, or } from 'drizzle-orm';
 
 export async function GET() {
@@ -31,7 +31,7 @@ export async function GET() {
 	});
 
 	const dayInMonth = date.getUTCDate();
-	const businessDayCount = getBusinessDayOfMonth(date);
+	const businessDayCount = isWeekday(date) ? getBusinessDayOfMonth(date) : 380;
 
 	const recurringTransactionsResult = await db
 		.select()

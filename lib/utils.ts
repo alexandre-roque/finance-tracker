@@ -23,7 +23,7 @@ export type TransactionType = 'income' | 'expense';
 export type Timeframe = 'month' | 'year';
 export type Period = { year: number; month: number };
 
-function isWeekday(date: Date) {
+export function isWeekday(date: Date) {
 	const day = date.getDay();
 	return day !== 0 && day !== 6; // 0 = Domingo, 6 = Sábado
 }

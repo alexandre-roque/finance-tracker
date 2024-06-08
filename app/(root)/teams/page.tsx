@@ -2,11 +2,10 @@
 
 import InviteToTeamDialog from '@/components/InviteToTeamDialog';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
-import TeamsComboBox, { teamsQueryType } from '@/components/TeamsComboBox';
+import TeamMembersTable from '@/components/TeamMembersTable';
+import TeamsComboBox from '@/components/TeamsComboBox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { userSettingsType } from '@/db/schema/finance';
 import { useQuery } from '@tanstack/react-query';
 import React from 'react';
@@ -26,6 +25,8 @@ type ResultQueryTeamsWithMembers = {
 			name: string | null;
 		};
 		members: {
+			teamId: string;
+			id: string;
 			userId: string;
 			role: string;
 			status: string;
@@ -95,24 +96,7 @@ const Teams = () => {
 														<span className='text-lg'>Membros do time</span>
 													</AccordionTrigger>
 													<AccordionContent>
-														{(team.team.members || []).map((member) => (
-															<div key={member.userId}>
-																<div className='p-3 justify-between flex items-center'>
-																	<p className='flex gap-1'>
-																		{member.user.name}{' '}
-																		{member.role !== 'member' && (
-																			<p className='capitalize'>
-																				({member.role})
-																			</p>
-																		)}
-																	</p>
-																	<div>
-																		<Button variant='ghost'>...</Button>
-																	</div>
-																</div>
-																<Separator />
-															</div>
-														))}
+														<TeamMembersTable data={team.team.members} />
 													</AccordionContent>
 												</AccordionItem>
 											</div>

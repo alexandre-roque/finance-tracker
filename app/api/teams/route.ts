@@ -21,6 +21,8 @@ export const GET = auth(async (req) => {
 						with: {
 							members: {
 								columns: {
+									teamId: true,
+									id: true,
 									userId: true,
 									role: true,
 									status: true,

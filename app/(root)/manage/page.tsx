@@ -1,7 +1,7 @@
 'use client';
 
 import BankingAccountComboBox from '@/components/BankingAccountComboBox';
-import { BankingAccountsTable } from '@/components/BankingAccountsTable';
+import BankingAccountsTable from '@/components/BankingAccountsTable';
 import CategoryPicker from '@/components/CategoryPicker';
 import CreateCategoryDialog from '@/components/CreateCategoryDialog';
 import { TransactionTitle } from '@/components/CreateTransactionDialog';

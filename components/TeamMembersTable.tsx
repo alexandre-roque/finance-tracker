@@ -26,32 +26,62 @@ import {
 } from '@tanstack/react-table';
 import { MoreHorizontal, Pencil, PlusSquare, TrashIcon } from 'lucide-react';
 import { DataTableColumnHeader } from './datatable/ColumnHeader';
-import { bankingAccountsType } from '@/db/schema/finance';
 import { ResponsiveDialog } from './ui/responsive-dialog';
-import EditBankingAccountForm from './EditBankingAccountForm';
-import CreateBankingAccountDialog from './CreateBankingAccountDialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { DeleteBankingAccount } from '@/app/(root)/_actions/bankingAccounts';
 import { toast } from 'sonner';
+import { DeleteTeamMember } from '@/app/(root)/_actions/teams';
+import EditTeamMemberForm from './EditTeamMemberForm';
+import { useSession } from 'next-auth/react';
 
-const columns: ColumnDef<bankingAccountsType>[] = [
+type teamMembersType = {
+	teamId: string;
+	id: string;
+	userId: string;
+	role: string;
+	status: string;
+	user: {
+		name: string;
+	};
+};
+
+export const ROLE_MAP = {
+	owner: 'Proprietário',
+	member: 'Membro',
+	manager: 'Gerente',
+};
+
+export const STATUS_MAP = {
+	active: 'Ativo',
+	inactive: 'Inativo',
+	pending: 'Pendente',
+	blocked: 'Bloqueado',
+};
+
+const columns: ColumnDef<teamMembersType>[] = [
 	{
 		accessorKey: 'name',
 		header: ({ column }) => <DataTableColumnHeader column={column} title='Nome' />,
 		cell: ({ row }) => {
-			const name = row.original.name as string;
-
 			return (
 				<div className='flex items-center space-x-2'>
-					<div>{name}</div>
+					<div>{row.original.user.name}</div>
 				</div>
 			);
 		},
 	},
 	{
-		accessorKey: 'description',
-		header: ({ column }) => <DataTableColumnHeader column={column} title='Descrição' />,
-		cell: ({ row }) => <div className='max-w-80 truncate'>{row.getValue('description')}</div>,
+		accessorKey: 'role',
+		header: ({ column }) => <DataTableColumnHeader column={column} title='Cargo' />,
+		cell: ({ row }) => (
+			<div className='max-w-80 truncate'>{ROLE_MAP[row.getValue('role') as keyof typeof ROLE_MAP]}</div>
+		),
+	},
+	{
+		accessorKey: 'status',
+		header: ({ column }) => <DataTableColumnHeader column={column} title='Status' />,
+		cell: ({ row }) => (
+			<div className='max-w-80 truncate'>{STATUS_MAP[row.getValue('status') as keyof typeof STATUS_MAP]}</div>
+		),
 	},
 	{
 		id: 'actions',
@@ -59,7 +89,7 @@ const columns: ColumnDef<bankingAccountsType>[] = [
 	},
 ];
 
-function BankingAccountsTable({ data }: { data: bankingAccountsType[] }) {
+function TeamMembersTable({ data }: { data: teamMembersType[] }) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [rowSelection, setRowSelection] = useState({});
@@ -82,19 +112,8 @@ function BankingAccountsTable({ data }: { data: bankingAccountsType[] }) {
 	});
 
 	return (
-		<div className='w-full mt-3'>
-			<div className='flex justify-between'>
-				<span className='text-lg font-semibold'>Gerenciar contas bancárias</span>
-				<CreateBankingAccountDialog
-					trigger={
-						<Button className='gap-2 text-sm'>
-							<PlusSquare className='h-4 w-4' />
-							Criar conta
-						</Button>
-					}
-				/>
-			</div>
-			<div className='rounded-md border mt-2'>
+		<div className='w-full'>
+			<div className='rounded-md border'>
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
@@ -136,61 +155,65 @@ function BankingAccountsTable({ data }: { data: bankingAccountsType[] }) {
 	);
 }
 
-interface WithId<T> {
-	id: string;
-}
 interface DataTableRowActionsProps<TData> {
 	row: Row<TData>;
 }
 
-function DataTableRowActions<TData extends WithId<string>>({ row }: DataTableRowActionsProps<TData>) {
+function DataTableRowActions({ row }: DataTableRowActionsProps<teamMembersType>) {
 	const [isEditOpen, setIsEditOpen] = useState(false);
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
 	const queryClient = useQueryClient();
-	const bankingAccountId = row.original.id as string;
+
+	const teamMemberId = row.original.id;
+
+	const session = useSession();
 
 	const deleteMutation = useMutation({
-		mutationFn: DeleteBankingAccount,
-		onSuccess: async () => {
-			toast.success('Conta deletada com sucesso', {
-				id: bankingAccountId,
+		mutationFn: DeleteTeamMember,
+		onSuccess: async ({ error }) => {
+			if (error) {
+				toast.error(error, {
+					id: teamMemberId,
+				});
+				return;
+			}
+
+			toast.success('Membro deletado com sucesso', {
+				id: teamMemberId,
 			});
 
 			await queryClient.invalidateQueries({
-				queryKey: ['banking-accounts'],
+				queryKey: ['teams-with-members'],
 			});
 		},
 		onError: () => {
 			toast.error('Algo deu errado', {
-				id: bankingAccountId,
+				id: teamMemberId,
 			});
 		},
 	});
 
 	return (
 		<>
-			<ResponsiveDialog isOpen={isEditOpen} setIsOpen={setIsEditOpen} title='Editar conta bancária'>
-				<EditBankingAccountForm
-					bankingAccount={row.original as unknown as bankingAccountsType}
-					setIsOpen={setIsEditOpen}
-				/>
+			<ResponsiveDialog isOpen={isEditOpen} setIsOpen={setIsEditOpen} title='Editar membro de time'>
+				<EditTeamMemberForm setIsOpen={setIsEditOpen} teamMember={row.original} />
 			</ResponsiveDialog>
 			<ResponsiveDialog
 				isOpen={isDeleteOpen}
 				setIsOpen={setIsDeleteOpen}
-				title='Deletar conta bancária'
-				description='Você tem certeza que quer deletar a conta bancária?'
+				title='Deletar membro de time'
+				description={`Você tem certeza que quer retirar o membro ${row.original.user.name}?`}
 			>
 				<div className='mt-auto flex flex-col gap-2 p-4 pt-2'>
 					<Button
 						variant='destructive'
 						onClick={() => {
-							toast.loading('Deletando conta bancária...', {
-								id: bankingAccountId,
+							toast.loading('Deletando membro de time...', {
+								id: teamMemberId,
 							});
 							deleteMutation.mutate({
-								bankingAccountId,
+								teamMemberId,
 							});
 						}}
 					>
@@ -212,6 +235,12 @@ function DataTableRowActions<TData extends WithId<string>>({ row }: DataTableRow
 					<DropdownMenuItem
 						className='flex items-center gap-2'
 						onSelect={() => {
+							if (session.data?.user?.id === row.original.userId) {
+								toast.error('Você não pode se editar', {
+									id: 'edit-team-member',
+								});
+								return;
+							}
 							setIsEditOpen((prev) => !prev);
 						}}
 					>
@@ -221,6 +250,12 @@ function DataTableRowActions<TData extends WithId<string>>({ row }: DataTableRow
 					<DropdownMenuItem
 						className='flex items-center gap-2'
 						onSelect={() => {
+							if (session.data?.user?.id === row.original.userId) {
+								toast.error('Você não pode se apagar', {
+									id: 'edit-team-member',
+								});
+								return;
+							}
 							setIsDeleteOpen((prev) => !prev);
 						}}
 					>
@@ -233,4 +268,4 @@ function DataTableRowActions<TData extends WithId<string>>({ row }: DataTableRow
 	);
 }
 
-export default BankingAccountsTable;
+export default TeamMembersTable;

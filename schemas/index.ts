@@ -127,3 +127,17 @@ export const editRecurrentTransactionSchema = z.object({
 });
 
 export type editRecurrentTransactionSchemaType = z.infer<typeof editRecurrentTransactionSchema>;
+
+export const possibleRolesArray = ['owner', 'member', 'manager'] as const;
+export type PossibleRoles = (typeof possibleRolesArray)[number];
+
+export const possibleStatusArray = ['active', 'inactive', 'pending', 'blocked'] as const;
+export type PossibleStatus = (typeof possibleStatusArray)[number];
+
+export const editTeamMemberSchema = z.object({
+	role: z.enum(possibleRolesArray),
+	status: z.enum(possibleStatusArray),
+	teamMemberId: z.string(),
+});
+
+export type editTeamMemberSchemaType = z.infer<typeof editTeamMemberSchema>;

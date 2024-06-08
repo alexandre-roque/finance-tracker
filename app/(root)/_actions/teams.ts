@@ -4,7 +4,14 @@ import { auth } from '@/auth';
 import { ResultQueryNotifications } from '@/components/NotificationsPopOver';
 import { db } from '@/db';
 import { pendingTeamAprovals, teamMembers, teams } from '@/db/schema/finance';
-import { createTeamSchema, createTeamSchemaType, inviteToTeamSchema, inviteToTeamSchemaType } from '@/schemas';
+import {
+	createTeamSchema,
+	createTeamSchemaType,
+	editTeamMemberSchema,
+	editTeamMemberSchemaType,
+	inviteToTeamSchema,
+	inviteToTeamSchemaType,
+} from '@/schemas';
 import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 
@@ -122,4 +129,76 @@ export async function HandleTeamInvitation({
 	}
 
 	return { accepted: wasAccepted };
+}
+
+export async function DeleteTeamMember(form: { teamMemberId: string }) {
+	const session = await auth();
+	if (!session || !session.user || !session.user.id) {
+		redirect('/sign-in');
+	}
+
+	const userId = session.user.id;
+	const { teamMemberId } = form;
+
+	const teamMemberToDelete = await db.query.teamMembers.findFirst({
+		columns: {
+			userId: true,
+			teamId: true,
+		},
+		where: (teamMembers, { eq }) => eq(teamMembers.id, teamMemberId),
+	});
+
+	if (!teamMemberToDelete) {
+		return { error: 'Membro não encontrado' };
+	}
+
+	if (userId === teamMemberToDelete.userId) {
+		return { error: 'Você não pode sair do seu próprio time' };
+	}
+
+	await db.delete(teamMembers).where(eq(teamMembers.id, teamMemberId));
+
+	return { success: true };
+}
+
+export async function EditTeamMember(form: editTeamMemberSchemaType) {
+	const parsedBody = editTeamMemberSchema.safeParse(form);
+	if (!parsedBody.success) {
+		throw new Error('bad request');
+	}
+
+	const session = await auth();
+	if (!session || !session.user || !session.user.id) {
+		redirect('/sign-in');
+	}
+
+	const userId = session.user.id;
+	const { teamMemberId, role, status } = parsedBody.data;
+
+	const teamMemberToEdit = await db.query.teamMembers.findFirst({
+		columns: {
+			userId: true,
+			teamId: true,
+		},
+		where: (teamMembers, { eq }) => eq(teamMembers.id, teamMemberId),
+	});
+
+	if (!teamMemberToEdit) {
+		return { error: 'Membro não encontrado' };
+	}
+
+	if (userId === teamMemberToEdit.userId) {
+		return { error: 'Você não pode editar seu próprio papel' };
+	}
+
+	const [editedTeamMember] = await db
+		.update(teamMembers)
+		.set({
+			role,
+			status,
+		})
+		.where(eq(teamMembers.id, teamMemberId))
+		.returning();
+
+	return { success: true, editedTeamMember };
 }

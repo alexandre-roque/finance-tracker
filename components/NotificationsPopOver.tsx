@@ -55,7 +55,7 @@ const NotificationsPopOver = () => {
 					<Bell className='size-4' />
 					{notificationsQuery.data && notificationsQuery.data.length > 0 && (
 						<Badge className='absolute -top-1.5 -right-2 flex size-6 items-center justify-center rounded-full'>
-							{notificationsQuery.data.length}
+							{notificationsQuery.data.length >= 100 ? '99+' : notificationsQuery.data.length}
 						</Badge>
 					)}
 				</Button>

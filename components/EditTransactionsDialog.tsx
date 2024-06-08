@@ -97,7 +97,7 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 				queryKey: ['transactions'],
 			});
 
-			// setOpen((prev) => !prev);
+			setOpen(false);
 		},
 		onError: (err) => {
 			toast.error(`Erro ao editar transação ${err.message}`, {

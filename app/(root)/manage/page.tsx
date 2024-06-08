@@ -1,6 +1,7 @@
 'use client';
 
 import BankingAccountComboBox from '@/components/BankingAccountComboBox';
+import { BankingAccountsTable } from '@/components/BankingAccountsTable';
 import CategoryPicker from '@/components/CategoryPicker';
 import CreateCategoryDialog from '@/components/CreateCategoryDialog';
 import { TransactionTitle } from '@/components/CreateTransactionDialog';
@@ -11,7 +12,7 @@ import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { userSettingsType, categoriesType } from '@/db/schema/finance';
+import { userSettingsType, categoriesType, bankingAccountsType } from '@/db/schema/finance';
 import { TransactionType, cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { Pencil, PlusSquare, TrashIcon, TrendingDown, TrendingUp } from 'lucide-react';
@@ -57,6 +58,7 @@ function Manage() {
 						<SkeletonWrapper isLoading={userSettingsQuery.isFetching}>
 							<BankingAccountComboBox isConfiguring userSettings={userSettingsQuery.data} />
 						</SkeletonWrapper>
+						<BankingAccountsList />
 					</CardContent>
 				</Card>
 
@@ -72,6 +74,19 @@ function Manage() {
 }
 
 export default Manage;
+
+function BankingAccountsList() {
+	const bankingAccountsQuery = useQuery<bankingAccountsType[]>({
+		queryKey: ['banking-accounts'],
+		queryFn: () => fetch('/api/banking-accounts').then((res) => res.json()),
+	});
+
+	return (
+		<SkeletonWrapper isLoading={bankingAccountsQuery.isFetching}>
+			<BankingAccountsTable data={bankingAccountsQuery.data || []} />
+		</SkeletonWrapper>
+	);
+}
 
 function CategoryList({ type, userSettings }: { type: TransactionType; userSettings?: userSettingsType }) {
 	const categoriesQuery = useQuery({

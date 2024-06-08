@@ -26,6 +26,7 @@ export const updateUserCurrencySchema = z.object({
 export const createBankingAccountSchema = z.object({
 	name: z.string(),
 	description: z.string().optional(),
+	bankingAccountId: z.string().optional(),
 });
 
 export type createBankingAccountSchemaType = z.infer<typeof createBankingAccountSchema>;

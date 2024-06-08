@@ -29,8 +29,8 @@ const BankingAccountComboBox = ({ userSettings, onChange, isConfiguring, firstSe
 	const queryClient = useQueryClient();
 
 	const bankingAccountsQuery = useQuery<bankingAccountsType[]>({
-		queryKey: ['bankingAccounts'],
-		queryFn: () => fetch('/api/bankingAccounts').then((res) => res.json()),
+		queryKey: ['banking-accounts'],
+		queryFn: () => fetch('/api/banking-accounts').then((res) => res.json()),
 	});
 
 	const mutation = useMutation({

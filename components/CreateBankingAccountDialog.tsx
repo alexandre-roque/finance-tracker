@@ -42,7 +42,7 @@ const CreateBankingAccountDialog = ({ trigger }: { trigger?: ReactNode }) => {
 			id: 'creating-bankingAccount',
 		});
 
-		await fetch('/api/bankingAccounts', {
+		await fetch('/api/banking-accounts', {
 			method: 'POST',
 			body: JSON.stringify({
 				name: values.name,
@@ -55,7 +55,7 @@ const CreateBankingAccountDialog = ({ trigger }: { trigger?: ReactNode }) => {
 				});
 
 				queryClient.invalidateQueries({
-					queryKey: ['bankingAccounts'],
+					queryKey: ['banking-accounts'],
 				});
 			} else {
 				toast.error('Erro ao criar conta bancária', {

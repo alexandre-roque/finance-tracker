@@ -51,10 +51,10 @@ const NotificationsPopOver = () => {
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
-				<Button variant='secondary' size='icon'>
+				<Button className='relative' variant='secondary' size='icon'>
 					<Bell className='size-4' />
 					{notificationsQuery.data && notificationsQuery.data.length > 0 && (
-						<Badge className='absolute bottom-2 left-2 flex size-6 items-center justify-center rounded-full'>
+						<Badge className='absolute -top-1.5 -right-2 flex size-6 items-center justify-center rounded-full'>
 							{notificationsQuery.data.length}
 						</Badge>
 					)}

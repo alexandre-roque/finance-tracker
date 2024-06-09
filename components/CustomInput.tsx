@@ -12,10 +12,16 @@ interface CustomInput {
 	description?: string;
 	disabled?: boolean;
 	fullWidth?: boolean;
+	min?: number;
+	max?: number;
+	step?: string;
 }
 
 const CustomInput = ({
+	min,
+	max,
 	name,
+	step,
 	label,
 	control,
 	fullWidth,
@@ -36,9 +42,10 @@ const CustomInput = ({
 							<Input
 								placeholder={placeholder}
 								type={type}
-								maxLength={name === 'cardNumber' ? 4 : undefined}
 								disabled={disabled}
-								step={name === 'amount' ? '0.1' : undefined}
+								step={name === 'amount' ? '0.1' : step}
+								min={min}
+								max={max}
 								{...field}
 							/>
 						</FormControl>

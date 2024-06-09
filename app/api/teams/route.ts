@@ -26,6 +26,7 @@ export const GET = auth(async (req) => {
 									userId: true,
 									role: true,
 									status: true,
+									percentage: true,
 								},
 								with: {
 									user: {

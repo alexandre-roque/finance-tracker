@@ -173,7 +173,7 @@ export async function EditTeamMember(form: editTeamMemberSchemaType) {
 	}
 
 	const userId = session.user.id;
-	const { teamMemberId, role, status } = parsedBody.data;
+	const { teamMemberId, role, status, percentage } = parsedBody.data;
 
 	const teamMemberToEdit = await db.query.teamMembers.findFirst({
 		columns: {
@@ -187,15 +187,12 @@ export async function EditTeamMember(form: editTeamMemberSchemaType) {
 		return { error: 'Membro não encontrado' };
 	}
 
-	if (userId === teamMemberToEdit.userId) {
-		return { error: 'Você não pode editar seu próprio papel' };
-	}
-
 	const [editedTeamMember] = await db
 		.update(teamMembers)
 		.set({
 			role,
 			status,
+			percentage,
 		})
 		.where(eq(teamMembers.id, teamMemberId))
 		.returning();

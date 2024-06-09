@@ -138,6 +138,7 @@ export const editTeamMemberSchema = z.object({
 	role: z.enum(possibleRolesArray),
 	status: z.enum(possibleStatusArray),
 	teamMemberId: z.string(),
+	percentage: z.coerce.number().positive().multipleOf(0.01).optional(),
 });
 
 export type editTeamMemberSchemaType = z.infer<typeof editTeamMemberSchema>;

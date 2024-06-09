@@ -39,6 +39,7 @@ type teamMembersType = {
 	userId: string;
 	role: string;
 	status: string;
+	percentage: number;
 	user: {
 		name: string;
 	};
@@ -65,6 +66,17 @@ const columns: ColumnDef<teamMembersType>[] = [
 			return (
 				<div className='flex items-center space-x-2'>
 					<div>{row.original.user.name}</div>
+				</div>
+			);
+		},
+	},
+	{
+		accessorKey: 'percentage',
+		header: ({ column }) => <DataTableColumnHeader column={column} title='Porcentagem %' />,
+		cell: ({ row }) => {
+			return (
+				<div className='flex items-center space-x-2'>
+					<div>{row.original.percentage}</div>
 				</div>
 			);
 		},
@@ -235,12 +247,6 @@ function DataTableRowActions({ row }: DataTableRowActionsProps<teamMembersType>)
 					<DropdownMenuItem
 						className='flex items-center gap-2'
 						onSelect={() => {
-							if (session.data?.user?.id === row.original.userId) {
-								toast.error('Você não pode se editar', {
-									id: 'edit-team-member',
-								});
-								return;
-							}
 							setIsEditOpen((prev) => !prev);
 						}}
 					>

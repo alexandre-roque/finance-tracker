@@ -21,6 +21,8 @@ import { teamMembersType } from '@/db/schema/finance';
 import { EditTeamMember } from '@/app/(root)/_actions/teams';
 import { ROLE_MAP, STATUS_MAP } from './TeamMembersTable';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import CustomInput from './CustomInput';
+import { useSession } from 'next-auth/react';
 
 const EditBankingAccountForm = ({
 	setIsOpen,
@@ -29,8 +31,9 @@ const EditBankingAccountForm = ({
 	setIsOpen: Dispatch<SetStateAction<boolean>>;
 	teamMember: teamMembersType;
 }) => {
-	const [isLoading, setIsLoading] = useState(false);
 	const queryClient = useQueryClient();
+
+	const session = useSession();
 
 	const form = useForm<editTeamMemberSchemaType>({
 		resolver: zodResolver(editTeamMemberSchema),
@@ -38,6 +41,7 @@ const EditBankingAccountForm = ({
 			role: teamMember.role as PossibleRoles | undefined,
 			status: teamMember.status as PossibleStatus | undefined,
 			teamMemberId: teamMember.id,
+			percentage: teamMember.percentage || undefined,
 		},
 	});
 	const { mutate, isPending } = useMutation({
@@ -83,51 +87,55 @@ const EditBankingAccountForm = ({
 	return (
 		<Form {...form}>
 			<form className='flex flex-col gap-3 space-y-2 md:px-0 px-4' onSubmit={form.handleSubmit(onSubmit)}>
-				<FormField
-					control={form.control}
-					name='role'
-					render={() => (
-						<FormItem className='flex flex-col'>
-							<FormLabel className='pb-2'>Cargo</FormLabel>
-							<FormControl>
-								<Select
-									onValueChange={(value) => {
-										form.setValue('role', value as PossibleRoles);
-									}}
-									value={form.getValues('role')}
-								>
-									<SelectTrigger className='w-full'>
-										<SelectValue placeholder='Selecionar cargo' />
-									</SelectTrigger>
-									<SelectContent>
-										{possibleRolesArray
-											.filter((role) => role !== 'owner')
-											.map((role, i) => {
-												return (
-													<SelectItem key={i} value={role}>
-														{ROLE_MAP[role as keyof typeof ROLE_MAP]}
-													</SelectItem>
-												);
-											})}
-									</SelectContent>
-								</Select>
-							</FormControl>
-						</FormItem>
-					)}
-				/>
+				{session.data?.user?.id !== teamMember.userId && (
+					<FormField
+						control={form.control}
+						name='role'
+						render={() => (
+							<FormItem className='flex flex-col'>
+								<FormLabel className='pb-2'>Cargo</FormLabel>
+								<FormControl>
+									<Select
+										onValueChange={(value) => {
+											form.setValue('role', value as PossibleRoles);
+										}}
+										value={form.getValues('role')}
+										disabled={session.data?.user?.id === teamMember.userId}
+									>
+										<SelectTrigger className='w-full'>
+											<SelectValue placeholder='Selecionar cargo' />
+										</SelectTrigger>
+										<SelectContent>
+											{possibleRolesArray
+												.filter((role) => role !== 'owner')
+												.map((role, i) => {
+													return (
+														<SelectItem key={i} value={role}>
+															{ROLE_MAP[role as keyof typeof ROLE_MAP]}
+														</SelectItem>
+													);
+												})}
+										</SelectContent>
+									</Select>
+								</FormControl>
+							</FormItem>
+						)}
+					/>
+				)}
 
 				<FormField
 					control={form.control}
 					name='status'
 					render={() => (
 						<FormItem className='flex flex-col'>
-							<FormLabel className='pb-2'>Cargo</FormLabel>
+							<FormLabel className='pb-2'>Status</FormLabel>
 							<FormControl>
 								<Select
 									onValueChange={(value) => {
 										form.setValue('status', value as PossibleStatus);
 									}}
 									value={form.getValues('status')}
+									disabled={session.data?.user?.id === teamMember.userId}
 								>
 									<SelectTrigger className='w-full'>
 										<SelectValue placeholder='Selecionar status' />
@@ -146,9 +154,21 @@ const EditBankingAccountForm = ({
 						</FormItem>
 					)}
 				/>
-				<Button type='submit' disabled={isLoading} className='w-full sm:w-auto'>
+
+				<CustomInput
+					control={form.control}
+					name='percentage'
+					label='Porcentagem (%)'
+					type='number'
+					placeholder='Porcentagem (%)'
+					step='0.01'
+					min={0}
+					max={100}
+				/>
+
+				<Button type='submit' disabled={isPending} className='w-full sm:w-auto'>
 					<>
-						{isLoading ? (
+						{isPending ? (
 							<>
 								<Loader2 className='mr-2 h-4 w-4 animate-spin' />
 								Editando...

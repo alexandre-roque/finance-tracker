@@ -157,6 +157,7 @@ export const teamMembers = sqliteTable('teamMember', {
 		.references(() => teams.id, { onDelete: 'cascade' }),
 	role: text('role').notNull().default('member'),
 	status: text('status').notNull().default('active'),
+	percentage: integer('percentage'),
 });
 
 export type teamMembersType = typeof teamMembers.$inferSelect;

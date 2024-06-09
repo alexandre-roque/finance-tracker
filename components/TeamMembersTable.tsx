@@ -24,7 +24,7 @@ import {
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table';
-import { MoreHorizontal, Pencil, PlusSquare, TrashIcon } from 'lucide-react';
+import { Loader2, MoreHorizontal, Pencil, PlusSquare, TrashIcon } from 'lucide-react';
 import { DataTableColumnHeader } from './datatable/ColumnHeader';
 import { ResponsiveDialog } from './ui/responsive-dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -229,7 +229,14 @@ function DataTableRowActions({ row }: DataTableRowActionsProps<teamMembersType>)
 							});
 						}}
 					>
-						Deletar
+						{deleteMutation.isPending ? (
+							<>
+								<Loader2 className='mr-2 h-4 w-4 animate-spin' />
+								Deletando...
+							</>
+						) : (
+							'Deletar'
+						)}
 					</Button>
 				</div>
 			</ResponsiveDialog>

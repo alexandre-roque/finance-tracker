@@ -68,15 +68,20 @@ function CategoriesCard({
 	data: GetCategoriesStatsResponseType;
 	selectedTeams?: Option[];
 }) {
-	const filteredData = data.filter((el) => {
-		if (
-			el.type === type &&
-			((!el.teamId && selectedTeams?.some((t) => t.value === 'me')) ||
-				selectedTeams?.some((t) => t.value === el.teamId))
-		) {
-			return true;
-		}
-	});
+	const filteredData = useMemo(
+		() =>
+			data.filter((el) => {
+				if (
+					el.type === type &&
+					((!el.teamId && selectedTeams?.some((t) => t.value === 'me')) ||
+						selectedTeams?.some((t) => t.value === el.teamId))
+				) {
+					return true;
+				}
+			}),
+		[type, data, selectedTeams]
+	);
+
 	const total = filteredData.reduce((acc, el) => acc + (el.value || 0), 0);
 
 	return (

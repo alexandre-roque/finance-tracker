@@ -30,26 +30,30 @@ function StatsCards({ from, to, userSettings, selectedTeams }: Props) {
 		return GetFormatterForCurrency(userSettings.currency || 'BRL');
 	}, [userSettings.currency]);
 
-	const { income, expense } = statsQuery.data
-		? statsQuery.data.reduce(
-				(acc, stats) => {
-					if (
-						(!stats.teamId && selectedTeams?.some((t) => t.value === 'me')) ||
-						selectedTeams?.some((t) => t.value === stats.teamId)
-					) {
-						acc[stats.type as 'income' | 'expense'] += parseFloat(stats.value ?? '0');
-					}
-					return acc;
-				},
-				{
-					income: 0,
-					expense: 0,
-				}
-		  )
-		: {
-				income: 0,
-				expense: 0,
-		  };
+	const { income, expense } = useMemo(
+		() =>
+			statsQuery.data
+				? statsQuery.data.reduce(
+						(acc, stats) => {
+							if (
+								(!stats.teamId && selectedTeams?.some((t) => t.value === 'me')) ||
+								selectedTeams?.some((t) => t.value === stats.teamId)
+							) {
+								acc[stats.type as 'income' | 'expense'] += parseFloat(stats.value ?? '0');
+							}
+							return acc;
+						},
+						{
+							income: 0,
+							expense: 0,
+						}
+				  )
+				: {
+						income: 0,
+						expense: 0,
+				  },
+		[statsQuery.data, selectedTeams]
+	);
 
 	const balance = income - expense;
 

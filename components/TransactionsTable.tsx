@@ -385,17 +385,15 @@ function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
 				<DropdownMenuContent align='end'>
 					<DropdownMenuLabel>Ações</DropdownMenuLabel>
 					<DropdownMenuSeparator />
-					{transaction.userId === session.data?.user?.id && (
-						<DropdownMenuItem
-							className='flex items-center gap-2'
-							onSelect={() => {
-								setShowEditDialog((prev) => !prev);
-							}}
-						>
-							<Pencil className='h-4 w-4 text-muted-foreground' />
-							Editar
-						</DropdownMenuItem>
-					)}
+					<DropdownMenuItem
+						className='flex items-center gap-2'
+						onSelect={() => {
+							setShowEditDialog((prev) => !prev);
+						}}
+					>
+						<Pencil className='h-4 w-4 text-muted-foreground' />
+						Editar
+					</DropdownMenuItem>
 					<DropdownMenuItem
 						className='flex items-center gap-2'
 						onSelect={() => {

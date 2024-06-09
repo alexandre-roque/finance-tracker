@@ -138,6 +138,7 @@ export const teams = sqliteTable('team', {
 		.$defaultFn(() => ulid()),
 	name: text('name').notNull(),
 	description: text('description'),
+	splitType: text('splitType').default('percentage').notNull(),
 	ownerId: text('ownerId')
 		.notNull()
 		.references(() => users.id, { onDelete: 'cascade' }),

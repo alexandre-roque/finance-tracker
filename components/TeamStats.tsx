@@ -1,6 +1,5 @@
 'use client';
 
-import { GetCategoriesStatsResponseType } from '@/app/api/stats/categories/route';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -13,7 +12,7 @@ import React, { useMemo } from 'react';
 import { TransactionTitle } from './CreateTransactionDialog';
 import { Option } from './ui/multiple-selector';
 import { GetTeamsBalanceResponseType } from '@/app/api/stats/teams/route';
-import { ResponsiveContainer, Pie, Tooltip, PieChart, Cell } from 'recharts';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface Props {
 	userSettings: userSettingsType;
@@ -36,55 +35,16 @@ function TeamsStats({ userSettings, from, to, selectedTeams }: Props) {
 	return (
 		<div className='flex w-full flex-wrap gap-2 md:flex-nowrap'>
 			<SkeletonWrapper isLoading={statsQuery.isFetching}>
-				<TeamsCard
-					selectedTeams={selectedTeams}
-					formatter={formatter}
-					type='income'
-					data={statsQuery.data || []}
-				/>
+				<TeamsCard selectedTeams={selectedTeams} formatter={formatter} type='income' data={statsQuery.data} />
 			</SkeletonWrapper>
 			<SkeletonWrapper isLoading={statsQuery.isFetching}>
-				<TeamsCard
-					selectedTeams={selectedTeams}
-					formatter={formatter}
-					type='expense'
-					data={statsQuery.data || []}
-				/>
+				<TeamsCard selectedTeams={selectedTeams} formatter={formatter} type='expense' data={statsQuery.data} />
 			</SkeletonWrapper>
 		</div>
 	);
 }
 
 export default TeamsStats;
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
-
-const RADIAN = Math.PI / 180;
-const renderCustomizedLabel = ({
-	cx,
-	cy,
-	midAngle,
-	innerRadius,
-	outerRadius,
-	percent,
-}: {
-	cx: number;
-	cy: number;
-	midAngle: number;
-	innerRadius: number;
-	outerRadius: number;
-	percent: number;
-}) => {
-	const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-	const x = cx + radius * Math.cos(-midAngle * RADIAN);
-	const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-	return (
-		<text x={x} y={y} fill='white' textAnchor={x > cx ? 'start' : 'end'} dominantBaseline='central'>
-			{`${(percent * 100).toFixed(0)}%`}
-		</text>
-	);
-};
 
 function TeamsCard({
 	data,
@@ -94,20 +54,39 @@ function TeamsCard({
 }: {
 	type: TransactionType;
 	formatter: Intl.NumberFormat;
-	data: GetTeamsBalanceResponseType;
+	data?: GetTeamsBalanceResponseType;
 	selectedTeams?: Option[];
 }) {
-	const filteredData = data.filter((el) => {
-		if (
-			el.type === type &&
-			((!el.teamId && selectedTeams?.some((t) => t.value === 'me')) ||
-				selectedTeams?.some((t) => t.value === el.teamId))
-		) {
-			return true;
-		}
-	});
+	const filteredData = useMemo(
+		() =>
+			(data?.totals || []).filter((el) => {
+				if (
+					el.type === type &&
+					((!el.teamId && selectedTeams?.some((t) => t.value === 'me')) ||
+						selectedTeams?.some((t) => t.value === el.teamId))
+				) {
+					return true;
+				}
+			}),
+		[data, selectedTeams, type]
+	);
 
 	const total = filteredData.reduce((acc, el) => acc + (parseFloat(el.value ?? '0') || 0), 0);
+
+	const groupedData: { [key: string]: { [key: string]: number; totalAmount: number } } = filteredData.reduce(
+		(acc, el) => {
+			const team = el.teamName ?? 'Eu';
+			const amount = parseFloat(el.value ?? '0') || 0;
+			const key = `${team}_${el.teamId}`;
+
+			acc[key] = acc[key] || ({} as { [key: string]: number; totalAmount: number });
+			acc[key][el.userId] = (acc[key][el.userId] || 0) + amount;
+			acc[key].totalAmount = (acc[key].totalAmount || 0) + amount;
+
+			return acc;
+		},
+		{} as { [key: string]: { [key: string]: number; totalAmount: number } }
+	);
 
 	return (
 		<Card className='h-96 w-full col-span-6'>
@@ -127,36 +106,91 @@ function TeamsCard({
 					</div>
 				)}
 
-				{filteredData.length > 0 && (
-					<ScrollArea className='w-full px-4 h-72'>
-						<div className='flex w-full flex-col gap-4 p-4'>
-							{filteredData.map((item) => {
-								const amount = parseFloat(item.value ?? '0') || 0;
-								const percentage = (amount * 100) / (total || amount);
+				<ScrollArea className='w-full px-4 h-72'>
+					<div className='flex w-full flex-col gap-4 p-4'>
+						{Object.entries(groupedData).map(([teamKey, teamData], i) => {
+							const teamTotal = teamData.totalAmount;
+							const teamMembers = Object.entries(teamData).filter(([key]) => key !== 'totalAmount');
+							const [teamName, teamId] = teamKey.split('_');
+							const team = data?.teamsResult.find((t) => t.teamId === teamId);
 
-								return (
-									<div key={item.teamName ?? 'Eu'} className='flex flex-col gap-2'>
-										<div className='flex items-center justify-between'>
-											<span className='flex items-center text-gray-400'>
-												{item.teamName ?? 'Eu'}
-												<span className='ml-2 text-xs text-muted-foreground'>
-													({percentage.toFixed(0)}%)
-												</span>
+							const percentage = (teamTotal * 100) / (total || teamTotal);
+
+							return (
+								<div key={teamName} className='flex flex-col gap-2'>
+									<div className='flex items-center justify-between'>
+										<span className='flex items-center text-gray-400'>
+											{teamName}
+											<span className='ml-2 text-xs text-muted-foreground'>
+												({percentage.toFixed(0)}%)
 											</span>
+										</span>
 
-											<span className='text-sm text-gray-400'>{formatter.format(amount)}</span>
-										</div>
-
-										<Progress
-											value={percentage}
-											indicator={type === 'income' ? 'bg-emerald-500' : 'bg-red-500'}
-										/>
+										<span className='text-sm text-gray-400'>{formatter.format(teamTotal)}</span>
 									</div>
-								);
-							})}
-						</div>
-					</ScrollArea>
-				)}
+									<Progress
+										value={percentage}
+										indicator={type === 'income' ? 'bg-emerald-500' : 'bg-red-500'}
+									/>
+									{team?.team?.splitType === 'percentage' &&
+										(team?.team?.members.length ?? 0) > 1 && (
+											<div className='flex flex-col gap-2'>
+												<Accordion type='single' collapsible>
+													<AccordionItem value='item-1'>
+														<AccordionTrigger>
+															Valores distribuídos de {teamName}
+														</AccordionTrigger>
+														<AccordionContent className='flex flex-col gap-2'>
+															{team?.team?.members.map((member) => {
+																const memberPercentage = member.percentage || 0;
+																const memberAmount =
+																	(teamTotal * memberPercentage) / 100;
+																const realAmount =
+																	teamMembers.find(
+																		([key]) => key === member.user.id
+																	)?.[1] || 0;
+
+																return (
+																	<div
+																		key={member.user.name ?? 'Eu'}
+																		className='flex items-start justify-between flex-col'
+																	>
+																		<span className='flex items-center text-primary'>
+																			{member.user.name ?? 'Eu'}
+																			<span className='ml-2 text-xs text-muted-foreground'>
+																				({memberPercentage.toFixed(2)}%)
+																			</span>
+																		</span>
+
+																		<span className='text-sm text-secondary-foreground flex flex-col'>
+																			<span>
+																				Total pago:{' '}
+																				{formatter.format(realAmount)}
+																			</span>
+																			<span>
+																				Total esperado:{' '}
+																				{formatter.format(memberAmount)}
+																			</span>
+																			<span>
+																				Diferença:{' '}
+																				{formatter.format(
+																					realAmount - memberAmount
+																				)}
+																			</span>
+																		</span>
+																	</div>
+																);
+															})}
+														</AccordionContent>
+													</AccordionItem>
+												</Accordion>
+											</div>
+										)}
+								</div>
+							);
+						})}
+					</div>
+				</ScrollArea>
 			</div>
 		</Card>
 	);

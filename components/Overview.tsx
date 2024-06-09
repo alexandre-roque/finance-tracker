@@ -43,7 +43,7 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 						prev.push(op);
 					}
 				});
-				return prev;
+				return [...prev];
 			});
 			setDefaultOptions((prev) => {
 				data.forEach((op: Option) => {
@@ -51,7 +51,7 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 						prev.push(op);
 					}
 				});
-				return prev;
+				return [...prev];
 			});
 		}
 	}, [teamsQuery.data]);
@@ -113,9 +113,10 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 						to={dateRange.to}
 					/>
 				</SkeletonWrapper>
+
 				{pathname === '/analytics' && (
 					<SkeletonWrapper isLoading={teamsQuery.isFetching}>
-						<AccountsStats
+						<TeamsStats
 							selectedTeams={selectedTeams}
 							userSettings={userSettings}
 							from={dateRange.from}
@@ -126,7 +127,7 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 
 				{pathname === '/analytics' && (
 					<SkeletonWrapper isLoading={teamsQuery.isFetching}>
-						<TeamsStats
+						<AccountsStats
 							selectedTeams={selectedTeams}
 							userSettings={userSettings}
 							from={dateRange.from}

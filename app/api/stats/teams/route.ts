@@ -28,17 +28,42 @@ export const GET = auth(async (req) => {
 	const fromDate = new Date(queryParams.data.from);
 	const toDate = new Date(queryParams.data.to);
 
-	const accountBalance = await getTeamsBalance(userId, fromDate, toDate);
+	const teamsBalance = await getTeamsBalance(userId, fromDate, toDate);
 
-	return Response.json(accountBalance);
+	return Response.json(teamsBalance);
 });
 
 export type GetTeamsBalanceResponseType = Awaited<ReturnType<typeof getTeamsBalance>>;
 
 async function getTeamsBalance(userId: string, from: Date, to: Date) {
-	const teamsResult = (
-		await db.select({ teamId: teamMembers.teamId }).from(teamMembers).where(eq(teamMembers.userId, userId))
-	).map((obj) => obj.teamId);
+	const teamsResult = await db.query.teamMembers.findMany({
+		columns: {
+			teamId: true,
+		},
+		with: {
+			team: {
+				columns: {
+					splitType: true,
+				},
+				with: {
+					members: {
+						columns: {
+							percentage: true,
+						},
+						with: {
+							user: {
+								columns: {
+									name: true,
+									id: true,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		where: (teamMembers, { eq }) => eq(teamMembers.userId, userId),
+	});
 
 	const totals = await db
 		.select({
@@ -46,17 +71,21 @@ async function getTeamsBalance(userId: string, from: Date, to: Date) {
 			type: transactions.type,
 			teamName: teams.name,
 			teamId: transactions.teamId,
+			userId: transactions.userId,
 		})
 		.from(transactions)
 		.where(
 			and(
-				or(inArray(transactions.teamId, teamsResult.concat('any')), eq(transactions.userId, userId)),
+				or(
+					inArray(transactions.teamId, teamsResult.map((t) => t.teamId).concat('any')),
+					eq(transactions.userId, userId)
+				),
 				lte(transactions.date, to),
 				gte(transactions.date, from)
 			)
 		)
 		.leftJoin(teams, eq(transactions.teamId, teams.id))
-		.groupBy(transactions.type, teams.name);
+		.groupBy(transactions.type, teams.name, transactions.userId);
 
-	return totals;
+	return { totals, teamsResult };
 }

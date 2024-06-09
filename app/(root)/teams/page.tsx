@@ -24,14 +24,17 @@ type ResultQueryTeamsWithMembers = {
 		owner: {
 			name: string | null;
 		};
+		splitType: string;
 		members: {
 			teamId: string;
 			id: string;
 			userId: string;
 			role: string;
 			status: string;
+			percentage: number;
 			user: {
 				name: string;
+				id: string;
 			};
 		}[];
 	};

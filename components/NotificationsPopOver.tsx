@@ -20,6 +20,7 @@ const NotificationsPopOver = () => {
 	const notificationsQuery = useQuery<ResultQueryNotifications[]>({
 		queryKey: ['notifications', 'teams-invitations'],
 		queryFn: () => fetch('/api/notifications').then((res) => res.json()),
+		staleTime: 1000 * 60,
 	});
 
 	const handleTeamInvitationMutation = useMutation({
@@ -36,6 +37,14 @@ const NotificationsPopOver = () => {
 			if (accepted) {
 				queryClient.invalidateQueries({
 					queryKey: ['teams-members'],
+				});
+
+				queryClient.invalidateQueries({
+					queryKey: ['overview'],
+				});
+
+				queryClient.invalidateQueries({
+					queryKey: ['transactions'],
 				});
 			}
 

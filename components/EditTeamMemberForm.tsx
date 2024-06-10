@@ -41,7 +41,6 @@ const EditBankingAccountForm = ({
 			role: teamMember.role as PossibleRoles | undefined,
 			status: teamMember.status as PossibleStatus | undefined,
 			teamMemberId: teamMember.id,
-			percentage: teamMember.percentage || undefined,
 		},
 	});
 	const { mutate, isPending } = useMutation({
@@ -153,17 +152,6 @@ const EditBankingAccountForm = ({
 							</FormControl>
 						</FormItem>
 					)}
-				/>
-
-				<CustomInput
-					control={form.control}
-					name='percentage'
-					label='Porcentagem (%)'
-					type='number'
-					placeholder='Porcentagem (%)'
-					step='0.01'
-					min={0}
-					max={100}
 				/>
 
 				<Button type='submit' disabled={isPending} className='w-full sm:w-auto'>

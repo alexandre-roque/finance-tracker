@@ -1,16 +1,20 @@
 'use client';
 
+import EditTeamForm from '@/components/EditTeamForm';
 import InviteToTeamDialog from '@/components/InviteToTeamDialog';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import TeamMembersTable from '@/components/TeamMembersTable';
 import TeamsComboBox from '@/components/TeamsComboBox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { userSettingsType } from '@/db/schema/finance';
 import { useQuery } from '@tanstack/react-query';
-import React from 'react';
+import { Cog } from 'lucide-react';
+import React, { useState } from 'react';
 
-type ResultQueryTeamsWithMembers = {
+export type ResultQueryTeamsWithMembers = {
 	id: string;
 	userId: string;
 	role: string;
@@ -38,15 +42,16 @@ type ResultQueryTeamsWithMembers = {
 			};
 		}[];
 	};
-}[];
+};
 
 const Teams = () => {
+	const [isEditTeamDialogOpen, setIsEditTeamDialogOpen] = useState(false);
 	const userSettingsQuery = useQuery<userSettingsType>({
 		queryKey: ['user-settings', { type: 'manage' }],
 		queryFn: () => fetch('/api/user-settings').then((res) => res.json()),
 	});
 
-	const teamsQuery = useQuery<ResultQueryTeamsWithMembers>({
+	const teamsQuery = useQuery<ResultQueryTeamsWithMembers[]>({
 		queryKey: ['teams-with-members'],
 		queryFn: () => fetch('/api/teams?withMembers=true').then((res) => res.json()),
 	});
@@ -90,8 +95,29 @@ const Teams = () => {
 												<span className='text-muted-foreground'>{team.team.description}</span>
 											</div>
 										</AccordionTrigger>
-										<AccordionContent>
-											<InviteToTeamDialog teamId={team.team.id} />
+										<AccordionContent className='flex flex-col'>
+											<div className='flex justify-between items-center'>
+												<InviteToTeamDialog teamId={team.team.id} />
+												<Button
+													variant='secondary'
+													className='flex items-center gap-2'
+													onClick={() => {
+														setIsEditTeamDialogOpen(true);
+													}}
+												>
+													<Cog /> Editar time
+												</Button>
+											</div>
+											<ResponsiveDialog
+												title='Editar time'
+												isOpen={isEditTeamDialogOpen}
+												setIsOpen={setIsEditTeamDialogOpen}
+											>
+												<EditTeamForm
+													setIsOpen={setIsEditTeamDialogOpen}
+													team={team}
+												></EditTeamForm>
+											</ResponsiveDialog>
 
 											<div className='flex flex-col gap-4'>
 												<AccordionItem value={`${team.id}_members`}>

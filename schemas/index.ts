@@ -138,7 +138,27 @@ export const editTeamMemberSchema = z.object({
 	role: z.enum(possibleRolesArray),
 	status: z.enum(possibleStatusArray),
 	teamMemberId: z.string(),
-	percentage: z.coerce.number().positive().multipleOf(0.01).optional(),
 });
 
 export type editTeamMemberSchemaType = z.infer<typeof editTeamMemberSchema>;
+
+export const possibleSplitTypesArray = ['percentage', 'none'] as const;
+export type PossibleSplitTypes = (typeof possibleSplitTypesArray)[number];
+
+const memberSchema = z.object({
+	id: z.string(),
+	percentage: z.coerce
+		.number()
+		.min(0, { message: 'Percentage must be at least 0' })
+		.max(100, { message: 'Percentage must be at most 100' }),
+});
+
+export const editTeamSchema = z.object({
+	name: z.string().min(3).max(20),
+	description: z.string().max(40),
+	splitType: z.enum(possibleSplitTypesArray),
+	members: z.array(memberSchema),
+	teamId: z.string(),
+});
+
+export type editTeamSchemaType = z.infer<typeof editTeamSchema>;

@@ -9,6 +9,8 @@ import {
 	createTeamSchemaType,
 	editTeamMemberSchema,
 	editTeamMemberSchemaType,
+	editTeamSchema,
+	editTeamSchemaType,
 	inviteToTeamSchema,
 	inviteToTeamSchemaType,
 } from '@/schemas';
@@ -173,7 +175,7 @@ export async function EditTeamMember(form: editTeamMemberSchemaType) {
 	}
 
 	const userId = session.user.id;
-	const { teamMemberId, role, status, percentage } = parsedBody.data;
+	const { teamMemberId, role, status } = parsedBody.data;
 
 	const teamMemberToEdit = await db.query.teamMembers.findFirst({
 		columns: {
@@ -187,15 +189,101 @@ export async function EditTeamMember(form: editTeamMemberSchemaType) {
 		return { error: 'Membro não encontrado' };
 	}
 
+	const team = await db.query.teams.findFirst({
+		with: {
+			members: true,
+		},
+		where: (teams, { eq }) => eq(teams.id, teamMemberToEdit.teamId),
+	});
+
+	if (!team) {
+		return { error: 'Time não encontrado' };
+	}
+
+	if (
+		team.ownerId !== userId ||
+		!team.members.some(
+			(member) => member.userId === userId && (member.role === 'manager' || member.role === 'owner')
+		)
+	) {
+		return { error: 'Você não tem permissão de editar o membro de time' };
+	}
+
 	const [editedTeamMember] = await db
 		.update(teamMembers)
 		.set({
 			role,
 			status,
-			percentage,
 		})
 		.where(eq(teamMembers.id, teamMemberId))
 		.returning();
 
 	return { success: true, editedTeamMember };
+}
+
+export async function EditTeam(form: editTeamSchemaType) {
+	const parsedBody = editTeamSchema.safeParse(form);
+	if (!parsedBody.success) {
+		throw new Error('bad request');
+	}
+
+	const session = await auth();
+	if (!session || !session.user || !session.user.id) {
+		redirect('/sign-in');
+	}
+
+	const userId = session.user.id;
+	const { name, description, splitType, members } = parsedBody.data;
+
+	const team = await db.query.teams.findFirst({
+		with: {
+			members: true,
+		},
+		where: (teams, { eq }) => eq(teams.id, form.teamId),
+	});
+
+	if (!team) {
+		return { error: 'Time não encontrado' };
+	}
+
+	if (
+		team.ownerId !== userId ||
+		!team.members.some(
+			(member) => member.userId === userId && (member.role === 'manager' || member.role === 'owner')
+		)
+	) {
+		return { error: 'Você não tem permissão de editar o time' };
+	}
+
+	if (splitType === 'percentage') {
+		const totalPercentage = members.reduce((acc, member) => acc + member.percentage, 0);
+		if (totalPercentage !== 100) {
+			return { error: 'A soma dos percentuais deve ser 100' };
+		}
+	}
+
+	await db
+		.update(teams)
+		.set({
+			name,
+			description,
+			splitType,
+		})
+		.where(eq(teams.id, form.teamId));
+
+	for (const member of members) {
+		const teamMember = team.members.find((m) => m.id === member.id);
+		if (!teamMember) {
+			continue;
+		}
+
+		await db
+			.update(teamMembers)
+			.set({
+				percentage: member.percentage,
+			})
+			.where(eq(teamMembers.id, member.id));
+	}
+
+	return { success: true };
 }

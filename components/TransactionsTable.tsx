@@ -108,6 +108,9 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
 		accessorKey: 'userId',
 		header: ({ column }) => <DataTableColumnHeader column={column} title='Usuário' />,
 		cell: ({ row }) => <div className='capitalize'>{row.original.user?.name}</div>,
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id));
+		},
 	},
 	{
 		accessorKey: 'type',
@@ -236,6 +239,18 @@ function TransactionTable({ from, to }: Props) {
 		return Array.from(uniquebankingAccounts);
 	}, [history.data]);
 
+	const userOptions = useMemo(() => {
+		const userOptions = new Map();
+		history.data?.forEach((transaction) => {
+			userOptions.set(transaction.userId, {
+				value: transaction.userId,
+				label: transaction.user.name,
+			});
+		});
+		const uniquebankingAccounts = new Set(userOptions.values());
+		return Array.from(uniquebankingAccounts);
+	}, [history.data]);
+
 	return (
 		<div className='w-full'>
 			<div className='flex flex-wrap items-end justify-between gap-2 py-4'>
@@ -269,6 +284,13 @@ function TransactionTable({ from, to }: Props) {
 							title='Conta'
 							column={table.getColumn('bankingAccountId')}
 							options={bankingAccountsOptions}
+						/>
+					)}
+					{table.getColumn('userId') && (
+						<DataTableFacetedFilter
+							title='Usuário'
+							column={table.getColumn('userId')}
+							options={userOptions}
 						/>
 					)}
 				</div>

@@ -36,7 +36,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import DeleteTransactionDialog from './DeleteTransactionsDialog';
 import EditTransactionsDialog from './EditTransactionsDialog';
-import { useSession } from 'next-auth/react';
 
 interface Props {
 	from: Date;
@@ -66,6 +65,21 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
 		header: ({ column }) => <DataTableColumnHeader column={column} title='Data' />,
 		cell: ({ row }) => {
 			const date = new Date(row.original.date);
+			const formattedDate = date.toLocaleDateString('default', {
+				timeZone: 'UTC',
+				year: 'numeric',
+				month: '2-digit',
+				day: '2-digit',
+			});
+			return <div className='text-muted-foreground'>{formattedDate}</div>;
+		},
+	},
+	{
+		accessorKey: 'createdAt',
+		header: ({ column }) => <DataTableColumnHeader column={column} title='Data de criação' />,
+		cell: ({ row }) => {
+			if (!row.original.createdAt) return <div className='text-muted-foreground'>Sem data</div>;
+			const date = new Date(row.original.createdAt);
 			const formattedDate = date.toLocaleDateString('default', {
 				timeZone: 'UTC',
 				year: 'numeric',
@@ -165,6 +179,7 @@ function TransactionTable({ from, to }: Props) {
 		type: false,
 		userId: false,
 		teamId: false,
+		createdAt: false,
 		bankingAccountId: false,
 	});
 
@@ -386,7 +401,6 @@ export default TransactionTable;
 function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [showEditDialog, setShowEditDialog] = useState(false);
-	const session = useSession();
 
 	return (
 		<>

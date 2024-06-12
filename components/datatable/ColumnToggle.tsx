@@ -21,6 +21,7 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
 	const COLUMN_MAP = {
 		category: 'Categoria',
 		date: 'Data',
+		createdAt: 'Data de criação',
 		description: 'Descrição',
 		teamId: 'Time',
 		userId: 'Usuário',

@@ -12,7 +12,7 @@ import {
 import { sideBarLinks } from '@/constants';
 import { usePathname, useRouter } from 'next/navigation';
 import CreateTransactionDialog from './CreateTransactionDialog';
-import { Frown, Smile } from 'lucide-react';
+import { Frown, Smile, SquareStack } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 const HeaderCommandBox = ({ trigger }: { trigger: ReactNode }) => {
@@ -98,6 +98,16 @@ const HeaderCommandBox = ({ trigger }: { trigger: ReactNode }) => {
 							}
 						/>
 					</CommandItem>
+					<CommandItem
+						onSelect={() => {
+							router.push('/expenses-table');
+							setOpen(false);
+						}}
+						className='flex items-center gap-2'
+					>
+						<SquareStack />
+						Despesas em lote
+					</CommandItem>
 				</CommandGroup>
 				<CommandGroup heading='Links'>
 					{sideBarLinks
@@ -106,7 +116,10 @@ const HeaderCommandBox = ({ trigger }: { trigger: ReactNode }) => {
 							<CommandItem
 								className='flex items-center gap-2'
 								value={sideBarLink.route}
-								onSelect={(value) => router.push(value)}
+								onSelect={(value) => {
+									router.push(value);
+									setOpen(false);
+								}}
 								key={index}
 							>
 								{sideBarLink.icon}

@@ -48,6 +48,11 @@ export const createTransactionSchema = z.object({
 
 export type createTransactionSchemaType = z.infer<typeof createTransactionSchema>;
 
+export const createTransactionsSchema = z.object({
+	transactions: z.array(createTransactionSchema),
+});
+export type createTransactionsSchemaType = z.infer<typeof createTransactionsSchema>;
+
 export const createCategorySchema = z.object({
 	name: z.string().min(3).max(20),
 	icon: z.string().max(20),

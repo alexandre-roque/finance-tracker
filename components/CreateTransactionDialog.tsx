@@ -34,6 +34,7 @@ import { GetFormatterForCurrency } from '@/lib/currencies';
 import TeamsComboBox from './TeamsComboBox';
 import { ScrollArea } from './ui/scroll-area';
 import DateSelectorDialog from './DateSelectorDialog';
+import Link from 'next/link';
 
 interface Props {
 	trigger: ReactNode;
@@ -324,6 +325,12 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSet
 						{isPending && <Loader2 className='animate-spin' />}
 					</Button>
 				</DialogFooter>
+				{type === 'expense' && (
+					<div className='flex justify-center gap-2 mt-4'>
+						<p className='text-14 font-normal text-gray-600'>Cadastrar despesas em lote:</p>
+						<Link href='/expenses-table'>Ir para página</Link>
+					</div>
+				)}
 			</DialogContent>
 		</Dialog>
 	);

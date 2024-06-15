@@ -70,15 +70,17 @@ function CategoriesCard({
 }) {
 	const filteredData = useMemo(
 		() =>
-			data.filter((el) => {
-				if (
-					el.type === type &&
-					((!el.teamId && selectedTeams?.some((t) => t.value === 'me')) ||
-						selectedTeams?.some((t) => t.value === el.teamId))
-				) {
-					return true;
-				}
-			}),
+			data
+				.filter((el) => {
+					if (
+						el.type === type &&
+						((!el.teamId && selectedTeams?.some((t) => t.value === 'me')) ||
+							selectedTeams?.some((t) => t.value === el.teamId))
+					) {
+						return true;
+					}
+				})
+				.sort((a, b) => (b.value || 0) - (a.value || 0)),
 		[type, data, selectedTeams]
 	);
 
@@ -115,7 +117,7 @@ function CategoriesCard({
 											<span className='flex items-center text-gray-400'>
 												{item.categoryIcon} {item.category}
 												<span className='ml-2 text-xs text-muted-foreground'>
-													({percentage.toFixed(0)}%)
+													({percentage.toFixed(2)}%)
 												</span>
 											</span>
 

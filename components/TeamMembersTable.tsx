@@ -111,6 +111,7 @@ function TeamMembersTable({ data }: { data: teamMembersType[] }) {
 		columns,
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
+		filterFns: { fuzzy: () => true },
 		getCoreRowModel: getCoreRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
 		getSortedRowModel: getSortedRowModel(),

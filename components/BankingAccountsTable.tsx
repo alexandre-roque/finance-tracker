@@ -69,6 +69,7 @@ function BankingAccountsTable({ data }: { data: bankingAccountsType[] }) {
 		columns,
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
+		filterFns: { fuzzy: () => true },
 		getCoreRowModel: getCoreRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
 		getSortedRowModel: getSortedRowModel(),

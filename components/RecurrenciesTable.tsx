@@ -162,6 +162,7 @@ function RecurrenciesTable() {
 	const table = useReactTable({
 		data: history.data || emptyData,
 		columns,
+		filterFns: { fuzzy: () => true },
 		getCoreRowModel: getCoreRowModel(),
 		initialState: {
 			pagination: {

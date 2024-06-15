@@ -5,15 +5,20 @@ import React, { useMemo, useState } from 'react';
 import {
 	ColumnDef,
 	ColumnFiltersState,
+	FilterFn,
 	flexRender,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
+	SortingFn,
+	sortingFns,
 	SortingState,
 	useReactTable,
 	VisibilityState,
 } from '@tanstack/react-table';
+import { RankingInfo, rankItem, compareItems } from '@tanstack/match-sorter-utils';
+
 import { GetTransactionHistoryResponseType } from '@/app/api/transactions-history/route';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -36,6 +41,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import DeleteTransactionDialog from './DeleteTransactionsDialog';
 import EditTransactionsDialog from './EditTransactionsDialog';
+import DebouncedInput from './ui/debounced-input';
 
 interface Props {
 	from: Date;
@@ -45,6 +51,43 @@ interface Props {
 const emptyData: any[] = [];
 
 type TransactionHistoryRow = GetTransactionHistoryResponseType[0];
+
+declare module '@tanstack/react-table' {
+	//add fuzzy filter to the filterFns
+	interface FilterFns {
+		fuzzy?: FilterFn<unknown>;
+	}
+	interface FilterMeta {
+		itemRank: RankingInfo;
+	}
+}
+
+// Define a custom fuzzy filter function that will apply ranking info to rows (using match-sorter utils)
+const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+	// Rank the item
+	const itemRank = rankItem(row.getValue(columnId), value);
+
+	// Store the itemRank info
+	addMeta({
+		itemRank,
+	});
+
+	// Return if the item should be filtered in/out
+	return itemRank.passed;
+};
+
+// Define a custom fuzzy sort function that will sort by rank if the row has ranking information
+const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
+	let dir = 0;
+
+	// Only sort by rank if the column has ranking information
+	if (rowA.columnFiltersMeta[columnId]) {
+		dir = compareItems(rowA.columnFiltersMeta[columnId]?.itemRank!, rowB.columnFiltersMeta[columnId]?.itemRank!);
+	}
+
+	// Provide an alphanumeric fallback for when the item ranks are equal
+	return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
+};
 
 const columns: ColumnDef<TransactionHistoryRow>[] = [
 	{
@@ -175,6 +218,7 @@ const csvConfig = mkConfig({
 function TransactionTable({ from, to }: Props) {
 	const [sorting, setSorting] = useState<SortingState>([{ id: 'date', desc: true }]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+	const [globalFilter, setGlobalFilter] = useState('');
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
 		type: false,
 		userId: false,
@@ -199,6 +243,9 @@ function TransactionTable({ from, to }: Props) {
 	const table = useReactTable({
 		data: history.data || emptyData,
 		columns,
+		filterFns: {
+			fuzzy: fuzzyFilter, //define as a filter function that can be used in column definitions
+		},
 		getCoreRowModel: getCoreRowModel(),
 		initialState: {
 			pagination: {
@@ -207,12 +254,15 @@ function TransactionTable({ from, to }: Props) {
 		},
 		state: {
 			sorting,
+			globalFilter,
 			columnFilters,
 			columnVisibility,
 		},
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
 		onColumnVisibilityChange: setColumnVisibility,
+		onGlobalFilterChange: setGlobalFilter,
+		globalFilterFn: 'fuzzy',
 		getSortedRowModel: getSortedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
@@ -269,6 +319,13 @@ function TransactionTable({ from, to }: Props) {
 	return (
 		<div className='w-full'>
 			<div className='flex flex-wrap items-end justify-between gap-2 py-4'>
+				<DebouncedInput
+					value={globalFilter ?? ''}
+					onChange={(value) => setGlobalFilter(String(value))}
+					className='p-2 font-lg shadow border border-block'
+					placeholder='Pesquisar por transações...'
+					debounce={300}
+				/>
 				<div className='flex gap-2'>
 					{table.getColumn('category') && (
 						<DataTableFacetedFilter

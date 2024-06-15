@@ -17,6 +17,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { CreateTransaction } from '../_actions/transactions';
 import { toast } from 'sonner';
 import { DateToUTCDate } from '@/lib/utils';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const ExpensesTable = () => {
 	const userSettingsQuery = useQuery({
@@ -138,67 +139,72 @@ const ExpensesTable = () => {
 			<CardContent className='p-0 min-w-[1200px]'>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>
-						<table className='w-full table-auto'>
-							<thead>
-								<tr className='bg-gray-100 dark:bg-gray-800'>
-									<th className='px-4 py-2 text-left'>Data</th>
-									<th className='px-4 py-2 text-left'>Descrição</th>
-									<th className='px-4 py-2 text-left'>Valor</th>
-									<th className='px-4 py-2 text-left'>Time</th>
-									<th className='px-4 py-2 text-left'>Categoria</th>
-									<th className='px-4 py-2 text-left'>Conta</th>
-									<th className='px-4 py-2 text-left'>Apagar</th>
-								</tr>
-							</thead>
-							<tbody>
-								{transactions.map((transaction, index) => (
-									<tr key={index} className='border-b border-gray-200 dark:border-gray-700'>
-										<td className='px-4 py-2'>
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>Data</TableHead>
+									<TableHead>Descrição</TableHead>
+									<TableHead>Valor</TableHead>
+									<TableHead>Time</TableHead>
+									<TableHead>Categoria</TableHead>
+									<TableHead>Conta</TableHead>
+									<TableHead>Apagar</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{transactions.map((_, index) => (
+									<TableRow key={index}>
+										<TableCell>
 											<DateSelectorDialog
+												onlyDigitsFormat
 												showLabel={false}
 												control={form.control}
 												dateValue={form.watch(`transactions.${index}.date`)}
 												onChange={(value) => handleDateChange({ value, index })}
 											/>
-										</td>
-										<td className='px-4 py-2'>
+										</TableCell>
+										<TableCell>
 											<Controller
 												name={`transactions.${index}.description`}
 												control={form.control}
-												render={({ field }) => (
-													<Input type='text' placeholder='Digite a descrição' {...field} />
-												)}
+												render={({ field }) => <Input type='text' {...field} />}
 											/>
-										</td>
-										<td className='px-4 py-2'>
+										</TableCell>
+										<TableCell>
 											<Controller
 												name={`transactions.${index}.amount`}
 												control={form.control}
 												render={({ field }) => (
-													<Input type='number' step='0.1' placeholder='Valor' {...field} />
+													<Input
+														className='w-24'
+														type='number'
+														step='0.1'
+														placeholder='Valor'
+														{...field}
+													/>
 												)}
 											/>
-										</td>
-										<td className='px-4 py-2'>
+										</TableCell>
+										<TableCell>
 											<TeamsComboBox
 												userSettings={userSettingsQuery.data}
 												onChange={(value) => handleTeamChange({ value, index })}
 											/>
-										</td>
-										<td className='px-4 py-2'>
+										</TableCell>
+										<TableCell>
 											<CategoryPicker
 												userSettings={userSettingsQuery.data}
 												type={'expense'}
 												onChange={(value) => handleCategoryChange({ value, index })}
 											/>
-										</td>
-										<td className='px-4 py-2'>
+										</TableCell>
+										<TableCell>
 											<BankingAccountComboBox
 												userSettings={userSettingsQuery.data}
 												onChange={(value) => handleBankingAccountChange({ value, index })}
 											/>
-										</td>
-										<td className='px-4 py-2'>
+										</TableCell>
+										<TableCell>
 											<Button size='icon' variant='ghost'>
 												<Trash2
 													color='red'
@@ -207,11 +213,11 @@ const ExpensesTable = () => {
 													size={20}
 												/>
 											</Button>
-										</td>
-									</tr>
+										</TableCell>
+									</TableRow>
 								))}
-							</tbody>
-						</table>
+							</TableBody>
+						</Table>
 						<div className='mt-4 flex justify-between p-2'>
 							<Button variant={'ghost'} type='button' onClick={handleAddTransaction}>
 								<PlusIcon /> Adicionar despesa

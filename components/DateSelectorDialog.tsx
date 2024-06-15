@@ -12,11 +12,13 @@ import { Control } from 'react-hook-form';
 import { useState } from 'react';
 
 const DateSelectorDialog = ({
+	onlyDigitsFormat = false,
 	dateValue,
 	control,
 	showLabel = true,
 	onChange,
 }: {
+	onlyDigitsFormat?: boolean;
 	dateValue: Date;
 	control: Control<any>;
 	showLabel?: boolean;
@@ -39,12 +41,22 @@ const DateSelectorDialog = ({
 										<Button
 											variant={'outline'}
 											className={cn(
-												'w-[200px] pl-3 text-left font-normal',
-												!dateValue && 'text-muted-foreground'
+												'pl-3 text-left font-normal',
+												!dateValue && 'text-muted-foreground',
+												onlyDigitsFormat ? 'w-[130px]' : 'w-[200px]'
 											)}
 										>
 											{dateValue ? (
-												format(dateValue, 'PPP', { locale: ptBR })
+												onlyDigitsFormat ? (
+													dateValue.toLocaleDateString('default', {
+														timeZone: 'UTC',
+														year: 'numeric',
+														month: '2-digit',
+														day: '2-digit',
+													})
+												) : (
+													format(dateValue, 'PPP', { locale: ptBR })
+												)
 											) : (
 												<span>Selecione uma data</span>
 											)}

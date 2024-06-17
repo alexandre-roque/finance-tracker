@@ -7,7 +7,7 @@ import { signIn } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import CustomInput from '@/components/CustomInput';
 import { z } from 'zod';
@@ -29,7 +29,7 @@ export default function AuthForm({ type }: { type: 'sign-in' | 'sign-up' }) {
         },
     });
 
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
 
         if (type === 'sign-in') {
@@ -65,7 +65,7 @@ export default function AuthForm({ type }: { type: 'sign-in' | 'sign-up' }) {
             }
         }
         setIsLoading(false);
-    };
+    },[router, type]);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -78,7 +78,7 @@ export default function AuthForm({ type }: { type: 'sign-in' | 'sign-up' }) {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, []);
+    }, [form, onSubmit]);
 
     return (
         <div>

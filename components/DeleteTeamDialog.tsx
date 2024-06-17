@@ -1,6 +1,6 @@
 'use client';
 
-import { DeleteCategory } from '@/app/(root)/_actions/categories';
+import { DeleteTeam } from '@/app/(root)/_actions/teams';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -12,7 +12,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { categoriesType } from '@/db/schema/finance';
+import { teamsType } from '@/db/schema/finance';
 import { TransactionType } from '@/lib/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { ReactNode } from 'react';
@@ -20,27 +20,37 @@ import { toast } from 'sonner';
 
 interface Props {
 	trigger: ReactNode;
-	category: categoriesType;
+	team: teamsType;
 }
 
-function DeleteCategoryDialog({ category, trigger }: Props) {
-	const categoryIdentifier = `${category.name}-${category.type}`;
+function DeleteTeamDialog({ team, trigger }: Props) {
 	const queryClient = useQueryClient();
 
 	const deleteMutation = useMutation({
-		mutationFn: DeleteCategory,
-		onSuccess: async () => {
-			toast.success('Categoria deletada com sucesso', {
-				id: categoryIdentifier,
+		mutationFn: DeleteTeam,
+		onSuccess: async ({ error }) => {
+			if (error) {
+				toast.error(error, {
+					id: team.id,
+				});
+				return;
+			}
+
+			toast.success('Time deletado com sucesso', {
+				id: team.id,
 			});
 
-			await queryClient.invalidateQueries({
-				queryKey: ['categories'],
+			queryClient.invalidateQueries({
+				queryKey: ['teams-with-members'],
+			});
+
+			queryClient.invalidateQueries({
+				queryKey: ['overview'],
 			});
 		},
 		onError: () => {
 			toast.error('Algo deu errado', {
-				id: categoryIdentifier,
+				id: team.id,
 			});
 		},
 	});
@@ -52,7 +62,7 @@ function DeleteCategoryDialog({ category, trigger }: Props) {
 				<AlertDialogHeader>
 					<AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
 					<AlertDialogDescription>
-						Essa ação não pode ser revertida. A categoria será deletada para sempre
+						Essa ação não pode ser revertida. O time será deletado para sempre
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
@@ -60,12 +70,11 @@ function DeleteCategoryDialog({ category, trigger }: Props) {
 					<AlertDialogAction
 						variant='destructive'
 						onClick={() => {
-							toast.loading('Deletando categoria...', {
-								id: categoryIdentifier,
+							toast.loading('Deletando time...', {
+								id: team.id,
 							});
 							deleteMutation.mutate({
-								name: category.name,
-								type: category.type as TransactionType,
+								teamId: team.id,
 							});
 						}}
 					>
@@ -77,4 +86,4 @@ function DeleteCategoryDialog({ category, trigger }: Props) {
 	);
 }
 
-export default DeleteCategoryDialog;
+export default DeleteTeamDialog;

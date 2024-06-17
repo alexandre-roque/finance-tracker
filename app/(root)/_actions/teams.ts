@@ -78,11 +78,31 @@ export async function CreateTeamInvitation(form: inviteToTeamSchemaType) {
 		return { error: 'Usuário não encontrado' };
 	}
 
+	const team = await db.query.teams.findFirst({
+		with: {
+			members: true,
+		},
+		where: (teams, { eq }) => eq(teams.id, teamId),
+	});
+
+	if (!team) {
+		return { error: 'Time não encontrado' };
+	}
+
+	if (
+		team.ownerId !== userId ||
+		!team.members.some(
+			(member) => member.userId === userId && (member.role === 'manager' || member.role === 'owner')
+		)
+	) {
+		return { error: 'Você não tem permissão de convidar para o time' };
+	}
+
 	try {
 		const [invite] = await db
 			.insert(pendingTeamAprovals)
 			.values({
-				guestId: invitee?.id,
+				guestId: invitee.id,
 				inviterId: userId,
 				teamId,
 			})
@@ -286,4 +306,37 @@ export async function EditTeam(form: editTeamSchemaType) {
 	}
 
 	return { success: true };
+}
+
+export async function DeleteTeam({ teamId }: { teamId: string }) {
+	const session = await auth();
+	if (!session || !session.user || !session.user.id) {
+		redirect('/sign-in');
+	}
+
+	const userId = session.user.id;
+
+	const team = await db.query.teams.findFirst({
+		with: {
+			members: true,
+		},
+		where: (teams, { eq }) => eq(teams.id, teamId),
+	});
+
+	if (!team) {
+		return { error: 'Time não encontrado' };
+	}
+
+	if (
+		team.ownerId !== userId ||
+		!team.members.some(
+			(member) => member.userId === userId && (member.role === 'manager' || member.role === 'owner')
+		)
+	) {
+		return { error: 'Você não tem permissão para apagar o time' };
+	}
+
+	return {
+		success: await db.delete(teams).where(eq(teams.id, teamId)),
+	};
 }

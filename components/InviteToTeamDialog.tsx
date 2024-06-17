@@ -78,7 +78,7 @@ function InviteToTeamDialog({ teamId }: { teamId: string }) {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button>Convidar para time</Button>
+				<Button>Convidar por email</Button>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>

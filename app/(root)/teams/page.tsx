@@ -1,6 +1,8 @@
 'use client';
 
+import DeleteTeamDialog from '@/components/DeleteTeamDialog';
 import EditTeamForm from '@/components/EditTeamForm';
+import InviteToTeamByLinkDialog from '@/components/InviteToTeamByLinkDialog';
 import InviteToTeamDialog from '@/components/InviteToTeamDialog';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import TeamMembersTable from '@/components/TeamMembersTable';
@@ -11,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { userSettingsType } from '@/db/schema/finance';
 import { useQuery } from '@tanstack/react-query';
-import { Cog } from 'lucide-react';
+import { Cog, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 
 export type ResultQueryTeamsWithMembers = {
@@ -97,26 +99,39 @@ const Teams = () => {
 										</AccordionTrigger>
 										<AccordionContent className='flex flex-col'>
 											<div className='flex justify-between items-center'>
-												<InviteToTeamDialog teamId={team.team.id} />
-												<Button
-													variant='secondary'
-													className='flex items-center gap-2'
-													onClick={() => {
-														setIsEditTeamDialogOpen(true);
-													}}
-												>
-													<Cog /> Editar time
-												</Button>
+												<div className='flex gap-3'>
+													<InviteToTeamDialog teamId={team.team.id} />
+													<InviteToTeamByLinkDialog teamId={team.team.id} />
+												</div>
+												<div className='flex gap-3'>
+													<Button
+														variant='secondary'
+														className='flex items-center gap-2'
+														onClick={() => {
+															setIsEditTeamDialogOpen(true);
+														}}
+													>
+														<Cog /> Editar time
+													</Button>
+													<DeleteTeamDialog
+														trigger={
+															<Button
+																variant='destructive'
+																className='flex items-center gap-2'
+															>
+																<Trash2 /> Apagar time
+															</Button>
+														}
+														team={team.team}
+													/>
+												</div>
 											</div>
 											<ResponsiveDialog
 												title='Editar time'
 												isOpen={isEditTeamDialogOpen}
 												setIsOpen={setIsEditTeamDialogOpen}
 											>
-												<EditTeamForm
-													setIsOpen={setIsEditTeamDialogOpen}
-													team={team}
-												></EditTeamForm>
+												<EditTeamForm setIsOpen={setIsEditTeamDialogOpen} team={team} />
 											</ResponsiveDialog>
 
 											<div className='flex flex-col gap-4'>

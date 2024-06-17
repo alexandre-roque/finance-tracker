@@ -146,20 +146,26 @@ export const teams = sqliteTable('team', {
 
 export type teamsType = typeof teams.$inferSelect;
 
-export const teamMembers = sqliteTable('teamMember', {
-	id: text('id')
-		.primaryKey()
-		.$defaultFn(() => ulid()),
-	userId: text('userId')
-		.notNull()
-		.references(() => users.id, { onDelete: 'cascade' }),
-	teamId: text('teamId')
-		.notNull()
-		.references(() => teams.id, { onDelete: 'cascade' }),
-	role: text('role').notNull().default('member'),
-	status: text('status').notNull().default('active'),
-	percentage: integer('percentage'),
-});
+export const teamMembers = sqliteTable(
+	'teamMember',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => ulid()),
+		userId: text('userId')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		teamId: text('teamId')
+			.notNull()
+			.references(() => teams.id, { onDelete: 'cascade' }),
+		role: text('role').notNull().default('member'),
+		status: text('status').notNull().default('active'),
+		percentage: integer('percentage'),
+	},
+	(table) => ({
+		unq: unique().on(table.userId, table.teamId),
+	})
+);
 
 export type teamMembersType = typeof teamMembers.$inferSelect;
 
@@ -196,6 +202,19 @@ export const dailyRecurrenceCheckers = sqliteTable(
 );
 
 export type dailyRecurrenceCheckersType = typeof dailyRecurrenceCheckers.$inferSelect;
+
+export const inviteTokens = sqliteTable('inviteToken', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => ulid()),
+	teamId: text('teamId')
+		.notNull()
+		.references(() => teams.id, { onDelete: 'cascade' }),
+	token: text('token').unique().notNull(),
+	expiresAt: integer('expiresAt', { mode: 'timestamp_ms' })
+		.default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`)
+		.notNull(),
+});
 
 export const usersRelations = relations(users, ({ many }) => ({
 	transactions: many(transactions),

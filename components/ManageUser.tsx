@@ -51,6 +51,7 @@ const ManageUser = () => {
 				<Label>Nome</Label>
 				<div className='flex items-center justify-center gap-2'>
 					<Input
+						maxLength={40}
 						value={name}
 						onChange={(ev) => {
 							setName(ev.target.value);
@@ -63,6 +64,7 @@ const ManageUser = () => {
 				<Label>Link da imagem</Label>
 				<div className='flex items-center justify-center gap-2'>
 					<Input
+						maxLength={300}
 						value={avatarImage}
 						onChange={(ev) => {
 							setAvatarImage(ev.target.value);

@@ -14,5 +14,8 @@ export async function EditUser({ avatarLink, name }: { avatarLink: string; name:
 
 	const userId = session.user.id;
 
-	await db.update(users).set({ image: avatarLink, name: name }).where(eq(users.id, userId));
+	await db
+		.update(users)
+		.set({ image: avatarLink ?? session.user.image, name: name ? name : session.user.name })
+		.where(eq(users.id, userId));
 }

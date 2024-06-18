@@ -19,6 +19,7 @@ import LogoutDropdownItem from './LogoutDropdownItem';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import NotificationsPopOver from './NotificationsPopOver';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 const Header = async () => {
 	const session = await auth();
@@ -74,8 +75,12 @@ const Header = async () => {
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button variant='secondary' size='icon' className='rounded-full'>
-							<CircleUser className='h-5 w-5' />
-							<span className='sr-only'>Toggle user menu</span>
+							<Avatar>
+								<AvatarImage src={session.user.image ?? undefined} />
+								<AvatarFallback>
+									<CircleUser />
+								</AvatarFallback>
+							</Avatar>
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align='end'>

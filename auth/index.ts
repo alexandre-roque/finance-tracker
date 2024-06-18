@@ -59,7 +59,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 			}
 			return session;
 		},
-		async jwt({ token }) {
+		async jwt({ token, trigger, session }) {
+			if (trigger === 'update') {
+				if (session?.image) {
+					token.picture = session.image;
+				}
+				if (session?.name) {
+					token.name = session.name;
+				}
+			}
+
 			return token;
 		},
 	},

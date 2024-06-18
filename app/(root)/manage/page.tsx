@@ -8,6 +8,7 @@ import { TransactionTitle } from '@/components/CreateTransactionDialog';
 import CurrencyComboBox from '@/components/CurrencyComboBox';
 import DeleteCategoryDialog from '@/components/DeleteCategoryDialog';
 import EditCategoryDialog from '@/components/EditCategoryDialog';
+import ManageUser from '@/components/ManageUser';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,7 +27,6 @@ function Manage() {
 
 	return (
 		<>
-			{/* HEADER */}
 			<div className='border-b bg-card'>
 				<div className='container flex flex-wrap items-center justify-between gap-6 py-8'>
 					<div>
@@ -35,8 +35,9 @@ function Manage() {
 					</div>
 				</div>
 			</div>
-			{/* END HEDER */}
 			<div className='container flex flex-col gap-4 p-4'>
+				<ManageUser />
+
 				<Card>
 					<CardHeader>
 						<CardTitle>Moeda</CardTitle>

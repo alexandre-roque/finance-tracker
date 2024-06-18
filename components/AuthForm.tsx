@@ -95,14 +95,14 @@ export default function AuthForm({ type }: { type: 'sign-in' | 'sign-up' }) {
                     <CustomInput
                         control={form.control}
                         name="password"
-                        label="Password"
+                        label="Senha"
                         placeholder="Digite sua senha"
                         type="password"
                     />
                 </form>
             </Form>
             <Button disabled={isLoading} onClick={form.handleSubmit(onSubmit)} className="w-full mt-6">
-                {isLoading ? <Loader2 className="animate-spin" /> : type === 'sign-in' ? 'Log in' : 'Cadastrar'}
+                {isLoading ? <Loader2 className="animate-spin" /> : type === 'sign-in' ? 'Entrar' : 'Cadastrar'}
             </Button>
 
             <footer className="flex justify-center gap-2 mt-4">
@@ -110,7 +110,7 @@ export default function AuthForm({ type }: { type: 'sign-in' | 'sign-up' }) {
                     {type === 'sign-in' ? 'Deseja realizar cadastro?' : 'Já possui uma conta?'}
                 </p>
                 <Link href={type === 'sign-in' ? '/sign-up' : '/sign-in'} className="form-link">
-                    {type === 'sign-in' ? 'Cadastrar' : 'Log in'}
+                    {type === 'sign-in' ? 'Cadastrar' : 'Entrar'}
                 </Link>
             </footer>
         </div>

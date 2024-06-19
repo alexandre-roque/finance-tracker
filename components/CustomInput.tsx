@@ -3,6 +3,7 @@ import { FormControl, FormField, FormLabel, FormMessage, FormItem, FormDescripti
 import { Input } from './ui/input';
 
 import { Control, FieldPath } from 'react-hook-form';
+import { PasswordInput } from './ui/password-input';
 interface CustomInput {
 	control: Control<any>;
 	name: FieldPath<any>;
@@ -15,6 +16,7 @@ interface CustomInput {
 	min?: number;
 	max?: number;
 	step?: string;
+	isPassword?: boolean;
 }
 
 const CustomInput = ({
@@ -29,6 +31,7 @@ const CustomInput = ({
 	description,
 	type = 'text',
 	disabled = false,
+	isPassword = false,
 }: CustomInput) => {
 	return (
 		<FormField
@@ -39,15 +42,24 @@ const CustomInput = ({
 					<FormLabel className='form-label'>{label}</FormLabel>
 					<div className='flex w-full flex-col'>
 						<FormControl>
-							<Input
-								placeholder={placeholder}
-								type={type}
-								disabled={disabled}
-								step={name === 'amount' ? '0.1' : step}
-								min={min}
-								max={max}
-								{...field}
-							/>
+							{isPassword ? (
+								<PasswordInput
+									placeholder={placeholder}
+									disabled={disabled}
+									autoComplete='current-password'
+									{...field}
+								/>
+							) : (
+								<Input
+									placeholder={placeholder}
+									type={type}
+									disabled={disabled}
+									step={name === 'amount' ? '0.1' : step}
+									min={min}
+									max={max}
+									{...field}
+								/>
+							)}
 						</FormControl>
 						{description && <FormDescription className='mt-1'>{description}</FormDescription>}
 						<FormMessage className='form-message mt-2' />

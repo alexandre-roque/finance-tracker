@@ -11,20 +11,29 @@ import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { EditUser } from '@/app/(root)/_actions/user';
 import { useSession } from 'next-auth/react';
+import { Checkbox } from './ui/checkbox';
 
 const ManageUser = () => {
-	const [avatarImage, setAvatarImage] = useState('');
-	const [name, setName] = useState('');
+	const { update, data } = useSession();
+	const [name, setName] = useState(data?.user?.name ?? '');
+	const [excludeProfileImage, setExcludeProfileImage] = useState(false);
+	const [avatarImage, setAvatarImage] = useState(data?.user?.image ?? '');
 
-	const { update } = useSession();
 	const { mutate, isPending } = useMutation({
 		mutationFn: EditUser,
-		onSuccess: async () => {
+		onSuccess: async ({ error }) => {
+			if (error) {
+				toast.error(`Erro ao editar dados: ${error}`, {
+					id: 'edit-user',
+				});
+				return;
+			}
+
 			toast.success('Dados editados com sucesso', {
 				id: 'edit-user',
 			});
 
-			update({ image: avatarImage, name: name });
+			await update({ image: excludeProfileImage ? null : avatarImage, name: name });
 		},
 		onError: () => {
 			toast.error('Algo deu errado', {
@@ -41,7 +50,7 @@ const ManageUser = () => {
 					<CardDescription>Altere seu nome e foto de perfil</CardDescription>
 				</div>
 				<Avatar>
-					<AvatarImage src={avatarImage} />
+					<AvatarImage src={excludeProfileImage ? '' : avatarImage} />
 					<AvatarFallback>
 						<CircleUser />
 					</AvatarFallback>
@@ -74,6 +83,21 @@ const ManageUser = () => {
 						className='w-full'
 					/>
 				</div>
+				<div className='flex items-center space-x-2 self-end'>
+					<Checkbox
+						checked={excludeProfileImage}
+						onCheckedChange={(ev) => {
+							setExcludeProfileImage(ev ? true : false);
+						}}
+						id='exclude-image'
+					/>
+					<label
+						htmlFor='exclude-image'
+						className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+					>
+						Excluir foto de perfil
+					</label>
+				</div>
 				<Button
 					className='w-[150px] self-end'
 					onClick={() => {
@@ -81,7 +105,7 @@ const ManageUser = () => {
 							id: 'edit-user',
 						});
 
-						mutate({ avatarLink: avatarImage, name: name });
+						mutate({ avatarLink: avatarImage, name: name, excludeProfileImage: excludeProfileImage });
 					}}
 				>
 					{isPending ? <Loader2 className='animate-spin' /> : 'Salvar'}

@@ -11,16 +11,29 @@ import CategoriesStats from './CategoriesStats';
 import MultipleSelector, { Option } from './ui/multiple-selector';
 import { useQuery } from '@tanstack/react-query';
 import SkeletonWrapper from './SkeletonWrapper';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import AccountsStats from './AccountsStats';
 import TeamsStats from './TeamStats';
 
 function Overview({ userSettings }: { userSettings: userSettingsType }) {
+	const { replace } = useRouter();
 	const pathname = usePathname();
-	const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
-		from: startOfMonth(new Date()),
-		to: endOfDay(new Date()),
-	});
+	const searchParams = useSearchParams();
+	const dateRange = {
+		from: new Date(searchParams.get('from') || startOfMonth(new Date()).toISOString()),
+		to: new Date(searchParams.get('to') || endOfDay(new Date()).toISOString()),
+	};
+
+	const setDateRange = (values: { from: Date; to: Date }) => {
+		if (differenceInDays(values.to, values.from) > MAX_DATE_RANGE_DAYS) {
+			toast.error(`Muitos dias selecionados, o máximo é ${MAX_DATE_RANGE_DAYS}!`);
+			return;
+		}
+		const params = new URLSearchParams(searchParams);
+		params.set('from', values.from.toISOString());
+		params.set('to', values.to.toISOString());
+		replace(`${pathname}?${params.toString()}`);
+	};
 
 	const [selectedTeams, setSelectedTeams] = useState<Option[]>([{ label: 'Sem time', value: 'me' }]);
 	const [defaultOptions, setDefaultOptions] = useState<Option[]>([{ label: 'Sem time', value: 'me' }]);

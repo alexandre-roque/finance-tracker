@@ -20,6 +20,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import NotificationsPopOver from './NotificationsPopOver';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import SideBarLinkComponent from './SideBarLinkComponent';
 
 const Header = async () => {
 	const session = await auth();
@@ -46,14 +47,12 @@ const Header = async () => {
 						</div>
 
 						{sideBarLinks.map((sideBarLink, index) => (
-							<Link
+							<SideBarLinkComponent
 								key={index}
-								href={sideBarLink.route}
-								className='mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-muted'
-							>
-								{sideBarLink.icon}
-								<span>{sideBarLink.label}</span>
-							</Link>
+								sideBarLink={sideBarLink}
+								index={index}
+								where='header'
+							/>
 						))}
 					</nav>
 				</SheetContent>

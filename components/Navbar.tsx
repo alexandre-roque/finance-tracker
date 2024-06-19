@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import Logo from './Logo';
 import { sideBarLinks } from '@/constants';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import SideBarLinkComponent from './SideBarLinkComponent';
 
 const Navbar = () => {
 	return (
@@ -15,18 +15,12 @@ const Navbar = () => {
 						{sideBarLinks.map((sideBarLink, index) => (
 							<Tooltip key={index}>
 								<TooltipTrigger>
-									<Link
-										href={sideBarLink.route}
-										className='flex items-center gap-3 rounded-lg pl-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted'
-									>
-										{sideBarLink.icon}
-										<span className='hidden lg:block'>{sideBarLink.label}</span>
-										<div className='block lg:hidden'>
-											<TooltipContent sideOffset={3} side='right'>
-												<span>{sideBarLink.label}</span>
-											</TooltipContent>
-										</div>
-									</Link>
+									<SideBarLinkComponent
+										key={index}
+										sideBarLink={sideBarLink}
+										index={index}
+										where='navbar'
+									/>
 								</TooltipTrigger>
 							</Tooltip>
 						))}

@@ -10,7 +10,7 @@ import {
 	CommandList,
 } from '@/components/ui/command';
 import { sideBarLinks } from '@/constants';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import CreateTransactionDialog from './CreateTransactionDialog';
 import { Frown, Smile, SquareStack } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -49,6 +49,8 @@ const HeaderCommandBox = ({ trigger }: { trigger: ReactNode }) => {
 		document.addEventListener('keydown', down);
 		return () => document.removeEventListener('keydown', down);
 	}, []);
+	
+	const searchParams = useSearchParams();
 
 	return (
 		<CommandDialog trigger={trigger} open={open} onOpenChange={setOpen}>
@@ -115,7 +117,7 @@ const HeaderCommandBox = ({ trigger }: { trigger: ReactNode }) => {
 						.map((sideBarLink, index) => (
 							<CommandItem
 								className='flex items-center gap-2'
-								value={sideBarLink.route}
+								value={`${sideBarLink.route}?${searchParams.toString()}`}
 								onSelect={(value) => {
 									router.push(value);
 									setOpen(false);

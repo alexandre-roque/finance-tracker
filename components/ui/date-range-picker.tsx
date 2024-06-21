@@ -66,14 +66,14 @@ interface Preset {
 
 // Define presets
 const PRESETS: Preset[] = [
-	{ name: 'today', label: 'Hoje' },
-	{ name: 'yesterday', label: 'Ontem' },
-	{ name: 'last7', label: 'Últimos 7 dias' },
-	{ name: 'last30', label: 'Últimos 30 dias' },
-	{ name: 'thisWeek', label: 'Essa semana' },
-	{ name: 'lastWeek', label: 'Última semana' },
-	{ name: 'thisMonth', label: 'Esse mês' },
+	{ name: 'lastAndBeforeMonth', label: 'Penúltimo e último' },
+	{ name: 'thisAndlastMonth', label: 'Últimos 2 meses' },
 	{ name: 'lastMonth', label: 'Último mês' },
+	{ name: 'last30', label: 'Últimos 30 dias' },
+	{ name: 'last7', label: 'Últimos 7 dias' },
+	{ name: 'lastWeek', label: 'Última semana' },
+	{ name: 'thisWeek', label: 'Essa semana' },
+	{ name: 'thisMonth', label: 'Esse mês' },
 	{ name: 'nextMonth', label: 'Próximo mês' },
 	{ name: 'next2Months', label: 'Próximos 2 meses' },
 	{ name: 'next30', label: 'Próximos 30 dias' },
@@ -208,6 +208,19 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 			case 'next60':
 				from.setHours(0, 0, 0, 0);
 				to.setMonth(to.getMonth() + 2);
+				to.setHours(23, 59, 59, 999);
+				break;
+			case 'thisAndlastMonth':
+				from.setMonth(from.getMonth() - 1);
+				from.setDate(1);
+				from.setHours(0, 0, 0, 0);
+				to.setHours(23, 59, 59, 999);
+				break;
+			case 'lastAndBeforeMonth':
+				from.setMonth(from.getMonth() - 2);
+				from.setDate(1);
+				from.setHours(0, 0, 0, 0);
+				to.setDate(0);
 				to.setHours(23, 59, 59, 999);
 				break;
 		}

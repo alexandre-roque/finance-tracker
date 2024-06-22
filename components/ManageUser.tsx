@@ -116,7 +116,7 @@ const ManageUser = () => {
 				</div>
 
 				<div className='flex gap-2 w-full'>
-					<div className='w-1/2'>
+					<div className='w-[63%]'>
 						<Label>Link da imagem</Label>
 						<div className='flex items-center justify-center gap-2'>
 							<Input
@@ -132,7 +132,7 @@ const ManageUser = () => {
 							/>
 						</div>
 					</div>
-					<div className='w-1/2'>
+					<div>
 						<Label>Arquivo</Label>
 						<div className='flex items-center justify-center gap-2'>
 							<Input
@@ -154,7 +154,7 @@ const ManageUser = () => {
 									}
 								}}
 								size={'icon'}
-								variant={'destructive'}
+								variant={'ghost'}
 							>
 								<Trash2 />
 							</Button>

@@ -99,11 +99,11 @@ const Teams = () => {
 										</AccordionTrigger>
 										<AccordionContent className='flex flex-col'>
 											<div className='flex justify-between items-center'>
-												<div className='flex gap-3'>
+												<div className='flex flex-col md:flex-row gap-3'>
 													<InviteToTeamDialog teamId={team.team.id} />
 													<InviteToTeamByLinkDialog teamId={team.team.id} />
 												</div>
-												<div className='flex gap-3'>
+												<div className='flex flex-col md:flex-row gap-3'>
 													<Button
 														variant='secondary'
 														className='flex items-center gap-2'

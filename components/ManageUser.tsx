@@ -115,8 +115,8 @@ const ManageUser = () => {
 					/>
 				</div>
 
-				<div className='flex gap-2 w-full'>
-					<div className='w-[63%]'>
+				<div className='flex  lg:flex-row flex-col gap-2 w-full'>
+					<div className=' lg:w-[63%] w-full'>
 						<Label>Link da imagem</Label>
 						<div className='flex items-center justify-center gap-2'>
 							<Input

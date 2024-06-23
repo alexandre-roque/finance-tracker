@@ -53,80 +53,76 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 		return { error: 'Categoria não encontrada' };
 	}
 
-	await db.transaction(async (trx) => {
-		if (isRecurring) {
-			const [recurringTransaction] = await trx
-				.insert(recurringTransactions)
-				.values({
+	const transactionsToInsert = [];
+
+	if (isRecurring) {
+		const [recurringTransaction] = await db
+			.insert(recurringTransactions)
+			.values({
+				userId,
+				amount,
+				type,
+				teamId,
+				bankingAccountId,
+				dayOfTheMonth: dayOfTheMonth ?? null,
+				businessDay: businessDay ?? null,
+				description: description || '',
+				category: categoryRow.name,
+				categoryIcon: categoryRow.icon,
+				categoryId: category,
+			})
+			.returning();
+
+		if (recurringTransaction) {
+			const d = new Date();
+			const dayInMonth = d.getUTCDate();
+			const businessDayCount = getBusinessDayOfMonth(d);
+
+			if (dayInMonth === dayOfTheMonth || businessDay === businessDayCount) {
+				transactionsToInsert.push({
 					userId,
 					amount,
 					type,
 					teamId,
 					bankingAccountId,
-					dayOfTheMonth: dayOfTheMonth ?? null,
-					businessDay: businessDay ?? null,
+					date: DateToUTCDate(new Date()),
 					description: description || '',
 					category: categoryRow.name,
 					categoryIcon: categoryRow.icon,
 					categoryId: category,
-				})
-				.returning();
-
-			if (recurringTransaction) {
-				const d = new Date();
-				const dayInMonth = d.getUTCDate();
-				const businessDayCount = getBusinessDayOfMonth(d);
-
-				if (dayInMonth === dayOfTheMonth || businessDay === businessDayCount) {
-					await trx.insert(transactions).values({
-						userId,
-						amount,
-						type,
-						teamId,
-						bankingAccountId,
-						date: DateToUTCDate(new Date()),
-						description: description || '',
-						category: categoryRow.name,
-						categoryIcon: categoryRow.icon,
-						categoryId: category,
-					});
-
-					await CreateOrUpdateHistories({
-						trx,
-						date: DateToUTCDate(new Date()),
-						type,
-						amount,
-						userId,
-						teamId,
-					});
-				}
+				});
 			}
-
-			return;
 		}
 
-		let howManyInstallments = !installments ? 1 : installments;
-		const installmentId = installments > 1 ? ulid() : null;
+		return;
+	}
 
-		for (let i = 0; i < (howManyInstallments ?? 1); i++) {
-			await trx.insert(transactions).values({
-				userId,
-				amount: amount / howManyInstallments,
-				date: moment(date).add(i, 'months').toDate(),
-				type,
-				teamId,
-				installmentId,
-				bankingAccountId,
-				description:
-					(description || '') + (howManyInstallments > 1 ? ` (${i + 1}/${howManyInstallments})` : ''),
-				category: categoryRow.name,
-				categoryIcon: categoryRow.icon,
-				categoryId: category,
-			});
+	let howManyInstallments = !installments ? 1 : installments;
+	const installmentId = installments > 1 ? ulid() : null;
 
+	for (let i = 0; i < (howManyInstallments ?? 1); i++) {
+		transactionsToInsert.push({
+			userId,
+			amount: amount / howManyInstallments,
+			date: moment(date).add(i, 'months').toDate(),
+			type,
+			teamId,
+			installmentId,
+			bankingAccountId,
+			description: (description || '') + (howManyInstallments > 1 ? ` (${i + 1}/${howManyInstallments})` : ''),
+			category: categoryRow.name,
+			categoryIcon: categoryRow.icon,
+			categoryId: category,
+		});
+	}
+
+	for (const transaction of transactionsToInsert) {
+		const { date, amount, type, teamId } = transaction;
+		await db.transaction(async (trx) => {
+			await trx.insert(transactions).values(transaction);
 			await CreateOrUpdateHistories({ trx, date, type, amount, userId, teamId });
-		}
-	});
+		});
+	}
 }
 
 export async function EditRecurrentTransaction(form: editRecurrentTransactionSchemaType) {

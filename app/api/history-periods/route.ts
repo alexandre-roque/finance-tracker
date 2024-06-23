@@ -1,3 +1,5 @@
+export const revalidate = 0;
+
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { monthHistories } from '@/db/schema/finance';

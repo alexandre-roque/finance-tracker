@@ -118,10 +118,14 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 
 	for (const transaction of transactionsToInsert) {
 		const { date, amount, type, teamId } = transaction;
-		await db.transaction(async (trx) => {
-			await trx.insert(transactions).values(transaction);
-			await CreateOrUpdateHistories({ trx, date, type, amount, userId, teamId });
-		});
+		try {
+			await db.transaction(async (trx) => {
+				await trx.insert(transactions).values(transaction);
+				await CreateOrUpdateHistories({ trx, date, type, amount, userId, teamId });
+			});
+		} catch (e) {
+			console.error(e);
+		}
 	}
 }
 

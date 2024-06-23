@@ -24,11 +24,10 @@ async function getHistoryPeriods(userId: string) {
 		.where(eq(monthHistories.userId, userId))
 		.orderBy(asc(monthHistories.year));
 
-	const years = result.map((el) => el.year);
-	if (years.length === 0) {
+	if (result.length === 0) {
 		// Return the current year
 		return [new Date().getFullYear()];
 	}
 
-	return years;
+	return result.map((el) => el.year);
 }

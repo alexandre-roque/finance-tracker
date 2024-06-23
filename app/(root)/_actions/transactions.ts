@@ -1,5 +1,9 @@
 'use server';
 
+export const config = {
+	maxDuration: 30,
+};
+
 import moment from 'moment';
 import { auth } from '@/auth';
 import { db } from '@/db';

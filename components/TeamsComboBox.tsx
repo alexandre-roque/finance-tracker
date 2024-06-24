@@ -172,6 +172,20 @@ function OptionList({
 		<Command>
 			<CommandInput placeholder='Pesquisar times...' />
 			<CreateTeamDialog />
+			{(!teams || !teams.length) && (
+				<>
+					<p className='text-xs text-muted-foreground mt-1 text-center md:max-w-[243px] p-2'>
+						Dica: Crie um novo time, por exemplo: Casa.
+					</p>
+					<p className='text-xs text-muted-foreground mt-1 text-center md:max-w-[243px] p-2'>
+						Isso irá te ajudar a agrupar suas despesas e receitas. Além de conseguir dividir suas contas e
+						compatilhar o que cadastrou com outras pessoas.
+					</p>
+					<p className='text-xs text-muted-foreground mt-1 text-center md:max-w-[243px] p-2'>
+						Para convidar alguém para o seu time, basta clicar na aba Times no canto esquerdo
+					</p>
+				</>
+			)}
 			<CommandList>
 				<CommandEmpty>Nenhum resultado encontrado</CommandEmpty>
 				<CommandGroup>

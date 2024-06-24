@@ -20,7 +20,7 @@ import { createCategorySchema, createCategorySchemaType } from '@/schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleOff, Loader2, PlusSquare } from 'lucide-react';
 import React, { ReactNode, useCallback, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { ControllerRenderProps, useForm } from 'react-hook-form';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -31,6 +31,7 @@ import { CreateCategory } from '@/app/(root)/_actions/categories';
 import { TransactionTitle } from './CreateTransactionDialog';
 import CustomInput from './CustomInput';
 import { Switch } from './ui/switch';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 interface Props {
 	type: TransactionType;
@@ -48,8 +49,9 @@ function CreateCategoryDialog({ type, successCallback, trigger }: Props) {
 		},
 	});
 
+	const iconValue = form.watch('icon');
+
 	const queryClient = useQueryClient();
-	const theme = useTheme();
 
 	const { mutate, isPending } = useMutation({
 		mutationFn: CreateCategory,
@@ -124,46 +126,7 @@ function CreateCategoryDialog({ type, successCallback, trigger }: Props) {
 						<FormField
 							control={form.control}
 							name='icon'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Ícone</FormLabel>
-									<FormControl>
-										<Popover>
-											<PopoverTrigger asChild>
-												<Button variant={'outline'} className='h-[100px] w-full'>
-													{form.watch('icon') ? (
-														<div className='flex flex-col items-center gap-2'>
-															<span className='text-5xl' role='img'>
-																{field.value}
-															</span>
-															<p className='text-xs text-muted-foreground'>
-																Clique para alterar
-															</p>
-														</div>
-													) : (
-														<div className='flex flex-col items-center gap-2'>
-															<CircleOff className='h-[48px] w-[48px]' />
-															<p className='text-xs text-muted-foreground'>
-																Clique para selecionar
-															</p>
-														</div>
-													)}
-												</Button>
-											</PopoverTrigger>
-											<PopoverContent className='w-full'>
-												<Picker
-													locale='pt'
-													data={data}
-													theme={theme.resolvedTheme}
-													onEmojiSelect={(emoji: { native: string }) => {
-														field.onChange(emoji.native);
-													}}
-												/>
-											</PopoverContent>
-										</Popover>
-									</FormControl>
-								</FormItem>
-							)}
+							render={({ field }) => <EmojiPickerFormItem field={field} iconValue={iconValue} />}
 						/>
 
 						<FormField
@@ -204,6 +167,97 @@ function CreateCategoryDialog({ type, successCallback, trigger }: Props) {
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+function EmojiPickerFormItem({
+	iconValue,
+	field,
+}: {
+	iconValue: string;
+	field: ControllerRenderProps<
+		{
+			name: string;
+			icon: string;
+			type: 'income' | 'expense';
+			sharable: boolean;
+		},
+		'icon'
+	>;
+}) {
+	const hasSpaceToEmoji = useMediaQuery('(min-height: 900px)');
+	const theme = useTheme();
+	const [open, setOpen] = useState(false);
+
+	return (
+		<FormItem>
+			<FormLabel>Ícone</FormLabel>
+			<FormControl>
+				{hasSpaceToEmoji ? (
+					<Popover onOpenChange={setOpen} open={open}>
+						<PopoverTrigger asChild>
+							<Button variant={'outline'} className='h-[100px] w-full'>
+								{iconValue ? (
+									<div className='flex flex-col items-center gap-2'>
+										<span className='text-5xl' role='img'>
+											{field.value}
+										</span>
+										<p className='text-xs text-muted-foreground'>Clique para alterar</p>
+									</div>
+								) : (
+									<div className='flex flex-col items-center gap-2'>
+										<CircleOff className='h-[48px] w-[48px]' />
+										<p className='text-xs text-muted-foreground'>Clique para selecionar</p>
+									</div>
+								)}
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className='w-full'>
+							<Picker
+								locale='pt'
+								data={data}
+								theme={theme.resolvedTheme}
+								onEmojiSelect={(emoji: { native: string }) => {
+									field.onChange(emoji.native);
+									setOpen(false);
+								}}
+							/>
+						</PopoverContent>
+					</Popover>
+				) : (
+					<Dialog onOpenChange={setOpen} open={open}>
+						<DialogTrigger asChild>
+							<Button variant={'outline'} className='h-[100px] w-full'>
+								{iconValue ? (
+									<div className='flex flex-col items-center gap-2'>
+										<span className='text-5xl' role='img'>
+											{field.value}
+										</span>
+										<p className='text-xs text-muted-foreground'>Clique para alterar</p>
+									</div>
+								) : (
+									<div className='flex flex-col items-center gap-2'>
+										<CircleOff className='h-[48px] w-[48px]' />
+										<p className='text-xs text-muted-foreground'>Clique para selecionar</p>
+									</div>
+								)}
+							</Button>
+						</DialogTrigger>
+						<DialogContent hideClose className='w-fit p-2'>
+							<Picker
+								locale='pt'
+								data={data}
+								theme={theme.resolvedTheme}
+								onEmojiSelect={(emoji: { native: string }) => {
+									field.onChange(emoji.native);
+									setOpen(false);
+								}}
+							/>
+						</DialogContent>
+					</Dialog>
+				)}
+			</FormControl>
+		</FormItem>
 	);
 }
 

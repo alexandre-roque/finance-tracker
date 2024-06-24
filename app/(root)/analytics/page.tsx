@@ -13,15 +13,10 @@ const Analytics = async () => {
 		redirect('/sign-in');
 	}
 
-	const [currentUserSettings] = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id));
-	if (!currentUserSettings) {
-		redirect('/wizard');
-	}
-
 	return (
 		<div>
-			<Overview userSettings={currentUserSettings} />
-			<History userSettings={currentUserSettings} />
+			<Overview />
+			<History />
 		</div>
 	);
 };

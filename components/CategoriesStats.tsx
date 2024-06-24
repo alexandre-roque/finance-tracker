@@ -14,13 +14,13 @@ import { TransactionTitle } from './CreateTransactionDialog';
 import { Option } from './ui/multiple-selector';
 
 interface Props {
-	userSettings: userSettingsType;
+	formatter: Intl.NumberFormat;
 	from: Date;
 	to: Date;
 	selectedTeams?: Option[];
 }
 
-function CategoriesStats({ userSettings, from, to, selectedTeams }: Props) {
+function CategoriesStats({ formatter, from, to, selectedTeams }: Props) {
 	const statsQuery = useQuery<GetCategoriesStatsResponseType>({
 		queryKey: ['overview', 'stats', 'categories', from, to],
 		queryFn: () =>
@@ -28,10 +28,6 @@ function CategoriesStats({ userSettings, from, to, selectedTeams }: Props) {
 				res.json()
 			),
 	});
-
-	const formatter = useMemo(() => {
-		return GetFormatterForCurrency(userSettings.currency || 'BRL');
-	}, [userSettings.currency]);
 
 	return (
 		<div className='flex w-full flex-wrap gap-2 md:flex-nowrap'>

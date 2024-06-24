@@ -12,16 +12,22 @@ import CountUp from 'react-countup';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import HistoryPeriodSelector from './HistoryPeriodSelector';
 
-function History({ userSettings }: { userSettings: userSettingsType }) {
+function History({}) {
 	const [timeframe, setTimeframe] = useState<Timeframe>('year');
 	const [period, setPeriod] = useState<Period>({
 		month: new Date().getMonth(),
 		year: new Date().getFullYear(),
 	});
 
+	const userSettingsQuery = useQuery<userSettingsType>({
+		queryKey: ['user-settings'],
+		queryFn: () => fetch('/api/user-settings').then((res) => res.json()),
+	});
+	const userSettings = userSettingsQuery.data;
+
 	const formatter = useMemo(() => {
-		return GetFormatterForCurrency(userSettings.currency || 'BRL');
-	}, [userSettings.currency]);
+		return GetFormatterForCurrency(userSettings?.currency || 'BRL');
+	}, [userSettings?.currency]);
 
 	const historyDataQuery = useQuery({
 		queryKey: ['overview', 'history', timeframe, period],

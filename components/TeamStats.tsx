@@ -15,22 +15,18 @@ import { GetTeamsBalanceResponseType } from '@/app/api/stats/teams/route';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface Props {
-	userSettings: userSettingsType;
+	formatter: Intl.NumberFormat;
 	from: Date;
 	to: Date;
 	selectedTeams?: Option[];
 }
 
-function TeamsStats({ userSettings, from, to, selectedTeams }: Props) {
+function TeamsStats({ formatter, from, to, selectedTeams }: Props) {
 	const statsQuery = useQuery<GetTeamsBalanceResponseType>({
 		queryKey: ['overview', 'stats', 'teams', from, to],
 		queryFn: () =>
 			fetch(`/api/stats/teams?from=${DateToUTCDate(from)}&to=${DateToUTCDate(to)}`).then((res) => res.json()),
 	});
-
-	const formatter = useMemo(() => {
-		return GetFormatterForCurrency(userSettings.currency || 'BRL');
-	}, [userSettings.currency]);
 
 	return (
 		<div className='flex w-full flex-wrap gap-2 md:flex-nowrap'>

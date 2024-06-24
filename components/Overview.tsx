@@ -2,7 +2,7 @@
 
 import { userSettingsType } from '@/db/schema/finance';
 import { differenceInDays, endOfDay, startOfMonth } from 'date-fns';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { DateRangePicker } from './ui/date-range-picker';
 import { MAX_DATE_RANGE_DAYS } from '@/constants';
@@ -14,8 +14,24 @@ import SkeletonWrapper from './SkeletonWrapper';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import AccountsStats from './AccountsStats';
 import TeamsStats from './TeamStats';
+import { GetFormatterForCurrency } from '@/lib/currencies';
+import { teamsQueryType } from './TeamsComboBox';
 
-function Overview({ userSettings }: { userSettings: userSettingsType }) {
+function Overview() {
+	const userSettingsQuery = useQuery<userSettingsType>({
+		queryKey: ['user-settings'],
+		queryFn: () => fetch('/api/user-settings').then((res) => res.json()),
+	});
+	const userSettings = userSettingsQuery.data;
+	const teamsQuery = useQuery({
+		queryKey: ['teams-members'],
+		queryFn: () => fetch('/api/teams').then((res) => res.json()),
+	});
+
+	const formatter = useMemo(() => {
+		return GetFormatterForCurrency(userSettings?.currency || 'BRL');
+	}, [userSettings?.currency]);
+
 	const { replace } = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
@@ -37,11 +53,6 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 
 	const [selectedTeams, setSelectedTeams] = useState<Option[]>([{ label: 'Sem time', value: 'me' }]);
 	const [defaultOptions, setDefaultOptions] = useState<Option[]>([{ label: 'Sem time', value: 'me' }]);
-
-	const teamsQuery = useQuery({
-		queryKey: ['teams-members'],
-		queryFn: () => fetch('/api/teams').then((res) => res.json()),
-	});
 
 	useEffect(() => {
 		if (teamsQuery.data) {
@@ -113,7 +124,7 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 				<SkeletonWrapper isLoading={teamsQuery.isFetching}>
 					<StatsCards
 						selectedTeams={selectedTeams}
-						userSettings={userSettings}
+						formatter={formatter}
 						from={dateRange.from}
 						to={dateRange.to}
 					/>
@@ -121,7 +132,7 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 				<SkeletonWrapper isLoading={teamsQuery.isFetching}>
 					<CategoriesStats
 						selectedTeams={selectedTeams}
-						userSettings={userSettings}
+						formatter={formatter}
 						from={dateRange.from}
 						to={dateRange.to}
 					/>
@@ -131,7 +142,7 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 					<SkeletonWrapper isLoading={teamsQuery.isFetching}>
 						<TeamsStats
 							selectedTeams={selectedTeams}
-							userSettings={userSettings}
+							formatter={formatter}
 							from={dateRange.from}
 							to={dateRange.to}
 						/>
@@ -142,7 +153,7 @@ function Overview({ userSettings }: { userSettings: userSettingsType }) {
 					<SkeletonWrapper isLoading={teamsQuery.isFetching}>
 						<AccountsStats
 							selectedTeams={selectedTeams}
-							userSettings={userSettings}
+							formatter={formatter}
 							from={dateRange.from}
 							to={dateRange.to}
 						/>

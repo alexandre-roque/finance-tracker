@@ -19,7 +19,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CalendarIcon, Loader2 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { TransactionType, DateToUTCDate } from '@/lib/utils';
 import { createTransactionSchemaType, createTransactionSchema } from '@/schemas';
@@ -39,13 +39,19 @@ import Link from 'next/link';
 interface Props {
 	trigger: ReactNode;
 	type: TransactionType;
-	userSettings: userSettingsType;
 	isSelected?: boolean;
 }
 
-function CreateTransactionDialog({ trigger, type = 'income', isSelected, userSettings }: Props) {
+function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props) {
+	const userSettingsQuery = useQuery<userSettingsType>({
+		queryKey: ['user-settings'],
+		queryFn: () => fetch('/api/user-settings').then((res) => res.json()),
+	});
+
+	const userSettings = userSettingsQuery.data;
+
 	const currencyFormatter: ReturnType<typeof GetFormatterForCurrency> = GetFormatterForCurrency(
-		userSettings.currency || 'BRL'
+		userSettings?.currency || 'BRL'
 	);
 
 	const form = useForm<createTransactionSchemaType>({

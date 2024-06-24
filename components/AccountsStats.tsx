@@ -15,22 +15,18 @@ import { Option } from './ui/multiple-selector';
 import { GetAccountsBalanceResponseType } from '@/app/api/stats/accounts/route';
 
 interface Props {
-	userSettings: userSettingsType;
+	formatter: Intl.NumberFormat;
 	from: Date;
 	to: Date;
 	selectedTeams?: Option[];
 }
 
-function AccountsStats({ userSettings, from, to, selectedTeams }: Props) {
+function AccountsStats({ formatter, from, to, selectedTeams }: Props) {
 	const statsQuery = useQuery<GetAccountsBalanceResponseType>({
 		queryKey: ['overview', 'stats', 'accounts', from, to],
 		queryFn: () =>
 			fetch(`/api/stats/accounts?from=${DateToUTCDate(from)}&to=${DateToUTCDate(to)}`).then((res) => res.json()),
 	});
-
-	const formatter = useMemo(() => {
-		return GetFormatterForCurrency(userSettings.currency || 'BRL');
-	}, [userSettings.currency]);
 
 	return (
 		<div className='flex w-full flex-wrap gap-2 md:flex-nowrap'>

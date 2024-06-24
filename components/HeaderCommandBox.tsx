@@ -49,7 +49,7 @@ const HeaderCommandBox = ({ trigger }: { trigger: ReactNode }) => {
 		document.addEventListener('keydown', down);
 		return () => document.removeEventListener('keydown', down);
 	}, []);
-	
+
 	const searchParams = useSearchParams();
 
 	return (
@@ -68,7 +68,6 @@ const HeaderCommandBox = ({ trigger }: { trigger: ReactNode }) => {
 						className='flex items-center gap-2'
 					>
 						<CreateTransactionDialog
-							userSettings={userSettingsQuery.data}
 							isSelected={openedActions['expense']}
 							type='expense'
 							trigger={
@@ -89,7 +88,6 @@ const HeaderCommandBox = ({ trigger }: { trigger: ReactNode }) => {
 						className='flex items-center gap-2'
 					>
 						<CreateTransactionDialog
-							userSettings={userSettingsQuery.data}
 							isSelected={openedActions['income']}
 							type='income'
 							trigger={

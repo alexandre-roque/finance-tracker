@@ -3,9 +3,6 @@ import CreateTransactionDialog from '@/components/CreateTransactionDialog';
 import Overview from '@/components/Overview';
 import History from '@/components/History';
 import { Button } from '@/components/ui/button';
-import { db } from '@/db';
-import { userSettings } from '@/db/schema/finance';
-import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import React from 'react';
 
@@ -13,11 +10,6 @@ const Home = async () => {
 	const session = await auth();
 	if (!session || !session.user || !session.user.id) {
 		redirect('/sign-in');
-	}
-
-	const [currentUserSettings] = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id));
-	if (!currentUserSettings) {
-		redirect('/wizard');
 	}
 
 	return (
@@ -28,7 +20,6 @@ const Home = async () => {
 
 					<div className='flex items-center gap-3'>
 						<CreateTransactionDialog
-							userSettings={currentUserSettings}
 							type='income'
 							trigger={
 								<Button
@@ -41,7 +32,6 @@ const Home = async () => {
 						/>
 
 						<CreateTransactionDialog
-							userSettings={currentUserSettings}
 							type='expense'
 							trigger={
 								<Button
@@ -55,8 +45,8 @@ const Home = async () => {
 					</div>
 				</div>
 			</div>
-			<Overview userSettings={currentUserSettings} />
-			<History userSettings={currentUserSettings} />
+			<Overview />
+			<History />
 		</div>
 	);
 };

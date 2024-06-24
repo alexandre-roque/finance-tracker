@@ -15,20 +15,16 @@ import { Option } from './ui/multiple-selector';
 interface Props {
 	from: Date;
 	to: Date;
-	userSettings: userSettingsType;
+	formatter: Intl.NumberFormat;
 	selectedTeams?: Option[];
 }
 
-function StatsCards({ from, to, userSettings, selectedTeams }: Props) {
+function StatsCards({ from, to, formatter, selectedTeams }: Props) {
 	const statsQuery = useQuery<GetBalanceStatsResponseType>({
 		queryKey: ['overview', 'stats', from, to],
 		queryFn: () =>
 			fetch(`/api/stats/balance?from=${DateToUTCDate(from)}&to=${DateToUTCDate(to)}`).then((res) => res.json()),
 	});
-
-	const formatter = useMemo(() => {
-		return GetFormatterForCurrency(userSettings.currency || 'BRL');
-	}, [userSettings.currency]);
 
 	const { income, expense } = useMemo(
 		() =>

@@ -13,7 +13,7 @@ import {
 	editTransactionSchema,
 	editTransactionSchemaType,
 } from '@/schemas';
-import { and, eq, or } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { ulid } from 'ulid';
 

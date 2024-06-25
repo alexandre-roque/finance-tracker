@@ -77,6 +77,7 @@ function DeleteTransactionDialog({ open, setOpen, transactionId, installmentId, 
 						</AlertDialogAction>
 					)}
 					<AlertDialogAction
+						variant={'destructive'}
 						onClick={() => {
 							toast.loading('Deletando transação...', {
 								id: transactionId,

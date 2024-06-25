@@ -96,28 +96,27 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 				});
 			}
 		}
+	} else {
+		let howManyInstallments = !installments ? 1 : installments;
+		const installmentId = installments > 1 ? ulid() : null;
 
-		return;
-	}
-
-	let howManyInstallments = !installments ? 1 : installments;
-	const installmentId = installments > 1 ? ulid() : null;
-
-	for (let i = 0; i < (howManyInstallments ?? 1); i++) {
-		transactionsToInsert.push({
-			userId,
-			amount: amount / howManyInstallments,
-			date: moment(date).add(i, 'months').toDate(),
-			type,
-			teamId,
-			installmentId,
-			bankingAccountId,
-			description: (description || '') + (howManyInstallments > 1 ? ` (${i + 1}/${howManyInstallments})` : ''),
-			category: categoryRow.name,
-			categoryIcon: categoryRow.icon,
-			categoryId: category,
-			paymentType: paymentType,
-		});
+		for (let i = 0; i < (howManyInstallments ?? 1); i++) {
+			transactionsToInsert.push({
+				userId,
+				amount: amount / howManyInstallments,
+				date: moment(date).add(i, 'months').toDate(),
+				type,
+				teamId,
+				installmentId,
+				bankingAccountId,
+				description:
+					(description || '') + (howManyInstallments > 1 ? ` (${i + 1}/${howManyInstallments})` : ''),
+				category: categoryRow.name,
+				categoryIcon: categoryRow.icon,
+				categoryId: category,
+				paymentType: paymentType,
+			});
+		}
 	}
 
 	for (const transaction of transactionsToInsert) {

@@ -26,10 +26,15 @@ export const updateUserCurrencySchema = z.object({
 export const createBankingAccountSchema = z.object({
 	name: z.string(),
 	description: z.string().optional(),
+	closeDay: z.coerce.number().gte(0).max(31),
+	payDay: z.coerce.number().gte(0).max(31),
 	bankingAccountId: z.string().optional(),
 });
 
 export type createBankingAccountSchemaType = z.infer<typeof createBankingAccountSchema>;
+
+export const possiblePaymentTypesArray = ['credit', 'debit'] as const;
+export type PossiblePaymentTypes = (typeof possiblePaymentTypesArray)[number];
 
 export const createTransactionSchema = z.object({
 	amount: z.coerce.number().positive().multipleOf(0.01),
@@ -39,6 +44,7 @@ export const createTransactionSchema = z.object({
 	bankingAccountId: z.string().optional(),
 	type: z.union([z.literal('income'), z.literal('expense')]),
 	teamId: z.string().optional(),
+	paymentType: z.enum(possiblePaymentTypesArray).optional(),
 	installments: z.coerce.number().default(1),
 	dayOfTheMonth: z.coerce.number().gte(0).max(31).or(z.literal(0)).optional(),
 	businessDay: z.coerce.number().gte(0).max(31).or(z.literal(0)).optional(),

@@ -58,6 +58,7 @@ export async function GET() {
 				teamId: transaction.teamId ?? undefined,
 				installments: 1,
 				userId: transaction.userId,
+				paymentType: transaction.paymentType as 'credit' | 'debit' | undefined,
 			});
 		}
 	}

@@ -29,6 +29,8 @@ export const bankingAccounts = sqliteTable('bankingAccount', {
 		.references(() => users.id, { onDelete: 'cascade' }),
 	name: text('name'),
 	description: text('description'),
+	payDay: integer('payDay').default(10).notNull(),
+	closeDay: integer('closeDay').default(3).notNull(),
 });
 
 export type bankingAccountsType = typeof bankingAccounts.$inferSelect;
@@ -70,6 +72,7 @@ export const transactions = sqliteTable('transaction', {
 		.default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`)
 		.notNull(),
 	type: text('type').default('income').notNull(),
+	paymentType: text('paymentType').default('credit').notNull(),
 	bankingAccountId: text('bankingAccountId'),
 	category: text('category'),
 	categoryIcon: text('categoryIcon'),
@@ -95,6 +98,7 @@ export const recurringTransactions = sqliteTable('recurringTransaction', {
 	businessDay: integer('businessDay'),
 	type: text('type').default('income').notNull(),
 	bankingAccountId: text('bankingAccountId'),
+	paymentType: text('paymentType').default('credit').notNull(),
 	category: text('category'),
 	categoryIcon: text('categoryIcon'),
 	categoryId: text('categoryId'),

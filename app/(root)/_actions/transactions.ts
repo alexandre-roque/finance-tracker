@@ -45,6 +45,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 		dayOfTheMonth,
 		bankingAccountId,
 		installments,
+		paymentType,
 	} = parsedBody.data;
 
 	const [categoryRow] = await db.select().from(categories).where(eq(categories.id, category));
@@ -70,6 +71,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 				category: categoryRow.name,
 				categoryIcon: categoryRow.icon,
 				categoryId: category,
+				paymentType: paymentType,
 			})
 			.returning();
 
@@ -90,6 +92,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 					category: categoryRow.name,
 					categoryIcon: categoryRow.icon,
 					categoryId: category,
+					paymentType: paymentType,
 				});
 			}
 		}
@@ -113,6 +116,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 			category: categoryRow.name,
 			categoryIcon: categoryRow.icon,
 			categoryId: category,
+			paymentType: paymentType,
 		});
 	}
 

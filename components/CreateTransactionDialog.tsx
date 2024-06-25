@@ -22,7 +22,12 @@ import { Calendar } from '@/components/ui/calendar';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { TransactionType, DateToUTCDate } from '@/lib/utils';
-import { createTransactionSchemaType, createTransactionSchema } from '@/schemas';
+import {
+	createTransactionSchemaType,
+	createTransactionSchema,
+	PossiblePaymentTypes,
+	possiblePaymentTypesArray,
+} from '@/schemas';
 import CustomInput from './CustomInput';
 import { Switch } from './ui/switch';
 import CategoryPicker from './CategoryPicker';
@@ -41,6 +46,11 @@ interface Props {
 	type: TransactionType;
 	isSelected?: boolean;
 }
+
+export const PAYMENT_TYPES_MAP = {
+	credit: 'Crédito',
+	debit: 'Débito / Pix / Boleto',
+};
 
 function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props) {
 	const userSettingsQuery = useQuery<userSettingsType>({
@@ -61,6 +71,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 			description: '',
 			bankingAccountId: '',
 			amount: 0,
+			paymentType: type === 'expense' ? 'credit' : undefined,
 			date: new Date(),
 			businessDay: 0,
 			dayOfTheMonth: 0,
@@ -72,6 +83,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 	const dateValue = form.watch('date');
 	const dayOfTheMonth = form.watch('dayOfTheMonth');
 	const businessDay = form.watch('businessDay');
+	const paymentType = form.watch('paymentType');
 	const amount = form.watch('amount');
 
 	useEffect(() => {
@@ -193,40 +205,38 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 						/>
 						<div className='flex items-center gap-2'>
 							<CustomInput
-								fullWidth={type !== 'expense' || isRecurringValue}
+								fullWidth={type !== 'expense'}
 								control={form.control}
 								name='amount'
 								label='Valor'
 								type='number'
 							/>
-							{type === 'expense' && !isRecurringValue && (
+							{type === 'expense' && (
 								<FormField
 									control={form.control}
-									name='installments'
+									name='paymentType'
 									render={() => (
 										<FormItem className='flex flex-col w-1/2'>
-											<FormLabel className='pb-2'>Quantidade de parcelas</FormLabel>
+											<FormLabel className='pb-2'>Tipo de pagamento</FormLabel>
 											<FormControl>
 												<Select
 													onValueChange={(value) => {
-														form.setValue('installments', parseInt(value));
+														form.setValue('paymentType', value as PossiblePaymentTypes);
 													}}
+													value={form.getValues('paymentType')}
 												>
 													<SelectTrigger className='w-full'>
-														<SelectValue placeholder='Parcelas' />
+														<SelectValue placeholder='Selecionar tipo' />
 													</SelectTrigger>
 													<SelectContent>
-														{Array.from({
-															length: amount <= 100 ? 5 : amount <= 1000 ? 12 : 24,
-														}).map((_, i) => {
-															const currentValue = i + 1;
+														{possiblePaymentTypesArray.map((type, i) => {
 															return (
-																<SelectItem
-																	key={currentValue}
-																	value={currentValue.toString()}
-																>
-																	{i + 1} x{' '}
-																	{currencyFormatter.format(amount / currentValue)}
+																<SelectItem key={i} value={type}>
+																	{
+																		PAYMENT_TYPES_MAP[
+																			type as keyof typeof PAYMENT_TYPES_MAP
+																		]
+																	}
 																</SelectItem>
 															);
 														})}
@@ -238,6 +248,52 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 								/>
 							)}
 						</div>
+
+						{paymentType === 'credit' && !isRecurringValue && (
+							<FormField
+								control={form.control}
+								name='installments'
+								render={() => (
+									<FormItem className='flex flex-col'>
+										<FormLabel className='pb-2'>Quantidade de parcelas</FormLabel>
+										<FormControl>
+											<Select
+												onValueChange={(value) => {
+													form.setValue('installments', parseInt(value));
+												}}
+											>
+												<SelectTrigger className='w-full'>
+													<SelectValue placeholder='Parcelas' />
+												</SelectTrigger>
+												<SelectContent>
+													{Array.from({
+														length:
+															amount >= 100
+																? amount >= 1000
+																	? amount >= 10000
+																		? 60
+																		: 24
+																	: 12
+																: 5,
+													}).map((_, i) => {
+														const currentValue = i + 1;
+														return (
+															<SelectItem
+																key={currentValue}
+																value={currentValue.toString()}
+															>
+																{i + 1} x{' '}
+																{currencyFormatter.format(amount / currentValue)}
+															</SelectItem>
+														);
+													})}
+												</SelectContent>
+											</Select>
+										</FormControl>
+									</FormItem>
+								)}
+							/>
+						)}
 
 						<div className='flex items-center gap-2'>
 							<FormField

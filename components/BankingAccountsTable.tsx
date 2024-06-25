@@ -54,6 +54,16 @@ const columns: ColumnDef<bankingAccountsType>[] = [
 		cell: ({ row }) => <div className='max-w-80 truncate'>{row.getValue('description')}</div>,
 	},
 	{
+		accessorKey: 'payDay',
+		header: ({ column }) => <DataTableColumnHeader column={column} title='Dia de pagamento' />,
+		cell: ({ row }) => <div className='max-w-80 truncate'>{row.getValue('payDay')}</div>,
+	},
+	{
+		accessorKey: 'closeDay',
+		header: ({ column }) => <DataTableColumnHeader column={column} title='Dia de fechamento' />,
+		cell: ({ row }) => <div className='max-w-80 truncate'>{row.getValue('closeDay')}</div>,
+	},
+	{
 		id: 'actions',
 		cell: ({ row }) => <DataTableRowActions row={row} />,
 	},

@@ -107,7 +107,7 @@ const BankingAccountComboBox = ({ userSettings, onChange, isConfiguring, firstSe
 				<Popover open={open} onOpenChange={setOpen}>
 					<PopoverTrigger asChild>
 						<Button variant='outline' className='w-full justify-between' disabled={mutation.isPending}>
-							{selectedOption ? <>{selectedOption.name}</> : <>Selecionar conta bancária</>}
+							{selectedOption ? <>{selectedOption.name}</> : <>Selecionar conta</>}
 							<ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
 						</Button>
 					</PopoverTrigger>
@@ -129,7 +129,7 @@ const BankingAccountComboBox = ({ userSettings, onChange, isConfiguring, firstSe
 			<Drawer open={open} onOpenChange={setOpen}>
 				<DrawerTrigger asChild>
 					<Button variant='outline' className='w-full justify-between' disabled={mutation.isPending}>
-						{selectedOption ? <>{selectedOption.name}</> : <>Selecionar conta bancária</>}
+						{selectedOption ? <>{selectedOption.name}</> : <>Selecionar conta</>}
 						<ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
 					</Button>
 				</DrawerTrigger>

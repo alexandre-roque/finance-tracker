@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -14,59 +14,59 @@ import {
 } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createBankingAccountSchema as formSchema } from '@/schemas';
-import { z } from 'zod';
+import { createBankingAccountSchema, createBankingAccountSchemaType } from '@/schemas';
 import { Form } from './ui/form';
 import CustomInput from './CustomInput';
 import { Loader2, PlusSquare } from 'lucide-react';
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { CreateOrUpdateBankingAccount } from '@/app/(root)/_actions/bankingAccounts';
 
 const CreateBankingAccountDialog = ({ trigger }: { trigger?: ReactNode }) => {
-	const [isLoading, setIsLoading] = useState(false);
 	const [open, setOpen] = useState(false);
 	const queryClient = useQueryClient();
 
-	const form = useForm<z.infer<typeof formSchema>>({
-		resolver: zodResolver(formSchema),
+	const form = useForm<createBankingAccountSchemaType>({
+		resolver: zodResolver(createBankingAccountSchema),
 		defaultValues: {
 			name: '',
 			description: '',
+			payDay: 10,
+			closeDay: 3,
 		},
 	});
 
-	const onSubmit = async (values: z.infer<typeof formSchema>) => {
-		setIsLoading(true);
-
-		toast.loading('Criando conta bancária', {
-			id: 'creating-bankingAccount',
-		});
-
-		await fetch('/api/banking-accounts', {
-			method: 'POST',
-			body: JSON.stringify({
-				name: values.name,
-				description: values.description,
-			}),
-		}).then((res) => {
-			if (res.status === 200) {
-				toast.success('Conta bancária criada com sucesso', {
+	const { mutate, isPending } = useMutation({
+		mutationFn: CreateOrUpdateBankingAccount,
+		onSuccess: ({ error }) => {
+			if (error) {
+				toast.error(error, {
 					id: 'creating-bankingAccount',
 				});
-
-				queryClient.invalidateQueries({
-					queryKey: ['banking-accounts'],
-				});
-			} else {
-				toast.error('Erro ao criar conta bancária', {
-					id: 'creating-bankingAccount',
-				});
+				return;
 			}
-		});
 
-		setIsLoading(false);
-		setOpen(false);
-	};
+			toast.success('Conta bancária criada com sucesso', {
+				id: 'creating-bankingAccount',
+			});
+
+			queryClient.invalidateQueries({
+				queryKey: ['banking-accounts'],
+			});
+
+			setOpen(false);
+		},
+	});
+
+	const onSubmit = useCallback(
+		(values: createBankingAccountSchemaType) => {
+			toast.loading('Criando conta bancária', {
+				id: 'creating-bankingAccount',
+			});
+			mutate(values);
+		},
+		[mutate]
+	);
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -103,6 +103,20 @@ const CreateBankingAccountDialog = ({ trigger }: { trigger?: ReactNode }) => {
 							label='Descrição'
 							placeholder='Exemplo: Conta da Nubank'
 						/>
+						<CustomInput
+							control={form.control}
+							name='closeDay'
+							label='Dia de fechamento'
+							placeholder='Exemplo: 3'
+							type='number'
+						/>
+						<CustomInput
+							control={form.control}
+							name='payDay'
+							label='Dia de pagamento'
+							placeholder='Exemplo: 10'
+							type='number'
+						/>
 					</form>
 				</Form>
 				<DialogFooter>
@@ -117,9 +131,9 @@ const CreateBankingAccountDialog = ({ trigger }: { trigger?: ReactNode }) => {
 							Cancelar
 						</Button>
 					</DialogClose>
-					<Button onClick={form.handleSubmit(onSubmit)} disabled={isLoading}>
-						{!isLoading && 'Criar'}
-						{isLoading && <Loader2 className='animate-spin' />}
+					<Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
+						{!isPending && 'Criar'}
+						{isPending && <Loader2 className='animate-spin' />}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

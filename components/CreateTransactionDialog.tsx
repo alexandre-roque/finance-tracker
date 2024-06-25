@@ -307,6 +307,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 												userSettings={userSettings}
 												type={type}
 												onChange={handleCategoryChange}
+												isTeamSelected={Boolean(form.watch('teamId'))}
 											/>
 										</FormControl>
 										<FormDescription>Selecione a categoria da sua transação</FormDescription>

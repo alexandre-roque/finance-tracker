@@ -21,9 +21,10 @@ interface Props {
 	isConfiguring?: boolean;
 	userSettings?: userSettingsType;
 	firstSelectedValue?: string | null;
+	isTeamSelected?: boolean;
 }
 
-function CategoryPicker({ type, onChange, isConfiguring, userSettings, firstSelectedValue }: Props) {
+function CategoryPicker({ type, onChange, isConfiguring, userSettings, firstSelectedValue, isTeamSelected }: Props) {
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(
 		firstSelectedValue
@@ -87,7 +88,9 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings, firstSele
 		[setValue, setOpen]
 	);
 
-	const selectedCategory = categoriesQuery.data?.find((category: Category) => category.id === value);
+	const selectedCategory = categoriesQuery.data?.find((category: Category) =>
+		isTeamSelected ? category.id === value && category.sharable : category.id === value
+	);
 
 	if (isDesktop) {
 		return (
@@ -110,6 +113,7 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings, firstSele
 							type={type}
 							successCallback={successCallback}
 							categoriesQuery={categoriesQuery}
+							isTeamSelected={isTeamSelected}
 							onSelect={(category) => {
 								handleConfiguring(category?.id || '');
 								setValue(category?.id || '');
@@ -165,6 +169,7 @@ function OptionsList({
 	onSelect,
 	value,
 	label,
+	isTeamSelected,
 }: {
 	isConfiguring?: boolean;
 	type: TransactionType;
@@ -173,7 +178,13 @@ function OptionsList({
 	onSelect: (category: Category | null) => void;
 	label: string;
 	value: string;
+	isTeamSelected?: boolean;
 }) {
+	let categories = categoriesQuery.data || [];
+	if (isTeamSelected) {
+		categories = categories.filter((category: Category) => category.sharable);
+	}
+
 	return (
 		<Command
 			onSubmit={(e) => {
@@ -212,19 +223,12 @@ function OptionsList({
 							<Check className={cn('mr-2 w-4 h-4 opacity-0', !value && 'opacity-100')} />
 						</CommandItem>
 					)}
-					{categoriesQuery.data &&
-						categoriesQuery.data.map((category: Category) => (
-							<CommandItem
-								className='justify-between'
-								key={category.id}
-								onSelect={() => onSelect(category)}
-							>
-								<CategoryRow category={category} />
-								<Check
-									className={cn('mr-2 w-4 h-4 opacity-0', value === category.id && 'opacity-100')}
-								/>
-							</CommandItem>
-						))}
+					{categories.map((category: Category) => (
+						<CommandItem className='justify-between' key={category.id} onSelect={() => onSelect(category)}>
+							<CategoryRow category={category} />
+							<Check className={cn('mr-2 w-4 h-4 opacity-0', value === category.id && 'opacity-100')} />
+						</CommandItem>
+					))}
 				</CommandList>
 			</CommandGroup>
 		</Command>

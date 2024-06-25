@@ -56,6 +56,10 @@ function CreateTeamDialog({ trigger }: Props) {
 				queryKey: ['teams-members'],
 			});
 
+			await queryClient.invalidateQueries({
+				queryKey: ['teams-with-members'],
+			});
+
 			setOpen((prev) => !prev);
 		},
 		onError: () => {

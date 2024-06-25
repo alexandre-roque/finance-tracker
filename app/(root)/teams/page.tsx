@@ -1,5 +1,6 @@
 'use client';
 
+import CreateTeamDialog from '@/components/CreateTeamDialog';
 import DeleteTeamDialog from '@/components/DeleteTeamDialog';
 import EditTeamForm from '@/components/EditTeamForm';
 import InviteToTeamByLinkDialog from '@/components/InviteToTeamByLinkDialog';
@@ -13,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { userSettingsType } from '@/db/schema/finance';
 import { useQuery } from '@tanstack/react-query';
-import { Cog, Trash2 } from 'lucide-react';
+import { Cog, PlusSquare, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 
 export type ResultQueryTeamsWithMembers = {
@@ -83,9 +84,19 @@ const Teams = () => {
 
 				<SkeletonWrapper isLoading={teamsQuery.isFetching}>
 					<Card>
-						<CardHeader>
-							<CardTitle>Times que faz parte</CardTitle>
-							<CardDescription>Gerencie/visualize os times que faz parte</CardDescription>
+						<CardHeader className='flex flex-row items-center justify-between'>
+							<div>
+								<CardTitle>Times que faz parte</CardTitle>
+								<CardDescription>Gerencie/visualize os times que faz parte</CardDescription>
+							</div>
+							<CreateTeamDialog
+								trigger={
+									<Button>
+										<PlusSquare className='mr-2 size-4' />
+										Criar time
+									</Button>
+								}
+							/>
 						</CardHeader>
 						<CardContent>
 							<Accordion type='multiple' className='w-full'>

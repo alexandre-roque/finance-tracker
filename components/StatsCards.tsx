@@ -3,8 +3,6 @@
 import { GetBalanceStatsResponseType } from '@/app/api/stats/balance/route';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { Card } from '@/components/ui/card';
-import { userSettingsType } from '@/db/schema/finance';
-import { GetFormatterForCurrency } from '@/lib/currencies';
 import { DateToUTCDate } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { TrendingDown, TrendingUp, Wallet } from 'lucide-react';
@@ -17,10 +15,10 @@ interface Props {
 	to: Date;
 	formatter: Intl.NumberFormat;
 	selectedTeams?: Option[];
-	disableAnimation?: boolean;
+	disableAnimations?: boolean;
 }
 
-function StatsCards({ from, to, formatter, selectedTeams, disableAnimation }: Props) {
+function StatsCards({ from, to, formatter, selectedTeams, disableAnimations }: Props) {
 	const statsQuery = useQuery<GetBalanceStatsResponseType>({
 		queryKey: ['overview', 'stats', from, to],
 		queryFn: () =>
@@ -58,7 +56,7 @@ function StatsCards({ from, to, formatter, selectedTeams, disableAnimation }: Pr
 		<div className='relative flex w-full flex-wrap gap-2 md:flex-nowrap'>
 			<SkeletonWrapper isLoading={statsQuery.isFetching}>
 				<StatCard
-					disableAnimation={disableAnimation}
+					disableAnimations={disableAnimations}
 					formatter={formatter}
 					value={income}
 					title='Receita'
@@ -70,7 +68,7 @@ function StatsCards({ from, to, formatter, selectedTeams, disableAnimation }: Pr
 
 			<SkeletonWrapper isLoading={statsQuery.isFetching}>
 				<StatCard
-					disableAnimation={disableAnimation}
+					disableAnimations={disableAnimations}
 					formatter={formatter}
 					value={expense}
 					title='Despesa'
@@ -80,6 +78,7 @@ function StatsCards({ from, to, formatter, selectedTeams, disableAnimation }: Pr
 
 			<SkeletonWrapper isLoading={statsQuery.isFetching}>
 				<StatCard
+					disableAnimations={disableAnimations}
 					formatter={formatter}
 					value={balance}
 					title='Média'
@@ -93,7 +92,7 @@ function StatsCards({ from, to, formatter, selectedTeams, disableAnimation }: Pr
 export default StatsCards;
 
 function StatCard({
-	disableAnimation,
+	disableAnimations,
 	formatter,
 	value,
 	title,
@@ -103,7 +102,7 @@ function StatCard({
 	icon: ReactNode;
 	title: String;
 	value: number;
-	disableAnimation?: boolean;
+	disableAnimations?: boolean;
 }) {
 	const formatFn = useCallback(
 		(value: number) => {
@@ -124,7 +123,7 @@ function StatCard({
 					decimals={2}
 					formattingFn={formatFn}
 					className='text-2xl'
-					duration={0}
+					duration={disableAnimations ? 0 : 2}
 				/>
 			</div>
 		</Card>

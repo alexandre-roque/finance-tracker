@@ -7,12 +7,13 @@ import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
 import { EditUserSettings } from '@/app/(root)/_actions/user';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const ManageUserSettings = ({ userSettings }: { userSettings: userSettingsType | undefined }) => {
 	const [isAnimationDisabled, setIsAnimationDisabled] = useState(userSettings?.disableAnimations ?? false);
+	const queryClient = useQueryClient();
 
 	const { mutate, isPending } = useMutation({
 		mutationFn: EditUserSettings,
@@ -27,6 +28,9 @@ const ManageUserSettings = ({ userSettings }: { userSettings: userSettingsType |
 					id: 'edit-user-settings',
 				});
 			}
+			queryClient.invalidateQueries({
+				queryKey: ['user-settings'],
+			});
 		},
 		onError: () => {
 			toast.error('Algo deu errado', {

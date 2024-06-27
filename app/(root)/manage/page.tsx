@@ -9,6 +9,7 @@ import CurrencyComboBox from '@/components/CurrencyComboBox';
 import DeleteCategoryDialog from '@/components/DeleteCategoryDialog';
 import EditCategoryDialog from '@/components/EditCategoryDialog';
 import ManageUser from '@/components/ManageUser';
+import ManageUserSettings from '@/components/ManageUserSettings';
 import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +21,7 @@ import { Pencil, PlusSquare, TrashIcon, TrendingDown, TrendingUp } from 'lucide-
 import React from 'react';
 
 function Manage() {
-	const userSettingsQuery = useQuery({
+	const userSettingsQuery = useQuery<userSettingsType>({
 		queryKey: ['user-settings', { type: 'manage' }],
 		queryFn: () => fetch('/api/user-settings').then((res) => res.json()),
 	});
@@ -36,6 +37,10 @@ function Manage() {
 				</div>
 			</div>
 			<div className='container flex flex-col gap-4 p-4'>
+				<SkeletonWrapper isLoading={userSettingsQuery.isPending}>
+					<ManageUserSettings userSettings={userSettingsQuery.data} />
+				</SkeletonWrapper>
+
 				<ManageUser />
 
 				<Card>

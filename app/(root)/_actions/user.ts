@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation';
 
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { userSettings } from '@/db/schema/finance';
 
 export async function EditUser({
 	avatarLink,
@@ -44,6 +45,27 @@ export async function EditUser({
 		.returning({ name: users.name, image: users.image });
 
 	return { success: { name: updatedUser.name, image: updatedUser.image } };
+}
+
+export async function EditUserSettings({ disableAnimations }: { disableAnimations: boolean }) {
+	const session = await auth();
+	if (!session || !session.user || !session.user.id) {
+		redirect('/sign-in');
+	}
+
+	const userId = session.user.id;
+	try {
+		await db
+			.update(userSettings)
+			.set({
+				disableAnimations,
+			})
+			.where(eq(userSettings.userId, userId));
+	} catch (error) {
+		return { error: `Erro ao editar configurações do usuário: ${error}}` };
+	}
+
+	return { success: true };
 }
 
 function isValidUrl(str: string) {

@@ -16,6 +16,7 @@ export const userSettings = sqliteTable('userSetting', {
 	mainExpenseCategory: text('mainExpenseCategory'),
 	mainBankingAccount: text('mainBankingAccount').references(() => bankingAccounts.id, { onDelete: 'set null' }),
 	mainTeam: text('mainTeam').references(() => teams.id, { onDelete: 'set null' }),
+	disableAnimations: integer('disableAnimation', { mode: 'boolean' }).default(false),
 });
 
 export type userSettingsType = typeof userSettings.$inferSelect;

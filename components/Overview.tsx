@@ -123,6 +123,7 @@ function Overview() {
 			<div className='container flex w-full flex-col gap-2'>
 				<SkeletonWrapper isLoading={teamsQuery.isFetching}>
 					<StatsCards
+						disableAnimation={userSettings?.disableAnimations ?? false}
 						selectedTeams={selectedTeams}
 						formatter={formatter}
 						from={dateRange.from}

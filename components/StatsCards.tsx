@@ -17,9 +17,10 @@ interface Props {
 	to: Date;
 	formatter: Intl.NumberFormat;
 	selectedTeams?: Option[];
+	disableAnimation?: boolean;
 }
 
-function StatsCards({ from, to, formatter, selectedTeams }: Props) {
+function StatsCards({ from, to, formatter, selectedTeams, disableAnimation }: Props) {
 	const statsQuery = useQuery<GetBalanceStatsResponseType>({
 		queryKey: ['overview', 'stats', from, to],
 		queryFn: () =>
@@ -57,6 +58,7 @@ function StatsCards({ from, to, formatter, selectedTeams }: Props) {
 		<div className='relative flex w-full flex-wrap gap-2 md:flex-nowrap'>
 			<SkeletonWrapper isLoading={statsQuery.isFetching}>
 				<StatCard
+					disableAnimation={disableAnimation}
 					formatter={formatter}
 					value={income}
 					title='Receita'
@@ -68,6 +70,7 @@ function StatsCards({ from, to, formatter, selectedTeams }: Props) {
 
 			<SkeletonWrapper isLoading={statsQuery.isFetching}>
 				<StatCard
+					disableAnimation={disableAnimation}
 					formatter={formatter}
 					value={expense}
 					title='Despesa'
@@ -90,6 +93,7 @@ function StatsCards({ from, to, formatter, selectedTeams }: Props) {
 export default StatsCards;
 
 function StatCard({
+	disableAnimation,
 	formatter,
 	value,
 	title,
@@ -99,6 +103,7 @@ function StatCard({
 	icon: ReactNode;
 	title: String;
 	value: number;
+	disableAnimation?: boolean;
 }) {
 	const formatFn = useCallback(
 		(value: number) => {
@@ -119,6 +124,7 @@ function StatCard({
 					decimals={2}
 					formattingFn={formatFn}
 					className='text-2xl'
+					duration={0}
 				/>
 			</div>
 		</Card>

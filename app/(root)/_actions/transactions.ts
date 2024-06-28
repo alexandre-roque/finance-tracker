@@ -255,7 +255,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 
 	const userId = session.user.id;
 
-	const { amount, category, date, description, type, teamId, bankingAccountId, transactionId } = parsedBody.data;
+	const { amount, category, date, description, type, teamId, bankingAccountId, transactionId, paymentType } = parsedBody.data;
 
 	const [categoryRow] = await db.select().from(categories).where(eq(categories.id, category));
 
@@ -294,7 +294,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 
 		if (oldAmount !== amount || !moment(date).isSame(oldDate) || oldTeamId !== teamId) {
 			await SubtractFromHistories(trx, oldTransaction);
-			await CreateOrUpdateHistories(trx, { date, type, amount, userId, teamId });
+			await CreateOrUpdateHistories(trx, { date, type, amount, userId, teamId, bankingAccountId, paymentType });
 		}
 	});
 }

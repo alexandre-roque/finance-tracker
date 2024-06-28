@@ -122,6 +122,7 @@ export const editTransactionSchema = z.object({
 	bankingAccountId: z.string().optional(),
 	type: z.union([z.literal('income'), z.literal('expense')]),
 	teamId: z.string().optional(),
+	paymentType: z.enum(possiblePaymentTypesArray).optional(),
 });
 
 export type editTransactionSchemaType = z.infer<typeof editTransactionSchema>;

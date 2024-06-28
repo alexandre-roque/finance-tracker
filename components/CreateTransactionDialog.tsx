@@ -152,6 +152,10 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 				queryKey: ['recurrent-transactions'],
 			});
 
+			queryClient.invalidateQueries({
+				queryKey: ['invoices'],
+			});
+
 			setOpen((prev) => !prev);
 		},
 		onError: (err) => {

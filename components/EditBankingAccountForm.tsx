@@ -22,7 +22,6 @@ const EditBankingAccountForm = ({
 	bankingAccount: bankingAccountsType;
 }) => {
 	const queryClient = useQueryClient();
-	console.log(bankingAccount);
 
 	const form = useForm<createBankingAccountSchemaType>({
 		resolver: zodResolver(createBankingAccountSchema),
@@ -31,6 +30,7 @@ const EditBankingAccountForm = ({
 			description: bankingAccount.description || '',
 			payDay: bankingAccount.payDay || 10,
 			closeDay: bankingAccount.closeDay || 3,
+			balance: bankingAccount.balance || 0,
 			bankingAccountId: bankingAccount.id,
 		},
 	});
@@ -73,7 +73,7 @@ const EditBankingAccountForm = ({
 
 	return (
 		<Form {...form}>
-			<form className='flex flex-col space-y-2 md:px-0 px-4' onSubmit={form.handleSubmit(onSubmit)}>
+			<form className='flex flex-col space-y-2 md:px-0 px-4 gap-3' onSubmit={form.handleSubmit(onSubmit)}>
 				<CustomInput
 					control={form.control}
 					name='name'
@@ -103,6 +103,15 @@ const EditBankingAccountForm = ({
 					placeholder='Exemplo: 10'
 					type='number'
 				/>
+
+				<CustomInput
+					control={form.control}
+					name='balance'
+					label='Valor em conta'
+					type='number'
+					placeholder='Exemplo: 1000'
+				/>
+
 				<Button type='submit' disabled={isPending} className='w-full sm:w-auto'>
 					<>
 						{isPending ? (

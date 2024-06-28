@@ -3,7 +3,16 @@
 import moment from 'moment';
 import { auth } from '@/auth';
 import { db } from '@/db';
-import { categories, monthHistories, recurringTransactions, transactions, yearHistories } from '@/db/schema/finance';
+import {
+	bankingAccounts,
+	categories,
+	creditCardInvoices,
+	monthHistories,
+	recurringTransactions,
+	transactions,
+	transactionsType,
+	yearHistories,
+} from '@/db/schema/finance';
 import { DateToUTCDate, TransactionType, getBusinessDayOfMonth } from '@/lib/utils';
 import {
 	createTransactionSchema,
@@ -16,6 +25,8 @@ import {
 import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { ulid } from 'ulid';
+
+type DBTransactionType = Parameters<typeof db.transaction>[0] extends (trx: infer T) => Promise<any> ? T : never;
 
 export async function CreateTransaction(form: createTransactionSchemaType) {
 	const parsedBody = createTransactionSchema.safeParse(form);
@@ -124,7 +135,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 		try {
 			await db.transaction(async (trx) => {
 				await trx.insert(transactions).values(transaction);
-				await CreateOrUpdateHistories({ trx, date, type, amount, userId, teamId });
+				await CreateOrUpdateHistories(trx, transaction);
 			});
 		} catch (e) {
 			console.error(e);
@@ -221,14 +232,12 @@ export async function DeleteTransaction({
 	}
 
 	for (const transaction of transactionsResult) {
-		const { date, amount, type, teamId } = transaction;
-
 		await db.transaction(async (trx) => {
 			await trx
 				.delete(transactions)
 				.where(and(eq(transactions.userId, userId), eq(transactions.id, transaction.id)));
 
-			await SubtractFromHistories({ trx, date, type, amount, userId, teamId });
+			await SubtractFromHistories(trx, transaction);
 		});
 	}
 }
@@ -254,17 +263,17 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 		return { error: 'Categoria não encontrada' };
 	}
 
-	const transactionsResult = await db.query.transactions.findFirst({
+	const oldTransaction = await db.query.transactions.findFirst({
 		where: (transactions, { eq }) => eq(transactions.id, transactionId),
 	});
 
-	if (!transactionsResult) {
+	if (!oldTransaction) {
 		throw new Error('Bad request');
 	}
 
-	const oldAmount = transactionsResult.amount;
-	const oldDate = transactionsResult.date;
-	const oldTeamId = transactionsResult.teamId;
+	const oldAmount = oldTransaction.amount;
+	const oldDate = oldTransaction.date;
+	const oldTeamId = oldTransaction.teamId;
 
 	await db.transaction(async (trx) => {
 		await trx
@@ -284,13 +293,24 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 			.where(eq(transactions.id, transactionId));
 
 		if (oldAmount !== amount || !moment(date).isSame(oldDate) || oldTeamId !== teamId) {
-			await SubtractFromHistories({ trx, date: oldDate, type, amount: oldAmount, userId, teamId: oldTeamId });
-			await CreateOrUpdateHistories({ trx, date, type, amount, userId, teamId });
+			await SubtractFromHistories(trx, oldTransaction);
+			await CreateOrUpdateHistories(trx, { date, type, amount, userId, teamId });
 		}
 	});
 }
 
-async function SubtractFromHistories({ trx, date, type, amount, userId, teamId }: any) {
+async function SubtractFromHistories(
+	trx: DBTransactionType,
+	{
+		date,
+		type,
+		amount,
+		userId,
+		teamId,
+		bankingAccountId,
+		paymentType,
+	}: Partial<transactionsType> & { date: Date; userId: string; type: string; amount: number }
+) {
 	// Atualiza monthHistory
 	const [existingMonthHistory] = await trx
 		.select()
@@ -335,23 +355,68 @@ async function SubtractFromHistories({ trx, date, type, amount, userId, teamId }
 			})
 			.where(eq(yearHistories.id, existingYearHistory.id));
 	}
+
+	if (bankingAccountId) {
+		const previousMonthDate = moment(date).subtract(1, 'month').toDate();
+
+		const existingBankingAccount = await trx.query.bankingAccounts.findFirst({
+			where: (bankingAccounts, { eq }) => eq(bankingAccounts.id, bankingAccountId),
+			with: {
+				creditCardInvoices: {
+					where: (creditCardInvoices, { eq, and, or }) =>
+						or(
+							and(
+								eq(creditCardInvoices.month, date.getUTCMonth()),
+								eq(creditCardInvoices.year, date.getUTCFullYear())
+							),
+							and(
+								eq(creditCardInvoices.month, previousMonthDate.getUTCMonth()),
+								eq(creditCardInvoices.year, previousMonthDate.getUTCFullYear())
+							)
+						),
+				},
+			},
+		});
+
+		if (existingBankingAccount) {
+			if (paymentType === 'debit') {
+				await trx
+					.update(bankingAccounts)
+					.set({
+						balance: (existingBankingAccount.balance ?? 0) + (type === 'expense' ? -amount : amount),
+					})
+					.where(eq(bankingAccounts.id, bankingAccountId));
+			} else if (paymentType === 'credit') {
+				const correctDate = date.getDay() < existingBankingAccount.closeDay ? previousMonthDate : date;
+				const creditCardInvoice = existingBankingAccount.creditCardInvoices.find((invoice) => {
+					return invoice.month === correctDate.getUTCMonth();
+				});
+
+				if (creditCardInvoice) {
+					await trx
+						.update(creditCardInvoices)
+						.set({
+							amount: (creditCardInvoice.amount ?? 0) + (type === 'expense' ? -amount : amount),
+						})
+						.where(eq(creditCardInvoices.id, creditCardInvoice.id));
+				}
+			}
+		}
+	}
 }
 
-async function CreateOrUpdateHistories({
-	trx,
-	date,
-	type,
-	amount,
-	userId,
-	teamId,
-}: {
-	trx: any;
-	date: Date;
-	type: TransactionType;
-	amount: number;
-	userId: string;
-	teamId?: string;
-}) {
+async function CreateOrUpdateHistories(
+	trx: DBTransactionType,
+	{
+		date,
+		type,
+		amount,
+		userId,
+		teamId,
+		paymentType,
+		bankingAccountId,
+	}: Partial<transactionsType> & { date: Date; userId: string; type: string; amount: number }
+) {
 	// Atualiza monthHistory
 	const [existingMonthHistory] = await trx
 		.select()
@@ -415,4 +480,110 @@ async function CreateOrUpdateHistories({
 			income: type === 'income' ? amount : 0,
 		});
 	}
+
+	if (bankingAccountId) {
+		const previousMonthDate = moment(date).subtract(1, 'month').toDate();
+
+		const existingBankingAccount = await trx.query.bankingAccounts.findFirst({
+			where: (bankingAccounts, { eq }) => eq(bankingAccounts.id, bankingAccountId),
+			with: {
+				creditCardInvoices: {
+					where: (creditCardInvoices, { eq, and, or }) =>
+						or(
+							and(
+								eq(creditCardInvoices.month, date.getUTCMonth()),
+								eq(creditCardInvoices.year, date.getUTCFullYear())
+							),
+							and(
+								eq(creditCardInvoices.month, previousMonthDate.getUTCMonth()),
+								eq(creditCardInvoices.year, previousMonthDate.getUTCFullYear())
+							)
+						),
+				},
+			},
+		});
+
+		if (existingBankingAccount) {
+			if (paymentType === 'debit') {
+				await trx
+					.update(bankingAccounts)
+					.set({
+						balance: (existingBankingAccount.balance ?? 0) + (type === 'expense' ? -amount : amount),
+					})
+					.where(eq(bankingAccounts.id, bankingAccountId));
+			} else if (paymentType === 'credit') {
+				const correctDate = date.getDay() < existingBankingAccount.closeDay ? previousMonthDate : date;
+				const creditCardInvoice = existingBankingAccount.creditCardInvoices.find((invoice) => {
+					return invoice.month === correctDate.getUTCMonth();
+				});
+
+				if (creditCardInvoice) {
+					await trx
+						.update(creditCardInvoices)
+						.set({
+							amount: (creditCardInvoice.amount ?? 0) + (type === 'expense' ? amount : -amount),
+							isPaid: false,
+							paymentDate: null,
+						})
+						.where(eq(creditCardInvoices.id, creditCardInvoice.id));
+				} else {
+					await trx.insert(creditCardInvoices).values({
+						userId: userId,
+						month: correctDate.getUTCMonth(),
+						year: correctDate.getUTCFullYear(),
+						amount: type === 'expense' ? amount : -amount,
+						bankingAccountId,
+					});
+				}
+			}
+		}
+	}
+}
+
+export async function PayInvoice({ invoiceId }: { invoiceId: string }) {
+	const session = await auth();
+	if (!session || !session.user || !session.user.id) {
+		redirect('/sign-in');
+	}
+
+	const userId = session.user.id;
+	const invoice = await db.query.creditCardInvoices.findFirst({
+		where: (creditCardInvoices, { eq, and }) =>
+			and(eq(creditCardInvoices.id, invoiceId), eq(creditCardInvoices.userId, userId)),
+	});
+
+	if (!invoice) {
+		return { error: 'Fatura não encontrada' };
+	}
+
+	if (invoice.isPaid) {
+		return { error: 'Fatura já paga' };
+	}
+
+	const bankingAccount = await db.query.bankingAccounts.findFirst({
+		where: (bankingAccounts, { eq }) => eq(bankingAccounts.id, invoice.bankingAccountId),
+	});
+
+	if (!bankingAccount) {
+		return { error: 'Conta bancária não encontrada' };
+	}
+
+	await db.transaction(async (trx) => {
+		await trx
+			.update(creditCardInvoices)
+			.set({
+				isPaid: true,
+				paymentDate: new Date(),
+			})
+			.where(eq(creditCardInvoices.id, invoiceId));
+
+		await trx
+			.update(bankingAccounts)
+			.set({
+				balance: (bankingAccount.balance ?? 0) - invoice.amount,
+			})
+			.where(eq(bankingAccounts.id, invoice.bankingAccountId));
+	});
+
+	return { success: true };
 }

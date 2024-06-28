@@ -5,7 +5,7 @@ import SkeletonWrapper from '@/components/SkeletonWrapper';
 import { Card } from '@/components/ui/card';
 import { DateToUTCDate } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
-import { TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import { Scale, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import CountUp from 'react-countup';
 import { Option } from './ui/multiple-selector';
@@ -82,7 +82,7 @@ function StatsCards({ from, to, formatter, selectedTeams, disableAnimations }: P
 					formatter={formatter}
 					value={balance}
 					title='Média'
-					icon={<Wallet className='h-12 w-12 items-center rounded-lg p-2 text-violet-500 bg-violet-400/10' />}
+					icon={<Scale className='h-12 w-12 items-center rounded-lg p-2 text-violet-500 bg-violet-400/10' />}
 				/>
 			</SkeletonWrapper>
 		</div>
@@ -91,7 +91,7 @@ function StatsCards({ from, to, formatter, selectedTeams, disableAnimations }: P
 
 export default StatsCards;
 
-function StatCard({
+export function StatCard({
 	disableAnimations,
 	formatter,
 	value,

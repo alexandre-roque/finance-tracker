@@ -32,6 +32,7 @@ const CreateBankingAccountDialog = ({ trigger }: { trigger?: ReactNode }) => {
 			name: '',
 			description: '',
 			payDay: 10,
+			balance: 0,
 			closeDay: 3,
 		},
 	});
@@ -116,6 +117,13 @@ const CreateBankingAccountDialog = ({ trigger }: { trigger?: ReactNode }) => {
 							label='Dia de pagamento'
 							placeholder='Exemplo: 10'
 							type='number'
+						/>
+						<CustomInput
+							control={form.control}
+							name='balance'
+							label='Valor em conta'
+							type='number'
+							placeholder='Exemplo: 1000'
 						/>
 					</form>
 				</Form>

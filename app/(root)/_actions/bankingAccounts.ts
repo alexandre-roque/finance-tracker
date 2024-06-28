@@ -28,6 +28,7 @@ export async function CreateOrUpdateBankingAccount(form: createBankingAccountSch
 					name: parsedBody.data.name,
 					payDay: parsedBody.data.payDay,
 					closeDay: parsedBody.data.closeDay,
+					balance: parsedBody.data.balance,
 				})
 				.returning();
 			return { success: true };
@@ -43,6 +44,7 @@ export async function CreateOrUpdateBankingAccount(form: createBankingAccountSch
 					name: parsedBody.data.name,
 					payDay: parsedBody.data.payDay,
 					closeDay: parsedBody.data.closeDay,
+					balance: parsedBody.data.balance,
 				})
 				.where(
 					and(

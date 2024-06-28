@@ -16,6 +16,7 @@ import AccountsStats from './AccountsStats';
 import TeamsStats from './TeamStats';
 import { GetFormatterForCurrency } from '@/lib/currencies';
 import { teamsQueryType } from './TeamsComboBox';
+import TotalBalanceAndCreditStats from './TotalBalanceAndCreditStats';
 
 function Overview() {
 	const userSettingsQuery = useQuery<userSettingsType>({
@@ -23,7 +24,7 @@ function Overview() {
 		queryFn: () => fetch('/api/user-settings').then((res) => res.json()),
 	});
 	const userSettings = userSettingsQuery.data;
-	const teamsQuery = useQuery({
+	const teamsQuery = useQuery<teamsQueryType[]>({
 		queryKey: ['teams-members'],
 		queryFn: () => fetch('/api/teams').then((res) => res.json()),
 	});
@@ -82,6 +83,16 @@ function Overview() {
 
 	return (
 		<>
+			<div className='container flex w-full flex-col gap-2 mt-4'>
+				<h1 className='text-4xl font-bold'>Dashboard</h1>
+				<p className='text-lg text-muted-foreground'>Visão geral de todas as contas e cartões de créditos</p>
+				<SkeletonWrapper isLoading={userSettingsQuery.isFetching}>
+					<TotalBalanceAndCreditStats
+						disableAnimations={userSettings?.disableAnimations ?? false}
+						formatter={formatter}
+					/>
+				</SkeletonWrapper>
+			</div>
 			<div className='container flex flex-wrap items-end justify-between gap-2 pt-6 pb-2'>
 				<h2 className='text-3xl font-bold'>Visão geral</h2>
 				<div className='flex justify-end w-full flex-wrap gap-2 md:flex-nowrap'>

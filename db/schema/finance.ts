@@ -32,9 +32,30 @@ export const bankingAccounts = sqliteTable('bankingAccount', {
 	description: text('description'),
 	payDay: integer('payDay').default(10).notNull(),
 	closeDay: integer('closeDay').default(3).notNull(),
+	balance: integer('balance').default(0).notNull(),
+	automaticDebitInvoices: integer('automaticDebitInvoices', { mode: 'boolean' }).default(false),
 });
 
 export type bankingAccountsType = typeof bankingAccounts.$inferSelect;
+
+export const creditCardInvoices = sqliteTable('creditCardInvoice', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => ulid()),
+	userId: text('userId')
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' }),
+	bankingAccountId: text('bankingAccountId')
+		.notNull()
+		.references(() => bankingAccounts.id, { onDelete: 'cascade' }),
+	month: integer('month').notNull(),
+	year: integer('year').notNull(),
+	paymentDate: integer('paymentDate', { mode: 'timestamp_ms' }),
+	isPaid: integer('isPaid', { mode: 'boolean' }).default(false),
+	amount: integer('amount').notNull(),
+});
+
+export type creditCardInvoicesType = typeof creditCardInvoices.$inferSelect;
 
 export const categories = sqliteTable(
 	'category',
@@ -242,10 +263,22 @@ export const userSettingsRelations = relations(userSettings, ({ one, many }) => 
 	}),
 }));
 
-export const bankingAccountRelations = relations(bankingAccounts, ({ one }) => ({
+export const bankingAccountRelations = relations(bankingAccounts, ({ one, many }) => ({
 	user: one(users, {
 		fields: [bankingAccounts.userId],
 		references: [users.id],
+	}),
+	creditCardInvoices: many(creditCardInvoices),
+}));
+
+export const creditCardInvoiceRelations = relations(creditCardInvoices, ({ one }) => ({
+	user: one(users, {
+		fields: [creditCardInvoices.userId],
+		references: [users.id],
+	}),
+	bankingAccount: one(bankingAccounts, {
+		fields: [creditCardInvoices.bankingAccountId],
+		references: [bankingAccounts.id],
 	}),
 }));
 

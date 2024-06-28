@@ -379,7 +379,7 @@ async function SubtractFromHistories(
 		});
 
 		if (existingBankingAccount) {
-			if (paymentType === 'debit') {
+			if (paymentType === 'debit' || type === 'income') {
 				await trx
 					.update(bankingAccounts)
 					.set({
@@ -504,7 +504,7 @@ async function CreateOrUpdateHistories(
 		});
 
 		if (existingBankingAccount) {
-			if (paymentType === 'debit') {
+			if (paymentType === 'debit' || type === 'income') {
 				await trx
 					.update(bankingAccounts)
 					.set({

@@ -99,7 +99,6 @@ const EditTeamForm = ({
 					name='name'
 					label='Nome'
 					placeholder='Nome do time'
-					// defaultValue={team.team.name}
 				/>
 
 				<CustomInput
@@ -107,7 +106,6 @@ const EditTeamForm = ({
 					name='description'
 					label='Descrição'
 					placeholder='Descrição do time'
-					// defaultValue={team.team.description}
 				/>
 
 				<FormField

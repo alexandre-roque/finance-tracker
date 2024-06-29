@@ -12,8 +12,7 @@ import { PayInvoice } from '../_actions/transactions';
 import { userSettingsType } from '@/db/schema/finance';
 import { GetFormatterForCurrency } from '@/lib/currencies';
 import { useMemo } from 'react';
-import { Accordion, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { AccordionContent } from '@radix-ui/react-accordion';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 
 const Invoices = () => {
 	const userSettingsQuery = useQuery<userSettingsType>({
@@ -35,15 +34,14 @@ const Invoices = () => {
 			<SkeletonWrapper isLoading={invoicesQuery.isPending}>
 				{invoicesQuery.data?.map((invoice) => (
 					<Card key={invoice.id} className='flex flex-col gap-2 p-4'>
-						<Accordion type='single' collapsible>
+						<Accordion type='single' collapsible defaultValue={`${invoice.id}-${invoice.name}`}>
 							<AccordionItem value={`${invoice.id}-${invoice.name}`}>
 								<CardHeader className='pb-2'>
 									<AccordionTrigger>
 										<CardTitle className='text-lg font-semibold'>Conta: {invoice.name}</CardTitle>
 									</AccordionTrigger>
 								</CardHeader>
-								<AccordionContent>
-									<CardContent className='flex w-full flex-wrap gap-2 md:flex-nowrap'>
+								<AccordionContent className='grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2'>
 										{invoice.creditCardInvoices.map((creditCardInvoice) => (
 											<InvoiceComponent
 												key={creditCardInvoice.id}
@@ -52,7 +50,6 @@ const Invoices = () => {
 												invoice={invoice}
 											/>
 										))}
-									</CardContent>
 								</AccordionContent>
 							</AccordionItem>
 						</Accordion>
@@ -141,7 +138,7 @@ function InvoiceComponent({
 				{creditCardInvoice.isPaid && (
 					<p>Paga em: {moment(creditCardInvoice.paymentDate).format('DD/MM/YYYY')}</p>
 				)}
-				{!creditCardInvoice.isPaid && <p>Deve ser paga até: {moment(payDate).format('DD/MM/YYYY')}</p>}
+				{!creditCardInvoice.isPaid && <p>Vencimento: {moment(payDate).format('DD/MM/YYYY')}</p>}
 			</CardContent>
 			<CardFooter className='flex justify-end'>
 				<div className='self-end'>

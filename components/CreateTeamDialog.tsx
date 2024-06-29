@@ -101,12 +101,12 @@ function CreateTeamDialog({ trigger }: Props) {
 				</DialogHeader>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-						<CustomInput control={form.control} name='name' label='Nome' placeholder='Nome do time' />
+						<CustomInput control={form.control} name='name' label='Nome' placeholder='Exemplo: Casa ou investimentos' />
 						<CustomInput
 							control={form.control}
 							name='description'
 							label='Descrição'
-							placeholder='Descrição do time, exemplo: Casa'
+							placeholder='Exemplo: Conta da casa'
 						/>
 					</form>
 				</Form>

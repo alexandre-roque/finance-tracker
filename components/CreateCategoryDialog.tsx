@@ -45,12 +45,12 @@ function CreateCategoryDialog({ type, successCallback, trigger }: Props) {
 		resolver: zodResolver(createCategorySchema),
 		defaultValues: {
 			name: '',
+			icon: type === 'income' ? '💰' : '💸',
 			type,
 		},
 	});
 
 	const iconValue = form.watch('icon');
-
 	const queryClient = useQueryClient();
 
 	const { mutate, isPending } = useMutation({

@@ -23,7 +23,7 @@ const TotalBalanceAndCreditStats = ({
 				<StatCard
 					disableAnimations={disableAnimations}
 					formatter={formatter}
-					title='Saldo total'
+					title='Valor disponível em conta(s)'
 					value={parseFloat(totalBalanceAndCreditQuery.data?.balance.value ?? '0')}
 					icon={
 						<Wallet2 className='h-12 w-12 items-center rounded-lg p-2 text-violet-500 bg-violet-400/10' />

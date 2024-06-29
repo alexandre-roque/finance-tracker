@@ -81,7 +81,7 @@ function StatsCards({ from, to, formatter, selectedTeams, disableAnimations }: P
 					disableAnimations={disableAnimations}
 					formatter={formatter}
 					value={balance}
-					title='Média'
+					title='Saldo'
 					icon={<Scale className='h-12 w-12 items-center rounded-lg p-2 text-violet-500 bg-violet-400/10' />}
 				/>
 			</SkeletonWrapper>

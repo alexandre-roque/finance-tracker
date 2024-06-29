@@ -25,6 +25,7 @@ import {
 import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { ulid } from 'ulid';
+import { getDaysInMonth } from 'date-fns';
 
 type DBTransactionType = Parameters<typeof db.transaction>[0] extends (trx: infer T) => Promise<any> ? T : never;
 
@@ -87,23 +88,52 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 			.returning();
 
 		if (recurringTransaction) {
-			const d = new Date();
-			const dayInMonth = d.getUTCDate();
-			const businessDayCount = getBusinessDayOfMonth(d);
+			const newDate = new Date();
+			const dayInMonth = newDate.getUTCDate();
+			const businessDayCount = getBusinessDayOfMonth(newDate);
+
+			let d;
+			if (dayOfTheMonth) {
+				d = new Date(
+					newDate.getUTCFullYear(),
+					newDate.getUTCMonth(),
+					dayOfTheMonth
+				);
+			} else if (businessDay) {
+				const daysInMonth = getDaysInMonth(newDate);
+				for (let i = 1; i <= daysInMonth; i++) {
+					if (i === businessDay) {
+						d = new Date(
+							newDate.getUTCFullYear(),
+							newDate.getUTCMonth(),
+							i
+						);
+
+						break;
+					}
+				}
+			}
+
+			const obj = {
+				userId,
+				amount,
+				type,
+				teamId,
+				bankingAccountId,
+				description: description || '',
+				category: categoryRow.name,
+				categoryIcon: categoryRow.icon,
+				categoryId: category,
+				paymentType: paymentType,
+				date: DateToUTCDate(d || newDate),
+			};
+
+			transactionsToInsert.push(obj);
 
 			if (dayInMonth === dayOfTheMonth || businessDay === businessDayCount) {
 				transactionsToInsert.push({
-					userId,
-					amount,
-					type,
-					teamId,
-					bankingAccountId,
-					date: DateToUTCDate(new Date()),
-					description: description || '',
-					category: categoryRow.name,
-					categoryIcon: categoryRow.icon,
-					categoryId: category,
-					paymentType: paymentType,
+					...obj,
+					date: moment(obj.date).add(1, 'months').toDate(),
 				});
 			}
 		}
@@ -131,7 +161,6 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 	}
 
 	for (const transaction of transactionsToInsert) {
-		const { date, amount, type, teamId } = transaction;
 		try {
 			await db.transaction(async (trx) => {
 				await trx.insert(transactions).values(transaction);
@@ -387,7 +416,7 @@ async function SubtractFromHistories(
 					})
 					.where(eq(bankingAccounts.id, bankingAccountId));
 			} else if (paymentType === 'credit') {
-				const correctDate = date.getDay() < existingBankingAccount.closeDay ? previousMonthDate : date;
+				const correctDate = date.getUTCDate() < existingBankingAccount.closeDay ? previousMonthDate : date;
 				const creditCardInvoice = existingBankingAccount.creditCardInvoices.find((invoice) => {
 					return invoice.month === correctDate.getUTCMonth();
 				});
@@ -512,7 +541,8 @@ async function CreateOrUpdateHistories(
 					})
 					.where(eq(bankingAccounts.id, bankingAccountId));
 			} else if (paymentType === 'credit') {
-				const correctDate = date.getDay() < existingBankingAccount.closeDay ? previousMonthDate : date;
+				const correctDate = date.getUTCDate() < existingBankingAccount.closeDay ? previousMonthDate : date;
+				
 				const creditCardInvoice = existingBankingAccount.creditCardInvoices.find((invoice) => {
 					return invoice.month === correctDate.getUTCMonth();
 				});

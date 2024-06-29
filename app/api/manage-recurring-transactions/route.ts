@@ -5,10 +5,10 @@ import { db } from '@/db';
 import { dailyRecurrenceCheckers, recurringTransactions } from '@/db/schema/finance';
 import { getBusinessDayOfMonth, isWeekday } from '@/lib/utils';
 import { and, eq, or } from 'drizzle-orm';
+import moment from 'moment';
 
 export async function GET() {
 	const date = new Date();
-
 	const [dailyChecker] = await db
 		.select()
 		.from(dailyRecurrenceCheckers)
@@ -30,8 +30,9 @@ export async function GET() {
 		year: date.getUTCFullYear(),
 	});
 
-	const dayInMonth = date.getUTCDate();
-	const businessDayCount = isWeekday(date) ? getBusinessDayOfMonth(date) : 380;
+	const nextMonthDate = moment(date).add(1, 'months').toDate();
+	const dayInMonth = nextMonthDate.getUTCDate();
+	const businessDayCount = isWeekday(nextMonthDate) ? getBusinessDayOfMonth(nextMonthDate) : 380;
 
 	const recurringTransactionsResult = await db
 		.select()
@@ -48,7 +49,7 @@ export async function GET() {
 			const { dayOfTheMonth, businessDay, createdAt, updatedAt, ...transaction } = recurringTransaction;
 			await CreateTransaction({
 				...transaction,
-				date: date,
+				date: nextMonthDate,
 				type: transaction.type === 'income' ? 'income' : 'expense',
 				amount: transaction.amount ?? 0,
 				isRecurring: false,

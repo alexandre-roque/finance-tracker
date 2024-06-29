@@ -103,7 +103,10 @@ function InvoiceComponent({
 	});
 
 	const closeDate = new Date(creditCardInvoice.year, creditCardInvoice.month + 1, invoice.closeDay);
-	const payDate = new Date(creditCardInvoice.year, creditCardInvoice.month + 1, invoice.payDay);
+	const payDate = new Date(creditCardInvoice.year, creditCardInvoice.month + (
+		invoice.payDay < invoice.closeDay ? 2 : 1
+	), invoice.payDay);
+
 	const isClosed = moment().isAfter(closeDate);
 	const isLate = moment().isAfter(payDate);
 

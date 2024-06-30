@@ -53,7 +53,7 @@ export async function GET() {
 				type: transaction.type === 'income' ? 'income' : 'expense',
 				amount: transaction.amount ?? 0,
 				isRecurring: false,
-				bankingAccountId: transaction.bankingAccountId ?? undefined,
+				bankingAccountId: transaction.bankingAccountId ?? '',
 				category: transaction.categoryId ?? '',
 				description: transaction.description ?? '',
 				teamId: transaction.teamId ?? undefined,

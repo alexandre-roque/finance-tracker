@@ -18,6 +18,17 @@ export const GET = auth(async (req) => {
 		if (userSetting) {
 			result = userSetting;
 		} else {
+			const user = await db.query.users.findFirst({
+				where: (users, { eq }) => eq(users.id, userId),
+				columns: {
+					id: true,
+				},
+			});
+
+			if (!user) {
+				redirect('/sign-up');
+			}
+
 			[result] = await db
 				.insert(userSettings)
 				.values({

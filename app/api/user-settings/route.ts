@@ -74,13 +74,13 @@ export const GET = auth(async (req) => {
 				for (const category of defaultCategories) {
 					await db.insert(categories).values({
 						...category,
-						userId: result.id,
+						userId,
 					});
 				}
 
 				await db.insert(bankingAccounts).values({
 					name: 'Conta principal',
-					userId: result.id,
+					userId,
 				});
 			} catch (e) {}
 

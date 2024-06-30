@@ -24,7 +24,7 @@ const SignOut = () => {
 							setIsLoading(false);
 						}}
 					>
-						{isLoading ? <Loader2 /> : 'Sair'}
+						{isLoading ? <Loader2 className='animate-spin' /> : 'Sair'}
 					</Button>
 				</CardContent>
 			</Card>

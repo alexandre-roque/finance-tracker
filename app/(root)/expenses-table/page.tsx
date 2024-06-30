@@ -40,7 +40,7 @@ const ExpensesTable = () => {
 	);
 
 	const handleBankingAccountChange = useCallback(
-		({ value, index }: { value?: string; index: number }) => {
+		({ value, index }: { value: string; index: number }) => {
 			form.setValue(`transactions.${index}.bankingAccountId`, value);
 		},
 		[form]

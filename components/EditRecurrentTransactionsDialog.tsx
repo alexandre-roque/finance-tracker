@@ -61,7 +61,7 @@ function EditRecurrentTransactionsDialog({ open, setOpen, transaction }: Props) 
 	);
 
 	const handleBankingAccountChange = useCallback(
-		(value?: string) => {
+		(value: string) => {
 			form.setValue('bankingAccountId', value);
 		},
 		[form]

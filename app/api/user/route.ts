@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { categories } from '@/db/schema/finance';
+import { bankingAccounts, categories } from '@/db/schema/finance';
 import { users } from '@/db/schema/users';
 import * as bcrypt from 'bcrypt';
 
@@ -75,6 +75,11 @@ export async function POST(request: Request) {
 					userId: result.id,
 				});
 			}
+
+			await db.insert(bankingAccounts).values({
+				name: 'Conta principal',
+				userId: result.id,
+			});
 		} catch (e) {}
 
 		return new Response(

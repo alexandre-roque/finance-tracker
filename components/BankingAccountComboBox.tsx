@@ -14,9 +14,10 @@ import { UpdateUserBankingAccount } from '@/app/wizard/_actions/userSettings';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import CreateBankingAccountDialog from './CreateBankingAccountDialog';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface Props {
-	onChange?: (value?: string) => void;
+	onChange?: (value: string) => void;
 	isConfiguring?: boolean;
 	userSettings?: userSettingsType;
 	firstSelectedValue?: string | null;
@@ -98,7 +99,9 @@ const BankingAccountComboBox = ({ userSettings, onChange, isConfiguring, firstSe
 	}, [bankingAccountsQuery.data, firstSelectedValue]);
 
 	useEffect(() => {
-		if (onChange) onChange(selectedOption?.id);
+		if (selectedOption) {
+			if (onChange) onChange(selectedOption.id);
+		}
 	}, [onChange, selectedOption]);
 
 	if (isDesktop) {
@@ -166,16 +169,6 @@ function OptionList({
 			<CommandList>
 				<CommandEmpty>Nenhum resultado encontrado</CommandEmpty>
 				<CommandGroup>
-					<CommandItem
-						className='justify-between'
-						onSelect={() => {
-							setSelectedOption(null);
-							setOpen(false);
-						}}
-					>
-						Nenhuma conta bancária
-						<Check className={cn('mr-2 w-4 h-4 opacity-0', !selectedOption && 'opacity-100')} />
-					</CommandItem>
 					{bankingAccounts?.map((bankingAccount) => (
 						<CommandItem
 							className='justify-between'
@@ -197,6 +190,9 @@ function OptionList({
 							/>
 						</CommandItem>
 					))}
+					<p className='text-xs text-muted-foreground text-center lg:max-w-[243px] p-2'>
+						Você pode configurar uma padrão nas <Link href='/manage'>configurações</Link>
+					</p>
 				</CommandGroup>
 			</CommandList>
 		</Command>

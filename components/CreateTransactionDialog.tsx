@@ -69,7 +69,6 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 		defaultValues: {
 			type,
 			description: '',
-			bankingAccountId: '',
 			amount: 0,
 			paymentType: type === 'expense' ? 'credit' : undefined,
 			date: new Date(),
@@ -107,7 +106,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 	);
 
 	const handleBankingAccountChange = useCallback(
-		(value?: string) => {
+		(value: string) => {
 			form.setValue('bankingAccountId', value);
 		},
 		[form]

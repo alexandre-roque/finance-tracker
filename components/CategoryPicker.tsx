@@ -14,6 +14,7 @@ import { UpdateUserCategory } from '@/app/wizard/_actions/userSettings';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { Drawer, DrawerContent, DrawerTrigger } from './ui/drawer';
 import SkeletonWrapper from './SkeletonWrapper';
+import Link from 'next/link';
 
 interface Props {
 	type: TransactionType;
@@ -231,6 +232,9 @@ function OptionsList({
 					))}
 				</CommandList>
 			</CommandGroup>
+			<p className='text-xs text-muted-foreground text-center lg:max-w-[243px] p-2'>
+				Você pode configurar uma padrão nas <Link href='/manage'>configurações</Link>
+			</p>
 		</Command>
 	);
 }

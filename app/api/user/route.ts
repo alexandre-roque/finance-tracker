@@ -41,7 +41,6 @@ export async function POST(request: Request) {
 					name: 'Lazer',
 					icon: '🎮',
 					type: 'expense',
-
 				},
 				{
 					name: 'Saúde',
@@ -67,21 +66,16 @@ export async function POST(request: Request) {
 					name: 'Vale alimentação',
 					icon: '🍔',
 					type: 'income',
-				}
+				},
 			];
 
 			for (const category of defaultCategories) {
-				await db
-					.insert(categories)
-					.values({
-						...category,
-						userId: result.id,
-						type: 'expense',
-					});
+				await db.insert(categories).values({
+					...category,
+					userId: result.id,
+				});
 			}
-		} catch (e) {
-
-		}
+		} catch (e) {}
 
 		return new Response(
 			JSON.stringify({

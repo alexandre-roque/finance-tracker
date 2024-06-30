@@ -2,7 +2,7 @@ export const revalidate = 0;
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { auth } from '@/auth';
+import { auth, signOut } from '@/auth';
 import { db } from '@/db';
 import { bankingAccounts, categories, userSettings } from '@/db/schema/finance';
 
@@ -26,7 +26,7 @@ export const GET = auth(async (req) => {
 			});
 
 			if (!user) {
-				redirect('/sign-up');
+				await signOut({ redirectTo: '/sign-in', redirect: true });
 			}
 
 			[result] = await db

@@ -4,14 +4,16 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { db } from '@/db';
-import { eq } from 'drizzle-orm';
-import { userSettings } from '@/db/schema/finance';
+import { bankingAccounts, categories, userSettings } from '@/db/schema/finance';
 
 export const GET = auth(async (req) => {
-	if (req.auth?.user?.id) {
+	const userId = req.auth?.user?.id;
+	if (userId) {
 		let result;
 
-		const [userSetting] = await db.select().from(userSettings).where(eq(userSettings.userId, req.auth.user.id));
+		const userSetting = await db.query.userSettings.findFirst({
+			where: (userSettings, { eq }) => eq(userSettings.userId, userId),
+		});
 
 		if (userSetting) {
 			result = userSetting;
@@ -19,10 +21,68 @@ export const GET = auth(async (req) => {
 			[result] = await db
 				.insert(userSettings)
 				.values({
-					userId: req.auth.user.id,
+					userId: userId,
 					currency: 'BRL',
 				})
 				.returning();
+
+			try {
+				// Criar categorias padrões para o usuário
+				const defaultCategories = [
+					{
+						name: 'Mercado',
+						icon: '🛒',
+						type: 'expense',
+					},
+					{
+						name: 'Transporte',
+						icon: '🚗',
+						type: 'expense',
+					},
+					{
+						name: 'Lazer',
+						icon: '🎮',
+						type: 'expense',
+					},
+					{
+						name: 'Saúde',
+						icon: '🏥',
+						type: 'expense',
+					},
+					{
+						name: 'Educação',
+						icon: '📚',
+						type: 'expense',
+					},
+					{
+						name: 'Outros',
+						icon: '💸',
+						type: 'expense',
+					},
+					{
+						name: 'Salário',
+						icon: '💰',
+						type: 'income',
+					},
+					{
+						name: 'Vale alimentação',
+						icon: '🍔',
+						type: 'income',
+					},
+				];
+
+				for (const category of defaultCategories) {
+					await db.insert(categories).values({
+						...category,
+						userId: result.id,
+					});
+				}
+
+				await db.insert(bankingAccounts).values({
+					name: 'Conta principal',
+					userId: result.id,
+				});
+			} catch (e) {}
 
 			revalidatePath('/');
 		}

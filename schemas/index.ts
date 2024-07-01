@@ -29,6 +29,7 @@ export const createBankingAccountSchema = z.object({
 	closeDay: z.coerce.number().gte(0).max(31),
 	payDay: z.coerce.number().gte(0).max(31),
 	balance: z.coerce.number().gte(0).default(0),
+	hideInBalance: z.boolean().default(false),
 	bankingAccountId: z.string().optional(),
 });
 
@@ -102,6 +103,7 @@ export const OverviewQuerySchema = z
 export const createTeamSchema = z.object({
 	name: z.string().min(3).max(20),
 	description: z.string().max(40),
+	hideOnLandingPage: z.boolean().default(false),
 });
 
 export type createTeamSchemaType = z.infer<typeof createTeamSchema>;
@@ -171,6 +173,7 @@ export const editTeamSchema = z.object({
 	description: z.string().max(40),
 	splitType: z.enum(possibleSplitTypesArray),
 	members: z.array(memberSchema),
+	hideOnLandingPage: z.boolean().default(false),
 	teamId: z.string(),
 });
 

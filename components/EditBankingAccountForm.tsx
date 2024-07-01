@@ -6,13 +6,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createBankingAccountSchema, createBankingAccountSchemaType } from '@/schemas';
 import { z } from 'zod';
-import { Form } from './ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from './ui/form';
 import CustomInput from './CustomInput';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { bankingAccountsType } from '@/db/schema/finance';
 import { CreateOrUpdateBankingAccount } from '@/app/(root)/_actions/bankingAccounts';
+import { Switch } from './ui/switch';
 
 const EditBankingAccountForm = ({
 	setIsOpen,
@@ -110,6 +111,25 @@ const EditBankingAccountForm = ({
 					label='Valor em conta'
 					type='number'
 					placeholder='Exemplo: 1000'
+				/>
+
+				<FormField
+					control={form.control}
+					name='hideInBalance'
+					render={({ field }) => (
+						<FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+							<div className='space-y-0.5'>
+								<FormLabel className='text-base'>Esconder no valor total em contas</FormLabel>
+								<FormDescription>
+									Ess opção faz com que a conta não seja levada em consideração no valor total em
+									contas
+								</FormDescription>
+							</div>
+							<FormControl>
+								<Switch checked={field.value} onCheckedChange={field.onChange} />
+							</FormControl>
+						</FormItem>
+					)}
 				/>
 
 				<Button type='submit' disabled={isPending} className='w-full sm:w-auto'>

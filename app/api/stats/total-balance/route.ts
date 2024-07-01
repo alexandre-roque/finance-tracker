@@ -20,12 +20,10 @@ export const GET = auth(async (req) => {
 export type GetTotalBalanceStatsResponseType = Awaited<ReturnType<typeof getTotalBalanceStats>>;
 
 async function getTotalBalanceStats(userId: string) {
-	const date = new Date();
-
 	const [balance] = await db
 		.select({ value: sum(bankingAccounts.balance) })
 		.from(bankingAccounts)
-		.where(eq(bankingAccounts.userId, userId));
+		.where(and(eq(bankingAccounts.userId, userId), eq(bankingAccounts.hideInBalance, false)));
 
 	const [totalCredit] = await db
 		.select({ value: sum(creditCardInvoices.amount) })
@@ -40,72 +38,88 @@ async function getTotalBalanceStats(userId: string) {
 	const nextMonth = moment(m).add(1, 'months').month();
 
 	const accountsThatClosesBeforeToday = await db.query.bankingAccounts.findMany({
-		where: (bankingAccounts, { lt,eq,and }) => and(
-			lt(bankingAccounts.closeDay, currentDay),
-			eq(bankingAccounts.userId, userId)
-		),
+		where: (bankingAccounts, { lt, eq, and }) =>
+			and(lt(bankingAccounts.closeDay, currentDay), eq(bankingAccounts.userId, userId)),
 		with: {
 			creditCardInvoices: {
-				where: (creditCardInvoices, { eq, or, and }) => and(
-					or(
-						eq(creditCardInvoices.month, currentMonth),
-						eq(creditCardInvoices.month, nextMonth)
+				where: (creditCardInvoices, { eq, or, and }) =>
+					and(
+						or(eq(creditCardInvoices.month, currentMonth), eq(creditCardInvoices.month, nextMonth)),
+						eq(creditCardInvoices.isPaid, false)
 					),
-					eq(creditCardInvoices.isPaid, false)
-				)
-			}
-		}
+			},
+		},
 	});
 
 	const accountsThatClosed = await db.query.bankingAccounts.findMany({
-		where: (bankingAccounts, { gte }) => and( 
-			gte(bankingAccounts.closeDay, currentDay), 
-			eq(bankingAccounts.userId, userId)
-		),
+		where: (bankingAccounts, { gte }) =>
+			and(gte(bankingAccounts.closeDay, currentDay), eq(bankingAccounts.userId, userId)),
 		with: {
 			creditCardInvoices: {
-				where: (creditCardInvoices, { eq, or, and }) => and(
-					or(
-						eq(creditCardInvoices.month, currentMonth),
-						eq(creditCardInvoices.month, prevMonth)
+				where: (creditCardInvoices, { eq, or, and }) =>
+					and(
+						or(eq(creditCardInvoices.month, currentMonth), eq(creditCardInvoices.month, prevMonth)),
+						eq(creditCardInvoices.isPaid, false)
 					),
-					eq(creditCardInvoices.isPaid, false)
-				)
-			}
-		}
+			},
+		},
 	});
 
-	const currentCredit = { value: accountsThatClosesBeforeToday.reduce((acc, account) => acc + account.creditCardInvoices.reduce((acc, invoice) => {
-		if (invoice.month === currentMonth) {
-			return acc + invoice.amount;
-		}
+	const currentCredit = {
+		value: accountsThatClosesBeforeToday.reduce(
+			(acc, account) =>
+				acc +
+				account.creditCardInvoices.reduce((acc, invoice) => {
+					if (invoice.month === currentMonth) {
+						return acc + invoice.amount;
+					}
 
-		return acc;
-	}, 0), 0)};
+					return acc;
+				}, 0),
+			0
+		),
+	};
 
-	currentCredit.value += accountsThatClosed.reduce((acc, account) => acc + account.creditCardInvoices.reduce((acc, invoice) => {
-		if (invoice.month === prevMonth) {
-			return acc + invoice.amount;
-		}
+	currentCredit.value += accountsThatClosed.reduce(
+		(acc, account) =>
+			acc +
+			account.creditCardInvoices.reduce((acc, invoice) => {
+				if (invoice.month === prevMonth) {
+					return acc + invoice.amount;
+				}
 
-		return acc;
-	},0), 0);
+				return acc;
+			}, 0),
+		0
+	);
 
-	const nextCredit = { value: accountsThatClosesBeforeToday.reduce((acc, account) => acc + account.creditCardInvoices.reduce((acc, invoice) => {
-		if (invoice.month === nextMonth) {
-			return acc + invoice.amount;
-		}
-		
-		return acc;
-	}, 0), 0)};
+	const nextCredit = {
+		value: accountsThatClosesBeforeToday.reduce(
+			(acc, account) =>
+				acc +
+				account.creditCardInvoices.reduce((acc, invoice) => {
+					if (invoice.month === nextMonth) {
+						return acc + invoice.amount;
+					}
 
-	nextCredit.value += accountsThatClosed.reduce((acc, account) => acc + account.creditCardInvoices.reduce((acc, invoice) => {
-		if (invoice.month === currentMonth) {
-			return acc + invoice.amount;
-		}
+					return acc;
+				}, 0),
+			0
+		),
+	};
 
-		return acc;
-	}, 0), 0);
+	nextCredit.value += accountsThatClosed.reduce(
+		(acc, account) =>
+			acc +
+			account.creditCardInvoices.reduce((acc, invoice) => {
+				if (invoice.month === currentMonth) {
+					return acc + invoice.amount;
+				}
+
+				return acc;
+			}, 0),
+		0
+	);
 
 	return {
 		balance,

@@ -11,7 +11,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from '@/components/ui/dialog';
-import { Form } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, PlusSquare } from 'lucide-react';
 import React, { ReactNode, useCallback, useState } from 'react';
@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 import CustomInput from './CustomInput';
 import { CreateTeam } from '@/app/(root)/_actions/teams';
 import { createTeamSchema, createTeamSchemaType } from '@/schemas';
+import { Switch } from '@/components/ui/switch';
 
 interface Props {
 	trigger?: ReactNode;
@@ -35,6 +36,7 @@ function CreateTeamDialog({ trigger }: Props) {
 		defaultValues: {
 			name: '',
 			description: '',
+			hideOnLandingPage: false,
 		},
 	});
 
@@ -101,12 +103,35 @@ function CreateTeamDialog({ trigger }: Props) {
 				</DialogHeader>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-						<CustomInput control={form.control} name='name' label='Nome' placeholder='Exemplo: Casa ou investimentos' />
+						<CustomInput
+							control={form.control}
+							name='name'
+							label='Nome'
+							placeholder='Exemplo: Casa ou investimentos'
+						/>
 						<CustomInput
 							control={form.control}
 							name='description'
 							label='Descrição'
 							placeholder='Exemplo: Conta da casa'
+						/>
+						<FormField
+							control={form.control}
+							name='hideOnLandingPage'
+							render={({ field }) => (
+								<FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+									<div className='space-y-0.5'>
+										<FormLabel className='text-base'>Não selecionar automaticamente</FormLabel>
+										<FormDescription>
+											Ess opção faz com que o time não seja selecionado automaticamente na tela
+											inicial
+										</FormDescription>
+									</div>
+									<FormControl>
+										<Switch checked={field.value} onCheckedChange={field.onChange} />
+									</FormControl>
+								</FormItem>
+							)}
 						/>
 					</form>
 				</Form>

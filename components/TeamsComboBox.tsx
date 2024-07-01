@@ -33,6 +33,7 @@ export type teamsQueryType = {
 		name: string;
 		description: string | null;
 		ownerId: string;
+		hideOnLandingPage: boolean;
 	};
 };
 

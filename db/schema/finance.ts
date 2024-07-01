@@ -34,6 +34,7 @@ export const bankingAccounts = sqliteTable('bankingAccount', {
 	closeDay: integer('closeDay').default(3).notNull(),
 	balance: integer('balance').default(0).notNull(),
 	automaticDebitInvoices: integer('automaticDebitInvoices', { mode: 'boolean' }).default(false),
+	hideInBalance: integer('hideInBalance', { mode: 'boolean' }).default(false),
 });
 
 export type bankingAccountsType = typeof bankingAccounts.$inferSelect;
@@ -165,6 +166,7 @@ export const teams = sqliteTable('team', {
 	name: text('name').notNull(),
 	description: text('description'),
 	splitType: text('splitType').default('percentage').notNull(),
+	hideOnLandingPage: integer('hideOnLandingPage', { mode: 'boolean' }).default(false),
 	ownerId: text('ownerId')
 		.notNull()
 		.references(() => users.id, { onDelete: 'cascade' }),

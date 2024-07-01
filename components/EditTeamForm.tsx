@@ -1,22 +1,21 @@
 'use client';
 
 import { ResultQueryTeamsWithMembers } from '@/app/(root)/teams/page';
-import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { possibleSplitTypesArray, PossibleSplitTypes, editTeamSchema, editTeamSchemaType } from '@/schemas';
-import { z } from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel } from './ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from './ui/form';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { EditTeam, EditTeamMember } from '@/app/(root)/_actions/teams';
+import { EditTeam } from '@/app/(root)/_actions/teams';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import CustomInput from './CustomInput';
-import { useSession } from 'next-auth/react';
 import { Input } from './ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
+import { Switch } from '@/components/ui/switch';
 
 export const SPLIT_TYPE_MAP = {
 	percentage: 'Porcentagem',
@@ -37,6 +36,7 @@ const EditTeamForm = ({
 		defaultValues: {
 			name: team.team.name,
 			description: team.team.description || '',
+			hideOnLandingPage: team.team.hideOnLandingPage || false,
 			splitType: team.team.splitType as PossibleSplitTypes,
 			members: team.team.members.map((member) => ({
 				percentage: member.percentage,
@@ -45,8 +45,6 @@ const EditTeamForm = ({
 			teamId: team.team.id,
 		},
 	});
-
-	const { errors } = form.formState;
 
 	const splitTypeValue = form.watch('splitType');
 
@@ -94,18 +92,31 @@ const EditTeamForm = ({
 	return (
 		<Form {...form}>
 			<form className='flex flex-col gap-3 space-y-2 md:px-0 px-4' onSubmit={form.handleSubmit(onSubmit)}>
-				<CustomInput
-					control={form.control}
-					name='name'
-					label='Nome'
-					placeholder='Nome do time'
-				/>
+				<CustomInput control={form.control} name='name' label='Nome' placeholder='Nome do time' />
 
 				<CustomInput
 					control={form.control}
 					name='description'
 					label='Descrição'
 					placeholder='Descrição do time'
+				/>
+
+				<FormField
+					control={form.control}
+					name='hideOnLandingPage'
+					render={({ field }) => (
+						<FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+							<div className='space-y-0.5'>
+								<FormLabel className='text-base'>Não selecionar automaticamente</FormLabel>
+								<FormDescription>
+									Ess opção faz com que o time não seja selecionado automaticamente na tela inicial
+								</FormDescription>
+							</div>
+							<FormControl>
+								<Switch checked={field.value} onCheckedChange={field.onChange} />
+							</FormControl>
+						</FormItem>
+					)}
 				/>
 
 				<FormField

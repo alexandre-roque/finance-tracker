@@ -57,19 +57,21 @@ function Overview() {
 
 	useEffect(() => {
 		if (teamsQuery.data) {
-			const data = teamsQuery.data?.map((teamMember: any) => ({
+			const data = teamsQuery.data.map((teamMember: any) => ({
 				label: teamMember.team.name,
 				value: teamMember.team.id,
+				hideOnLandingPage: teamMember.team.hideOnLandingPage,
 			}));
 
 			setSelectedTeams((prev) => {
-				data.forEach((op: Option) => {
+				data.filter((teamMember) => !teamMember.hideOnLandingPage).forEach((op: Option) => {
 					if (!prev.some((t) => t.value === op.value)) {
 						prev.push(op);
 					}
 				});
 				return [...prev];
 			});
+
 			setDefaultOptions((prev) => {
 				data.forEach((op: Option) => {
 					if (!prev.some((t) => t.value === op.value)) {

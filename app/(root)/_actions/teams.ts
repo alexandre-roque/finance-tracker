@@ -29,13 +29,14 @@ export async function CreateTeam(form: createTeamSchemaType) {
 	}
 
 	const userId = session.user.id;
-	const { name, description } = parsedBody.data;
+	const { name, description, hideOnLandingPage } = parsedBody.data;
 	const [team] = await db
 		.insert(teams)
 		.values({
 			ownerId: userId,
 			name,
 			description: description || '',
+			hideOnLandingPage,
 		})
 		.returning();
 
@@ -253,7 +254,7 @@ export async function EditTeam(form: editTeamSchemaType) {
 	}
 
 	const userId = session.user.id;
-	const { name, description, splitType, members } = parsedBody.data;
+	const { name, description, splitType, members, hideOnLandingPage } = parsedBody.data;
 
 	const team = await db.query.teams.findFirst({
 		with: {
@@ -288,6 +289,7 @@ export async function EditTeam(form: editTeamSchemaType) {
 			name,
 			description,
 			splitType,
+			hideOnLandingPage,
 		})
 		.where(eq(teams.id, form.teamId));
 

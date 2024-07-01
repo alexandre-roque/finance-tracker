@@ -32,6 +32,7 @@ export type ResultQueryTeamsWithMembers = {
 			name: string | null;
 		};
 		splitType: string;
+		hideOnLandingPage: boolean;
 		members: {
 			teamId: string;
 			id: string;

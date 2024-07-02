@@ -571,13 +571,19 @@ async function CreateOrUpdateHistories(
 	}
 }
 
-export async function PayInvoice({ invoiceId }: { invoiceId: string }) {
-	const session = await auth();
-	if (!session || !session.user || !session.user.id) {
-		redirect('/sign-in');
+export async function PayInvoice({ invoiceId, isRecurring, recurringUserId }: { invoiceId: string, isRecurring?: boolean, recurringUserId?: string }) {
+	let userId = '';
+	if (!isRecurring) {
+		const session = await auth();
+		if (!session || !session.user || !session.user.id) {
+			redirect('/sign-in');
+		} else {
+			userId = session.user.id;
+		}
+	} else {
+		userId = recurringUserId ?? '';
 	}
 
-	const userId = session.user.id;
 	const invoice = await db.query.creditCardInvoices.findFirst({
 		where: (creditCardInvoices, { eq, and }) =>
 			and(eq(creditCardInvoices.id, invoiceId), eq(creditCardInvoices.userId, userId)),

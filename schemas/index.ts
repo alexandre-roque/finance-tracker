@@ -30,6 +30,7 @@ export const createBankingAccountSchema = z.object({
 	payDay: z.coerce.number().gte(0).max(31),
 	balance: z.coerce.number().default(0),
 	hideInBalance: z.boolean().default(false),
+	automaticDebitInvoices: z.boolean().default(false),
 	bankingAccountId: z.string().optional(),
 });
 

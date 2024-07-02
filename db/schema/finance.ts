@@ -231,6 +231,20 @@ export const dailyRecurrenceCheckers = sqliteTable(
 
 export type dailyRecurrenceCheckersType = typeof dailyRecurrenceCheckers.$inferSelect;
 
+export const dailyDebitCheckers = sqliteTable(
+	'dailyDebitChecker',
+	{
+		day: integer('day'),
+		month: integer('month'),
+		year: integer('year'),
+	},
+	(table) => ({
+		pk: primaryKey({ columns: [table.day, table.month, table.year] }),
+	})
+);
+
+export type dailyDebitCheckersType = typeof dailyDebitCheckers.$inferSelect;
+
 export const inviteTokens = sqliteTable('inviteToken', {
 	id: text('id')
 		.primaryKey()

@@ -30,6 +30,7 @@ export async function CreateOrUpdateBankingAccount(form: createBankingAccountSch
 					closeDay: parsedBody.data.closeDay,
 					balance: parsedBody.data.balance,
 					hideInBalance: parsedBody.data.hideInBalance,
+					automaticDebitInvoices: parsedBody.data.automaticDebitInvoices,
 				})
 				.returning();
 			return { success: true };
@@ -47,6 +48,7 @@ export async function CreateOrUpdateBankingAccount(form: createBankingAccountSch
 					closeDay: parsedBody.data.closeDay,
 					balance: parsedBody.data.balance,
 					hideInBalance: parsedBody.data.hideInBalance,
+					automaticDebitInvoices: parsedBody.data.automaticDebitInvoices,
 				})
 				.where(
 					and(

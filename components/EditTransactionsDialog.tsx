@@ -105,6 +105,10 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 				queryKey: ['transactions'],
 			});
 
+			queryClient.invalidateQueries({
+				queryKey: ['invoices'],
+			});
+
 			setOpen(false);
 		},
 		onError: (err) => {

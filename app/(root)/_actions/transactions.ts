@@ -297,6 +297,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 	const oldDate = oldTransaction.date;
 	const oldTeamId = oldTransaction.teamId;
 	const oldBankingAccountId = oldTransaction.bankingAccountId;
+	const oldPaymentType = oldTransaction.paymentType;
 
 	await db.transaction(async (trx) => {
 		await trx
@@ -319,7 +320,8 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 			oldAmount !== amount ||
 			oldTeamId !== teamId ||
 			!moment(date).isSame(oldDate) ||
-			oldBankingAccountId !== bankingAccountId
+			oldBankingAccountId !== bankingAccountId ||
+			oldPaymentType !== paymentType
 		) {
 			await SubtractFromHistories(trx, oldTransaction);
 			await CreateOrUpdateHistories(trx, { date, type, amount, userId, teamId, bankingAccountId, paymentType });

@@ -94,20 +94,12 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 
 			let d;
 			if (dayOfTheMonth) {
-				d = new Date(
-					newDate.getUTCFullYear(),
-					newDate.getUTCMonth(),
-					dayOfTheMonth
-				);
+				d = new Date(newDate.getUTCFullYear(), newDate.getUTCMonth(), dayOfTheMonth);
 			} else if (businessDay) {
 				const daysInMonth = getDaysInMonth(newDate);
 				for (let i = 1; i <= daysInMonth; i++) {
 					if (i === businessDay) {
-						d = new Date(
-							newDate.getUTCFullYear(),
-							newDate.getUTCMonth(),
-							i
-						);
+						d = new Date(newDate.getUTCFullYear(), newDate.getUTCMonth(), i);
 
 						break;
 					}
@@ -284,7 +276,8 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 
 	const userId = session.user.id;
 
-	const { amount, category, date, description, type, teamId, bankingAccountId, transactionId, paymentType } = parsedBody.data;
+	const { amount, category, date, description, type, teamId, bankingAccountId, transactionId, paymentType } =
+		parsedBody.data;
 
 	const [categoryRow] = await db.select().from(categories).where(eq(categories.id, category));
 
@@ -303,6 +296,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 	const oldAmount = oldTransaction.amount;
 	const oldDate = oldTransaction.date;
 	const oldTeamId = oldTransaction.teamId;
+	const oldBankingAccountId = oldTransaction.bankingAccountId;
 
 	await db.transaction(async (trx) => {
 		await trx
@@ -321,7 +315,12 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 			})
 			.where(eq(transactions.id, transactionId));
 
-		if (oldAmount !== amount || !moment(date).isSame(oldDate) || oldTeamId !== teamId) {
+		if (
+			oldAmount !== amount ||
+			oldTeamId !== teamId ||
+			!moment(date).isSame(oldDate) ||
+			oldBankingAccountId !== bankingAccountId
+		) {
 			await SubtractFromHistories(trx, oldTransaction);
 			await CreateOrUpdateHistories(trx, { date, type, amount, userId, teamId, bankingAccountId, paymentType });
 		}
@@ -542,7 +541,7 @@ async function CreateOrUpdateHistories(
 					.where(eq(bankingAccounts.id, bankingAccountId));
 			} else if (paymentType === 'credit') {
 				const correctDate = date.getUTCDate() < existingBankingAccount.closeDay ? previousMonthDate : date;
-				
+
 				const creditCardInvoice = existingBankingAccount.creditCardInvoices.find((invoice) => {
 					return invoice.month === correctDate.getUTCMonth();
 				});

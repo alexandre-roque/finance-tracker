@@ -118,7 +118,7 @@ export default function AuthForm({ type }: { type: 'sign-in' | 'sign-up' }) {
 				<p className='text-14 font-normal text-gray-600'>
 					{type === 'sign-in' ? 'Deseja realizar cadastro?' : 'Já possui uma conta?'}
 				</p>
-				<Link href={type === 'sign-in' ? '/sign-up' : '/sign-in'} className='form-link'>
+				<Link href={type === 'sign-in' ? '/sign-up' : '/sign-in'} className='form-link underline'>
 					{type === 'sign-in' ? 'Cadastrar' : 'Entrar'}
 				</Link>
 			</footer>

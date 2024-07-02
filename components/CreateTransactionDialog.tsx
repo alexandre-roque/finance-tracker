@@ -182,6 +182,9 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 				<DialogHeader>
 					<DialogTitle>
 						Criar nova <TransactionTitle type={type} />
+						{type === 'expense' && (
+							<>{', ou '} <Link className='underline' href='/expenses-table'>cadastrar em lote</Link></>
+						)}
 					</DialogTitle>
 				</DialogHeader>
 
@@ -391,12 +394,6 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 						{isPending && <Loader2 className='animate-spin' />}
 					</Button>
 				</DialogFooter>
-				{type === 'expense' && (
-					<div className='flex justify-center gap-2 mt-4'>
-						<p className='text-14 font-normal text-gray-600'>Cadastrar despesas em lote:</p>
-						<Link href='/expenses-table'>Ir para página</Link>
-					</div>
-				)}
 			</DialogContent>
 		</Dialog>
 	);

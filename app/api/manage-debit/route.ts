@@ -1,6 +1,6 @@
 export const revalidate = 0;
 
-import { PayInvoice } from '@/app/(root)/_actions/transactions';
+import { PayInvoice } from '@/app/(root)/_actions/invoices';
 import { db } from '@/db';
 import { bankingAccounts, creditCardInvoices, dailyDebitCheckers } from '@/db/schema/finance';
 import { and, eq, sql } from 'drizzle-orm';
@@ -31,13 +31,8 @@ export async function GET() {
 	const accountsWithPayDayToday = await db
 		.select()
 		.from(bankingAccounts)
-		.where(
-			and(
-				eq(bankingAccounts.payDay, date.getUTCDate()),
-				eq(bankingAccounts.automaticDebitInvoices, true),
-			),
-		);
-		
+		.where(and(eq(bankingAccounts.payDay, date.getUTCDate()), eq(bankingAccounts.automaticDebitInvoices, true)));
+
 	for (const account of accountsWithPayDayToday) {
 		const creditCardInvoicesResult = await db
 			.select()
@@ -46,10 +41,12 @@ export async function GET() {
 				and(
 					eq(creditCardInvoices.isPaid, false),
 					eq(creditCardInvoices.year, date.getUTCFullYear()),
-					sql`month = ${date.getUTCMonth()} - CASE WHEN ${account.payDay} < ${account.closeDay} THEN 2 ELSE 1 END`,
-				),
+					sql`month = ${date.getUTCMonth()} - CASE WHEN ${account.payDay} < ${
+						account.closeDay
+					} THEN 2 ELSE 1 END`
+				)
 			);
-	
+
 		for (const invoice of creditCardInvoicesResult) {
 			await PayInvoice({ invoiceId: invoice.id, isRecurring: true, recurringUserId: account.userId });
 		}

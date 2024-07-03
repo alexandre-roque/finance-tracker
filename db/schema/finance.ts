@@ -102,6 +102,7 @@ export const transactions = sqliteTable('transaction', {
 	categoryId: text('categoryId'),
 	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
 	installmentId: text('installmentId'),
+	isPaid: integer('isPaid', { mode: 'boolean' }).default(true),
 });
 
 export type transactionsType = typeof transactions.$inferSelect;

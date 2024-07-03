@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 const LogoutDropdownItem = () => {
 	const router = useRouter();
-	return <DropdownMenuItem onClick={() => router.push('/api/auth/signout')}>Logout</DropdownMenuItem>;
+	return <DropdownMenuItem onClick={() => router.push('/api/auth/signout')}>Sair</DropdownMenuItem>;
 };
 
 export default LogoutDropdownItem;

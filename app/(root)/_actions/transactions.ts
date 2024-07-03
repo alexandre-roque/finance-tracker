@@ -25,7 +25,7 @@ import {
 import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { ulid } from 'ulid';
-import { getDaysInMonth } from 'date-fns';
+import { getDaysInMonth, startOfDay } from 'date-fns';
 
 type DBTransactionType = Parameters<typeof db.transaction>[0] extends (trx: infer T) => Promise<any> ? T : never;
 
@@ -100,7 +100,6 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 				for (let i = 1; i <= daysInMonth; i++) {
 					if (i === businessDay) {
 						d = new Date(newDate.getUTCFullYear(), newDate.getUTCMonth(), i);
-
 						break;
 					}
 				}
@@ -118,6 +117,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 				categoryId: category,
 				paymentType: paymentType,
 				date: DateToUTCDate(d || newDate),
+				isPaid: true,
 			};
 
 			transactionsToInsert.push(obj);
@@ -148,15 +148,21 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 				categoryIcon: categoryRow.icon,
 				categoryId: category,
 				paymentType: paymentType,
+				isPaid: true,
 			});
 		}
 	}
 
 	for (const transaction of transactionsToInsert) {
 		try {
+			if (moment().isBefore(startOfDay(transaction.date)) && (transaction.type === 'income' || transaction.paymentType === 'debit')) {
+				transaction.isPaid = false;
+			}
+
 			await db.transaction(async (trx) => {
 				await trx.insert(transactions).values(transaction);
 				await CreateOrUpdateHistories(trx, transaction);
+				await CreateOrUpdateInvoices(trx, transaction);
 			});
 		} catch (e) {
 			console.error(e);
@@ -260,6 +266,7 @@ export async function DeleteTransaction({
 				.where(and(eq(transactions.userId, userId), eq(transactions.id, transaction.id)));
 
 			await SubtractFromHistories(trx, transaction);
+			await SubtractFromInvoices(trx, transaction);
 		});
 	}
 }
@@ -324,8 +331,15 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 			oldBankingAccountId !== bankingAccountId ||
 			oldPaymentType !== paymentType
 		) {
+			let isPaid = true;
+			if (moment().isBefore(startOfDay(date)) && (type === 'income' || paymentType === 'debit')) {
+				isPaid = false;
+			}
+
 			await SubtractFromHistories(trx, oldTransaction);
+			await SubtractFromInvoices(trx, oldTransaction);
 			await CreateOrUpdateHistories(trx, { date, type, amount, userId, teamId, bankingAccountId, paymentType });
+			await CreateOrUpdateInvoices(trx, { date, type, amount, userId, teamId, bankingAccountId, paymentType, isPaid });
 		}
 	});
 }
@@ -338,8 +352,6 @@ async function SubtractFromHistories(
 		amount,
 		userId,
 		teamId,
-		bankingAccountId,
-		paymentType,
 	}: Partial<transactionsType> & { date: Date; userId: string; type: string; amount: number }
 ) {
 	// Atualiza monthHistory
@@ -385,54 +397,6 @@ async function SubtractFromHistories(
 				income: (existingYearHistory.income ?? 0) - (type === 'income' ? amount : 0),
 			})
 			.where(eq(yearHistories.id, existingYearHistory.id));
-	}
-
-	if (bankingAccountId) {
-		const previousMonthDate = moment(date).subtract(1, 'month').toDate();
-
-		const existingBankingAccount = await trx.query.bankingAccounts.findFirst({
-			where: (bankingAccounts, { eq }) => eq(bankingAccounts.id, bankingAccountId),
-			with: {
-				creditCardInvoices: {
-					where: (creditCardInvoices, { eq, and, or }) =>
-						or(
-							and(
-								eq(creditCardInvoices.month, date.getUTCMonth()),
-								eq(creditCardInvoices.year, date.getUTCFullYear())
-							),
-							and(
-								eq(creditCardInvoices.month, previousMonthDate.getUTCMonth()),
-								eq(creditCardInvoices.year, previousMonthDate.getUTCFullYear())
-							)
-						),
-				},
-			},
-		});
-
-		if (existingBankingAccount) {
-			if (paymentType === 'debit' || type === 'income') {
-				await trx
-					.update(bankingAccounts)
-					.set({
-						balance: (existingBankingAccount.balance ?? 0) + (type === 'expense' ? -amount : amount),
-					})
-					.where(eq(bankingAccounts.id, bankingAccountId));
-			} else if (paymentType === 'credit') {
-				const correctDate = date.getUTCDate() < existingBankingAccount.closeDay ? previousMonthDate : date;
-				const creditCardInvoice = existingBankingAccount.creditCardInvoices.find((invoice) => {
-					return invoice.month === correctDate.getUTCMonth();
-				});
-
-				if (creditCardInvoice) {
-					await trx
-						.update(creditCardInvoices)
-						.set({
-							amount: (creditCardInvoice.amount ?? 0) + (type === 'expense' ? -amount : amount),
-						})
-						.where(eq(creditCardInvoices.id, creditCardInvoice.id));
-				}
-			}
-		}
 	}
 }
 
@@ -511,7 +475,92 @@ async function CreateOrUpdateHistories(
 			income: type === 'income' ? amount : 0,
 		});
 	}
+}
 
+export async function CreateOrUpdateInvoices(
+	trx: DBTransactionType,
+	{
+		date,
+		type,
+		amount,
+		userId,
+		paymentType,
+		bankingAccountId,
+		isPaid,
+	}: Partial<transactionsType> & { date: Date; userId: string; type: string; amount: number }
+) {
+	if (bankingAccountId) {
+		const previousMonthDate = moment(date).subtract(1, 'month').toDate();
+
+		const existingBankingAccount = await trx.query.bankingAccounts.findFirst({
+			where: (bankingAccounts, { eq }) => eq(bankingAccounts.id, bankingAccountId),
+			with: {
+				creditCardInvoices: {
+					where: (creditCardInvoices, { eq, and, or }) =>
+						or(
+							and(
+								eq(creditCardInvoices.month, date.getUTCMonth()),
+								eq(creditCardInvoices.year, date.getUTCFullYear())
+							),
+							and(
+								eq(creditCardInvoices.month, previousMonthDate.getUTCMonth()),
+								eq(creditCardInvoices.year, previousMonthDate.getUTCFullYear())
+							)
+						),
+				},
+			},
+		});
+
+		if (existingBankingAccount) {
+			if (paymentType === 'debit' || type === 'income') {
+				if (isPaid) {
+					await trx
+						.update(bankingAccounts)
+						.set({
+							balance: (existingBankingAccount.balance ?? 0) + (type === 'expense' ? -amount : amount),
+						})
+						.where(eq(bankingAccounts.id, bankingAccountId));
+				}
+			} else if (paymentType === 'credit') {
+				const correctDate = date.getUTCDate() < existingBankingAccount.closeDay ? previousMonthDate : date;
+
+				const creditCardInvoice = existingBankingAccount.creditCardInvoices.find((invoice) => {
+					return invoice.month === correctDate.getUTCMonth();
+				});
+
+				if (creditCardInvoice) {
+					await trx
+						.update(creditCardInvoices)
+						.set({
+							amount: (creditCardInvoice.amount ?? 0) + (type === 'expense' ? amount : -amount),
+							isPaid: false,
+							paymentDate: null,
+						})
+						.where(eq(creditCardInvoices.id, creditCardInvoice.id));
+				} else {
+					await trx.insert(creditCardInvoices).values({
+						userId: userId,
+						month: correctDate.getUTCMonth(),
+						year: correctDate.getUTCFullYear(),
+						amount: type === 'expense' ? amount : -amount,
+						bankingAccountId,
+					});
+				}
+			}
+		}
+	}
+}
+
+async function SubtractFromInvoices(
+	trx: DBTransactionType,
+	{
+		date,
+		type,
+		amount,
+		bankingAccountId,
+		paymentType,
+	}: Partial<transactionsType> & { date: Date; type: string; amount: number }
+) {
 	if (bankingAccountId) {
 		const previousMonthDate = moment(date).subtract(1, 'month').toDate();
 
@@ -544,7 +593,6 @@ async function CreateOrUpdateHistories(
 					.where(eq(bankingAccounts.id, bankingAccountId));
 			} else if (paymentType === 'credit') {
 				const correctDate = date.getUTCDate() < existingBankingAccount.closeDay ? previousMonthDate : date;
-
 				const creditCardInvoice = existingBankingAccount.creditCardInvoices.find((invoice) => {
 					return invoice.month === correctDate.getUTCMonth();
 				});
@@ -553,19 +601,9 @@ async function CreateOrUpdateHistories(
 					await trx
 						.update(creditCardInvoices)
 						.set({
-							amount: (creditCardInvoice.amount ?? 0) + (type === 'expense' ? amount : -amount),
-							isPaid: false,
-							paymentDate: null,
+							amount: (creditCardInvoice.amount ?? 0) + (type === 'expense' ? -amount : amount),
 						})
 						.where(eq(creditCardInvoices.id, creditCardInvoice.id));
-				} else {
-					await trx.insert(creditCardInvoices).values({
-						userId: userId,
-						month: correctDate.getUTCMonth(),
-						year: correctDate.getUTCFullYear(),
-						amount: type === 'expense' ? amount : -amount,
-						bankingAccountId,
-					});
 				}
 			}
 		}

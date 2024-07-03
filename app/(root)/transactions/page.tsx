@@ -3,7 +3,7 @@
 import TransactionTable from '@/components/TransactionsTable';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { MAX_DATE_RANGE_DAYS } from '@/constants';
-import { differenceInDays, endOfDay, startOfMonth } from 'date-fns';
+import { differenceInDays, endOfMonth, startOfMonth } from 'date-fns';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { toast } from 'sonner';
@@ -14,7 +14,7 @@ function TransactionsPage() {
 	const searchParams = useSearchParams();
 	const dateRange = {
 		from: new Date(searchParams.get('from') || startOfMonth(new Date()).toISOString()),
-		to: new Date(searchParams.get('to') || endOfDay(new Date()).toISOString()),
+		to: new Date(searchParams.get('to') || endOfMonth(new Date()).toISOString()),
 	};
 
 	const setDateRange = (values: { from: Date; to: Date }) => {

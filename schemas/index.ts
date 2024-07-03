@@ -140,6 +140,7 @@ export const editRecurrentTransactionSchema = z.object({
 	teamId: z.string().optional(),
 	dayOfTheMonth: z.coerce.number().gte(0).max(31).or(z.literal(0)).optional(),
 	businessDay: z.coerce.number().gte(0).max(31).or(z.literal(0)).optional(),
+	paymentType: z.enum(possiblePaymentTypesArray).optional(),
 });
 
 export type editRecurrentTransactionSchemaType = z.infer<typeof editRecurrentTransactionSchema>;

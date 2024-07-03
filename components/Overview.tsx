@@ -1,7 +1,7 @@
 'use client';
 
 import { userSettingsType } from '@/db/schema/finance';
-import { differenceInDays, endOfDay, startOfMonth } from 'date-fns';
+import { differenceInDays, endOfMonth, startOfMonth } from 'date-fns';
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { DateRangePicker } from './ui/date-range-picker';
@@ -38,7 +38,7 @@ function Overview() {
 	const searchParams = useSearchParams();
 	const dateRange = {
 		from: new Date(searchParams.get('from') || startOfMonth(new Date()).toISOString()),
-		to: new Date(searchParams.get('to') || endOfDay(new Date()).toISOString()),
+		to: new Date(searchParams.get('to') || endOfMonth(new Date()).toISOString()),
 	};
 
 	const setDateRange = (values: { from: Date; to: Date }) => {

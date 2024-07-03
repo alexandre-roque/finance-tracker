@@ -9,17 +9,16 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { TransactionType, DateToUTCDate } from '@/lib/utils';
-import { editRecurrentTransactionSchema, editRecurrentTransactionSchemaType } from '@/schemas';
+import { TransactionType } from '@/lib/utils';
+import { PossiblePaymentTypes, editRecurrentTransactionSchema, editRecurrentTransactionSchemaType, possiblePaymentTypesArray } from '@/schemas';
 import CustomInput from './CustomInput';
 import CategoryPicker from './CategoryPicker';
-import { EditRecurrentTransaction, EditTransaction } from '@/app/(root)/_actions/transactions';
-import { recurringTransactionsType, transactionsType } from '@/db/schema/finance';
+import { EditRecurrentTransaction } from '@/app/(root)/_actions/transactions';
+import { recurringTransactionsType, } from '@/db/schema/finance';
 import TeamsComboBox from './TeamsComboBox';
-import { TransactionTitle } from './CreateTransactionDialog';
+import { PAYMENT_TYPES_MAP, TransactionTitle } from './CreateTransactionDialog';
 import BankingAccountComboBox from './BankingAccountComboBox';
-import DateSelectorDialog from './DateSelectorDialog';
-import moment from 'moment';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface Props {
 	open: boolean;
@@ -40,6 +39,7 @@ function EditRecurrentTransactionsDialog({ open, setOpen, transaction }: Props) 
 			transactionId: transaction.id,
 			businessDay: transaction.businessDay || 0,
 			dayOfTheMonth: transaction.dayOfTheMonth || 0,
+			paymentType: transaction.paymentType as PossiblePaymentTypes || undefined,
 		},
 	});
 
@@ -146,7 +146,45 @@ function EditRecurrentTransactionsDialog({ open, setOpen, transaction }: Props) 
 								</FormItem>
 							)}
 						/>
-						<CustomInput control={form.control} name='amount' label='Valor' type='number' />
+						<div className='flex items-center gap-2'>
+							<CustomInput control={form.control} name='amount' label='Valor' type='number' />
+							{transaction.type === 'expense' && (
+								<FormField
+									control={form.control}
+									name='paymentType'
+									render={() => (
+										<FormItem className='flex flex-col w-1/2'>
+											<FormLabel className='pb-2'>Tipo de pagamento</FormLabel>
+											<FormControl>
+												<Select
+													onValueChange={(value) => {
+														form.setValue('paymentType', value as PossiblePaymentTypes);
+													}}
+													value={form.getValues('paymentType')}
+												>
+													<SelectTrigger className='w-full'>
+														<SelectValue placeholder='Selecionar tipo' />
+													</SelectTrigger>
+													<SelectContent>
+														{possiblePaymentTypesArray.map((type, i) => {
+															return (
+																<SelectItem key={i} value={type}>
+																	{
+																		PAYMENT_TYPES_MAP[
+																			type as keyof typeof PAYMENT_TYPES_MAP
+																		]
+																	}
+																</SelectItem>
+															);
+														})}
+													</SelectContent>
+												</Select>
+											</FormControl>
+										</FormItem>
+									)}
+								/>
+							)}
+						</div>
 
 						<div className='flex items-center gap-2'>
 							<FormField

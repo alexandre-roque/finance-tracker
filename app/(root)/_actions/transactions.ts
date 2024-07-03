@@ -177,7 +177,7 @@ export async function EditRecurrentTransaction(form: editRecurrentTransactionSch
 
 	const userId = session.user.id;
 
-	const { amount, category, description, type, teamId, bankingAccountId, transactionId, businessDay, dayOfTheMonth } =
+	const { amount, category, description, type, teamId, bankingAccountId, transactionId, businessDay, dayOfTheMonth, paymentType } =
 		parsedBody.data;
 
 	const [categoryRow] = await db.select().from(categories).where(eq(categories.id, category));
@@ -208,6 +208,7 @@ export async function EditRecurrentTransaction(form: editRecurrentTransactionSch
 			category: categoryRow.name,
 			categoryIcon: categoryRow.icon,
 			categoryId: category,
+			paymentType: paymentType,
 		})
 		.where(eq(recurringTransactions.id, transactionId));
 }

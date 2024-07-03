@@ -147,7 +147,7 @@ function EditRecurrentTransactionsDialog({ open, setOpen, transaction }: Props) 
 							)}
 						/>
 						<div className='flex items-center gap-2'>
-							<CustomInput control={form.control} name='amount' label='Valor' type='number' />
+							<CustomInput fullWidth={transaction.type !== 'expense'} control={form.control} name='amount' label='Valor' type='number' />
 							{transaction.type === 'expense' && (
 								<FormField
 									control={form.control}

@@ -15,6 +15,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import CreateBankingAccountDialog from './CreateBankingAccountDialog';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { Separator } from './ui/separator';
 
 interface Props {
 	onChange?: (value: string) => void;
@@ -190,10 +191,13 @@ function OptionList({
 							/>
 						</CommandItem>
 					))}
-					<p className='text-xs text-muted-foreground text-center lg:max-w-[243px] p-2'>
-						Você pode configurar uma padrão nas <Link href='/manage'>configurações</Link>
-					</p>
 				</CommandGroup>
+
+				<Separator />
+
+				<p className='text-xs text-muted-foreground text-center lg:max-w-[243px] p-2'>
+					Você pode configurar uma padrão nas <Link className='underline text-blue-500' href='/manage'>configurações</Link>
+				</p>
 			</CommandList>
 		</Command>
 	);

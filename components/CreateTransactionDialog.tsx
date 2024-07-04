@@ -183,7 +183,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 					<DialogTitle>
 						Criar nova <TransactionTitle type={type} />
 						{type === 'expense' && (
-							<>{', ou '} <Link className='underline' href='/expenses-table'>cadastrar em lote</Link></>
+							<>{', ou '} <Link className='underline text-blue-500' href='/expenses-table'>cadastrar em lote</Link></>
 						)}
 					</DialogTitle>
 				</DialogHeader>

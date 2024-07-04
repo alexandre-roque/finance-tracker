@@ -15,6 +15,7 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import { Drawer, DrawerContent, DrawerTrigger } from './ui/drawer';
 import SkeletonWrapper from './SkeletonWrapper';
 import Link from 'next/link';
+import { Separator } from './ui/separator';
 
 interface Props {
 	type: TransactionType;
@@ -232,8 +233,11 @@ function OptionsList({
 					))}
 				</CommandList>
 			</CommandGroup>
+
+			<Separator />
+					
 			<p className='text-xs text-muted-foreground text-center lg:max-w-[243px] p-2'>
-				Você pode configurar uma padrão nas <Link href='/manage'>configurações</Link>
+				Você pode configurar uma padrão nas <Link className='underline text-blue-500' href='/manage'>configurações</Link>
 			</p>
 		</Command>
 	);

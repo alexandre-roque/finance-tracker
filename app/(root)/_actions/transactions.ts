@@ -566,9 +566,10 @@ async function SubtractFromInvoices(
 		amount,
 		bankingAccountId,
 		paymentType,
+		isPaid,
 	}: Partial<transactionsType> & { date: Date; type: string; amount: number }
 ) {
-	if (bankingAccountId) {
+	if (bankingAccountId && isPaid) {
 		const previousMonthDate = moment(date).subtract(1, 'month').toDate();
 
 		const existingBankingAccount = await trx.query.bankingAccounts.findFirst({

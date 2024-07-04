@@ -596,7 +596,7 @@ async function SubtractFromInvoices(
 				await trx
 					.update(bankingAccounts)
 					.set({
-						balance: (existingBankingAccount.balance ?? 0) + (type === 'expense' ? -amount : amount),
+						balance: (existingBankingAccount.balance ?? 0) + (type === 'expense' ? amount : -amount),
 					})
 					.where(eq(bankingAccounts.id, bankingAccountId));
 			} else if (paymentType === 'credit') {

@@ -60,6 +60,7 @@ export async function GET() {
 				installments: 1,
 				userId: transaction.userId,
 				paymentType: transaction.paymentType as 'credit' | 'debit' | undefined,
+				recurrenceId: recurringTransaction.id,
 			});
 		}
 	}

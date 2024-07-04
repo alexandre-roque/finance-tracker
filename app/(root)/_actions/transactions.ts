@@ -58,6 +58,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 		bankingAccountId,
 		installments,
 		paymentType,
+		recurrenceId,
 	} = parsedBody.data;
 
 	const [categoryRow] = await db.select().from(categories).where(eq(categories.id, category));
@@ -118,6 +119,8 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 				paymentType: paymentType,
 				date: DateToUTCDate(d || newDate),
 				isPaid: true,
+				recurrenceId: recurringTransaction.id,
+				isToday: false,
 			};
 
 			transactionsToInsert.push(obj);
@@ -126,6 +129,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 				transactionsToInsert.push({
 					...obj,
 					date: moment(obj.date).add(1, 'months').toDate(),
+					isToday: true,
 				});
 			}
 		}
@@ -149,13 +153,15 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 				categoryId: category,
 				paymentType: paymentType,
 				isPaid: true,
+				recurrenceId,
+				isToday: false,
 			});
 		}
 	}
 
 	for (const transaction of transactionsToInsert) {
 		try {
-			if (moment().isBefore(startOfDay(transaction.date)) && (transaction.type === 'income' || transaction.paymentType === 'debit')) {
+			if (moment().isBefore(moment.utc(transaction.date).startOf('day')) && (transaction.type === 'income' || transaction.paymentType === 'debit' || (transaction.recurrenceId && !transaction.isToday))) {
 				transaction.isPaid = false;
 			}
 
@@ -487,6 +493,7 @@ export async function CreateOrUpdateInvoices(
 		paymentType,
 		bankingAccountId,
 		isPaid,
+		recurrenceId,
 	}: Partial<transactionsType> & { date: Date; userId: string; type: string; amount: number }
 ) {
 	if (bankingAccountId) {
@@ -521,7 +528,7 @@ export async function CreateOrUpdateInvoices(
 						})
 						.where(eq(bankingAccounts.id, bankingAccountId));
 				}
-			} else if (paymentType === 'credit') {
+			} else if (paymentType === 'credit' && !recurrenceId) {
 				const correctDate = date.getUTCDate() < existingBankingAccount.closeDay ? previousMonthDate : date;
 
 				const creditCardInvoice = existingBankingAccount.creditCardInvoices.find((invoice) => {

@@ -103,6 +103,7 @@ export const transactions = sqliteTable('transaction', {
 	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
 	installmentId: text('installmentId'),
 	isPaid: integer('isPaid', { mode: 'boolean' }).default(true),
+	recurrenceId: text('recurrenceId').references(() => recurringTransactions.id, { onDelete: 'set null' }),
 });
 
 export type transactionsType = typeof transactions.$inferSelect;
@@ -312,9 +313,13 @@ export const transactionRelations = relations(transactions, ({ one }) => ({
 		fields: [transactions.bankingAccountId],
 		references: [bankingAccounts.id],
 	}),
+	recurringTransaction: one(recurringTransactions, {
+		fields: [transactions.recurrenceId],
+		references: [recurringTransactions.id],
+	}),
 }));
 
-export const recurringTransactionRelations = relations(recurringTransactions, ({ one }) => ({
+export const recurringTransactionRelations = relations(recurringTransactions, ({ one, many }) => ({
 	user: one(users, {
 		fields: [recurringTransactions.userId],
 		references: [users.id],
@@ -327,6 +332,7 @@ export const recurringTransactionRelations = relations(recurringTransactions, ({
 		fields: [recurringTransactions.bankingAccountId],
 		references: [bankingAccounts.id],
 	}),
+	transactions: many(transactions)
 }));
 
 export const monthHistoryRelations = relations(monthHistories, ({ one }) => ({

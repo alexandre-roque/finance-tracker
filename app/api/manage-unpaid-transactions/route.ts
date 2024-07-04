@@ -21,7 +21,7 @@ export async function GET() {
     for (const transaction of unpaidTodayTransactions) {
         await db.transaction(async (trx) => {
             await db.update(transactions).set({ isPaid: true }).where(eq(transactions.id, transaction.id));
-            await CreateOrUpdateInvoices(trx, {...transaction, isPaid: true});
+            await CreateOrUpdateInvoices(trx, {...transaction, isPaid: true, recurrenceId: null});
         });
     }
 

@@ -116,14 +116,14 @@ function TeamsCard({
 								return (
 									<div key={teamName} className='flex flex-col gap-2'>
 										<div className='flex items-center justify-between'>
-											<span className='flex items-center text-gray-400'>
+											<span className='flex items-center'>
 												{teamName}
 												<span className='ml-2 text-xs text-muted-foreground'>
-													({percentage.toFixed(0)}%)
+													({percentage.toFixed(2)}%)
 												</span>
 											</span>
 
-											<span className='text-sm text-gray-400'>{formatter.format(teamTotal)}</span>
+											<span className='text-sm text-muted-foreground'>{formatter.format(teamTotal)}</span>
 										</div>
 										<Progress
 											value={percentage}

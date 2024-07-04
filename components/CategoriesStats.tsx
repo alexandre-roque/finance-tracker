@@ -110,14 +110,14 @@ function CategoriesCard({
 								return (
 									<div key={item.category} className='flex flex-col gap-2'>
 										<div className='flex items-center justify-between'>
-											<span className='flex items-center text-gray-400'>
+											<span className='flex items-center'>
 												{item.categoryIcon} {item.category}
 												<span className='ml-2 text-xs text-muted-foreground'>
 													({percentage.toFixed(2)}%)
 												</span>
 											</span>
 
-											<span className='text-sm text-gray-400'>{formatter.format(amount)}</span>
+											<span className='text-sm text-muted-foreground'>{formatter.format(amount)}</span>
 										</div>
 
 										<Progress

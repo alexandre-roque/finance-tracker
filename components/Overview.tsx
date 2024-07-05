@@ -17,6 +17,8 @@ import TeamsStats from './TeamStats';
 import { GetFormatterForCurrency } from '@/lib/currencies';
 import { teamsQueryType } from './TeamsComboBox';
 import TotalBalanceAndCreditStats from './TotalBalanceAndCreditStats';
+import { Button } from './ui/button';
+import { Eye, EyeOff } from 'lucide-react';
 
 function Overview() {
 	const userSettingsQuery = useQuery<userSettingsType>({
@@ -29,10 +31,6 @@ function Overview() {
 		queryFn: () => fetch('/api/teams').then((res) => res.json()),
 	});
 
-	const formatter = useMemo(() => {
-		return GetFormatterForCurrency(userSettings?.currency || 'BRL');
-	}, [userSettings?.currency]);
-
 	const { replace } = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
@@ -40,6 +38,12 @@ function Overview() {
 		from: new Date(searchParams.get('from') || startOfMonth(new Date()).toISOString()),
 		to: new Date(searchParams.get('to') || endOfMonth(new Date()).toISOString()),
 	};
+
+	const isHidden = searchParams.get('hidden') === 'true';
+
+	const formatter = useMemo(() => {
+		return GetFormatterForCurrency(userSettings?.currency || 'BRL', isHidden);
+	}, [isHidden, userSettings?.currency]);
 
 	const setDateRange = (values: { from: Date; to: Date }) => {
 		if (differenceInDays(values.to, values.from) > MAX_DATE_RANGE_DAYS) {
@@ -49,6 +53,12 @@ function Overview() {
 		const params = new URLSearchParams(searchParams);
 		params.set('from', values.from.toISOString());
 		params.set('to', values.to.toISOString());
+		replace(`${pathname}?${params.toString()}`);
+	};
+
+	const setIsHidden = (value: boolean) => {
+		const params = new URLSearchParams(searchParams);
+		params.set('hidden', value.toString());
 		replace(`${pathname}?${params.toString()}`);
 	};
 
@@ -86,8 +96,15 @@ function Overview() {
 	return (
 		<>
 			<div className='container flex w-full flex-col gap-2 mt-4'>
-				<h1 className='text-4xl font-bold'>Dashboard</h1>
-				<p className='text-lg text-muted-foreground'>Visão geral de todas as contas e cartões de créditos</p>
+				<div className='flex gap-2 justify-between'>
+					<div>
+						<h1 className='text-4xl font-bold'>Dashboard</h1>
+						<p className='text-lg text-muted-foreground'>Visão geral de todas as contas e cartões de créditos</p>		
+					</div>
+					<Button variant='secondary' onClick={() => setIsHidden(!isHidden)}>
+						<span className='mr-2'>Esconder</span> {isHidden ? <EyeOff className='h-5 w-5' /> : <Eye className='h-5 w-5' /> } 
+					</Button>
+				</div>
 				<SkeletonWrapper isLoading={userSettingsQuery.isFetching}>
 					<TotalBalanceAndCreditStats
 						disableAnimations={userSettings?.disableAnimations ?? false}

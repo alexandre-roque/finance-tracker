@@ -38,7 +38,30 @@ function History({}) {
 	});
 
 	const dataAvailable = historyDataQuery.data && historyDataQuery.data.length > 0;
-
+	const otherBars = Object.keys(historyDataQuery.data || {})
+		.reduce((acc, entry) => {
+			return acc.concat(
+				Object.keys(historyDataQuery.data[entry]).filter(
+					(key) => acc.indexOf(key) < 0 && key.includes('expense_') || key.includes('income_')
+				)
+			);
+		}, [] as string[])
+		.map((key: string, index) => {
+			const [type, teamName, color] = key.split('_');
+			return (
+				<Bar
+					key={index}
+					dataKey={key}
+					label={`${
+						type === 'income' ? 'Receita' : 'Despesa'
+					} de ${teamName}`}
+					fill={color}
+					radius={4}
+					className='cursor-pointer'
+					stackId={type}
+				/>
+			);
+		});
 	return (
 		<div className='container'>
 			<h2 className='mt-12 text-3xl font-bold'>Histórico</h2>
@@ -117,30 +140,7 @@ function History({}) {
 										className='cursor-pointer'
 										stackId={'expense'}
 									/>
-									{Object.keys(historyDataQuery.data)
-										.reduce((acc, entry) => {
-											return acc.concat(
-												Object.keys(historyDataQuery.data[entry]).filter(
-													(key) => key.includes('expense_') || key.includes('income_')
-												)
-											);
-										}, [] as string[])
-										.map((key: string) => {
-											const [type, teamName, color] = key.split('_');
-											return (
-												<Bar
-													key={key}
-													dataKey={key}
-													label={`${
-														type === 'income' ? 'Receita' : 'Despesa'
-													} de ${teamName}`}
-													fill={color}
-													radius={4}
-													className='cursor-pointer'
-													stackId={type}
-												/>
-											);
-										})}
+									{otherBars}
 									<Tooltip
 										cursor={{ opacity: 0.1 }}
 										content={(props) => <CustomTooltip formatter={formatter} {...props} />}

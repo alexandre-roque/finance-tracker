@@ -17,6 +17,7 @@ export const userSettings = sqliteTable('userSetting', {
 	mainBankingAccount: text('mainBankingAccount').references(() => bankingAccounts.id, { onDelete: 'set null' }),
 	mainTeam: text('mainTeam').references(() => teams.id, { onDelete: 'set null' }),
 	disableAnimations: integer('disableAnimation', { mode: 'boolean' }).default(false),
+	hideMoney: integer('hideMoney', { mode: 'boolean' }).default(false),
 });
 
 export type userSettingsType = typeof userSettings.$inferSelect;
@@ -332,7 +333,7 @@ export const recurringTransactionRelations = relations(recurringTransactions, ({
 		fields: [recurringTransactions.bankingAccountId],
 		references: [bankingAccounts.id],
 	}),
-	transactions: many(transactions)
+	transactions: many(transactions),
 }));
 
 export const monthHistoryRelations = relations(monthHistories, ({ one }) => ({

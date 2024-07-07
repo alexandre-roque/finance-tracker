@@ -2,7 +2,7 @@
 
 import { userSettingsType } from '@/db/schema/finance';
 import { differenceInDays, endOfMonth, startOfMonth } from 'date-fns';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { use, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { DateRangePicker } from './ui/date-range-picker';
 import { MAX_DATE_RANGE_DAYS } from '@/constants';
@@ -25,6 +25,7 @@ function Overview() {
 		queryKey: ['user-settings'],
 		queryFn: () => fetch('/api/user-settings').then((res) => res.json()),
 	});
+
 	const userSettings = userSettingsQuery.data;
 	const teamsQuery = useQuery<teamsQueryType[]>({
 		queryKey: ['teams-members'],
@@ -38,8 +39,7 @@ function Overview() {
 		from: new Date(searchParams.get('from') || startOfMonth(new Date()).toISOString()),
 		to: new Date(searchParams.get('to') || endOfMonth(new Date()).toISOString()),
 	};
-
-	const isHidden = searchParams.get('hidden') === 'true';
+	const [isHidden, setIsHidden] = useState(userSettings?.hideMoney || false);
 
 	const formatter = useMemo(() => {
 		return GetFormatterForCurrency(userSettings?.currency || 'BRL', isHidden);
@@ -53,12 +53,6 @@ function Overview() {
 		const params = new URLSearchParams(searchParams);
 		params.set('from', values.from.toISOString());
 		params.set('to', values.to.toISOString());
-		replace(`${pathname}?${params.toString()}`);
-	};
-
-	const setIsHidden = (value: boolean) => {
-		const params = new URLSearchParams(searchParams);
-		params.set('hidden', value.toString());
 		replace(`${pathname}?${params.toString()}`);
 	};
 
@@ -99,10 +93,13 @@ function Overview() {
 				<div className='flex gap-2 justify-between'>
 					<div>
 						<h1 className='text-4xl font-bold'>Dashboard</h1>
-						<p className='text-lg text-muted-foreground'>Visão geral de todas as contas e cartões de créditos</p>		
+						<p className='text-lg text-muted-foreground'>
+							Visão geral de todas as contas e cartões de créditos
+						</p>
 					</div>
 					<Button variant='secondary' onClick={() => setIsHidden(!isHidden)}>
-						<span className='mr-2'>Esconder</span> {isHidden ? <EyeOff className='h-5 w-5' /> : <Eye className='h-5 w-5' /> } 
+						<span className='mr-2'>Esconder</span>{' '}
+						{isHidden ? <EyeOff className='h-5 w-5' /> : <Eye className='h-5 w-5' />}
 					</Button>
 				</div>
 				<SkeletonWrapper isLoading={userSettingsQuery.isFetching}>

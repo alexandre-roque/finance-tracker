@@ -13,6 +13,7 @@ import { Loader2 } from 'lucide-react';
 
 const ManageUserSettings = ({ userSettings }: { userSettings: userSettingsType | undefined }) => {
 	const [isAnimationDisabled, setIsAnimationDisabled] = useState(userSettings?.disableAnimations ?? false);
+	const [hideMoney, setHideMoney] = useState(userSettings?.hideMoney ?? false);
 	const queryClient = useQueryClient();
 
 	const { mutate, isPending } = useMutation({
@@ -59,13 +60,22 @@ const ManageUserSettings = ({ userSettings }: { userSettings: userSettingsType |
 						onCheckedChange={() => setIsAnimationDisabled((prev) => !prev)}
 					/>
 				</div>
+				<div className='flex flex-row items-center justify-between rounded-lg border p-4'>
+					<div className='w-[90%]'>
+						<Label className='font-bold text-lg'>Esconder valores</Label>
+						<p className='text-muted-foreground'>
+							Por padrão, esconde os valores na tela inicial, mostrando ****** ao invés do número
+						</p>
+					</div>
+					<Switch checked={hideMoney} onCheckedChange={() => setHideMoney((prev) => !prev)} />
+				</div>
 				<Button
 					className='w-28 self-end'
 					onClick={() => {
 						toast.loading('Editando dados...', {
 							id: 'edit-user-settings',
 						});
-						mutate({ disableAnimations: isAnimationDisabled });
+						mutate({ disableAnimations: isAnimationDisabled, hideMoney: hideMoney });
 					}}
 				>
 					{isPending ? <Loader2 className='h-5 w-5 animate-spin' /> : 'Salvar'}

@@ -47,7 +47,13 @@ export async function EditUser({
 	return { success: { name: updatedUser.name, image: updatedUser.image } };
 }
 
-export async function EditUserSettings({ disableAnimations }: { disableAnimations: boolean }) {
+export async function EditUserSettings({
+	disableAnimations,
+	hideMoney,
+}: {
+	disableAnimations: boolean;
+	hideMoney: boolean;
+}) {
 	const session = await auth();
 	if (!session || !session.user || !session.user.id) {
 		redirect('/sign-in');
@@ -59,6 +65,7 @@ export async function EditUserSettings({ disableAnimations }: { disableAnimation
 			.update(userSettings)
 			.set({
 				disableAnimations,
+				hideMoney,
 			})
 			.where(eq(userSettings.userId, userId));
 	} catch (error) {

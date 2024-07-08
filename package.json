@@ -18,7 +18,7 @@
 		"@emoji-mart/data": "^1.2.1",
 		"@emoji-mart/react": "^1.1.1",
 		"@hookform/resolvers": "^3.4.2",
-		"@libsql/client": "^0.6.0",
+		"@libsql/client": "^0.6.2",
 		"@radix-ui/react-accordion": "^1.1.2",
 		"@radix-ui/react-alert-dialog": "^1.0.5",
 		"@radix-ui/react-avatar": "^1.0.4",

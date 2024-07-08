@@ -40,6 +40,7 @@ import TeamsComboBox from './TeamsComboBox';
 import { ScrollArea } from './ui/scroll-area';
 import DateSelectorDialog from './DateSelectorDialog';
 import Link from 'next/link';
+import { Checkbox } from './ui/checkbox';
 
 interface Props {
 	trigger: ReactNode;
@@ -82,6 +83,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 	const dateValue = form.watch('date');
 	const dayOfTheMonth = form.watch('dayOfTheMonth');
 	const businessDay = form.watch('businessDay');
+	const isLastBusinessDay = form.watch('isLastBusinessDay');
 	const paymentType = form.watch('paymentType');
 	const amount = form.watch('amount');
 
@@ -367,7 +369,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 									label='Dia do mês'
 									name='dayOfTheMonth'
 									placeholder='Digite o dia fixo do mês'
-									disabled={Boolean(businessDay && businessDay > 0)}
+									disabled={Boolean(businessDay && businessDay > 0) || Boolean(isLastBusinessDay)}
 								/>
 
 								<CustomInput
@@ -376,9 +378,31 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 									label='Dia do útil do mês'
 									name='businessDay'
 									placeholder='Digite o dia útil'
-									disabled={Boolean(dayOfTheMonth && dayOfTheMonth > 0)}
+									disabled={Boolean(dayOfTheMonth && dayOfTheMonth > 0) || Boolean(isLastBusinessDay)}
 								/>
 							</div>
+						)}
+						{isRecurringValue && (
+							<FormField
+								control={form.control}
+								name="isLastBusinessDay"
+								render={({ field }) => (
+								<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+									<FormControl>
+									<Checkbox
+										checked={field.value || false}
+										onCheckedChange={field.onChange}
+										disabled={Boolean(businessDay && businessDay > 0) || Boolean(dayOfTheMonth && dayOfTheMonth > 0)}
+									/>
+									</FormControl>
+									<div className="space-y-1 leading-none">
+									<FormLabel>
+										Último dia útil do mês
+									</FormLabel>
+									</div>
+								</FormItem>
+								)}
+							/>
 						)}
 					</form>
 				</Form>

@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from 'clsx';
+import { endOfMonth, startOfDay } from 'date-fns';
 import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
@@ -94,4 +95,19 @@ export async function computeSHA256(file: File) {
 	const hashArray = Array.from(new Uint8Array(hashBuffer));
 	const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 	return hashHex;
+}
+
+export function getLastBusinessDayOfTheMonth(date: Date) {
+	let i = 0;
+	const lastDay = startOfDay(endOfMonth(date));
+	while (!isWeekday(lastDay)) {
+		i++;
+		if (i > 20) {
+			throw new Error('Erro ao calcular o último dia útil do mês');
+		}
+		
+		lastDay.setDate(lastDay.getDate() - 1);
+	}
+
+	return lastDay;
 }

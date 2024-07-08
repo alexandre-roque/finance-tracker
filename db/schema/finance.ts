@@ -122,6 +122,7 @@ export const recurringTransactions = sqliteTable('recurringTransaction', {
 	description: text('description'),
 	dayOfTheMonth: integer('dayOfTheMonth'),
 	businessDay: integer('businessDay'),
+	isLastBusinessDay: integer('isLastBusinessDay', { mode: 'boolean' }).default(false),
 	type: text('type').default('income').notNull(),
 	bankingAccountId: text('bankingAccountId'),
 	paymentType: text('paymentType').default('credit').notNull(),

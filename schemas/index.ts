@@ -51,6 +51,7 @@ export const createTransactionSchema = z.object({
 	installments: z.coerce.number().default(1),
 	dayOfTheMonth: z.coerce.number().gte(0).max(31).or(z.literal(0)).optional(),
 	businessDay: z.coerce.number().gte(0).max(31).or(z.literal(0)).optional(),
+	isLastBusinessDay: z.boolean().optional().nullable(),
 	isRecurring: z.coerce.boolean(),
 	userId: z.string().optional(),
 	recurrenceId: z.string().optional(),

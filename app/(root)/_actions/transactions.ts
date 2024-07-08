@@ -13,7 +13,7 @@ import {
 	transactionsType,
 	yearHistories,
 } from '@/db/schema/finance';
-import { DateToUTCDate, TransactionType, getBusinessDayOfMonth } from '@/lib/utils';
+import { DateToUTCDate, TransactionType, getBusinessDayOfMonth, getLastBusinessDayOfTheMonth, isWeekday } from '@/lib/utils';
 import {
 	createTransactionSchema,
 	createTransactionSchemaType,
@@ -22,7 +22,7 @@ import {
 	editTransactionSchema,
 	editTransactionSchemaType,
 } from '@/schemas';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, is } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { ulid } from 'ulid';
 import { getDaysInMonth, startOfDay } from 'date-fns';
@@ -59,6 +59,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 		installments,
 		paymentType,
 		recurrenceId,
+		isLastBusinessDay,
 	} = parsedBody.data;
 
 	const [categoryRow] = await db.select().from(categories).where(eq(categories.id, category));
@@ -85,6 +86,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 				categoryIcon: categoryRow.icon,
 				categoryId: category,
 				paymentType: paymentType,
+				isLastBusinessDay,
 			})
 			.returning();
 
@@ -92,18 +94,21 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 			const newDate = new Date();
 			const dayInMonth = newDate.getUTCDate();
 			const businessDayCount = getBusinessDayOfMonth(newDate);
+			const daysInMonth = getDaysInMonth(newDate);
+			const lastBusinessDay = getLastBusinessDayOfTheMonth(newDate);
 
 			let d;
 			if (dayOfTheMonth) {
 				d = new Date(newDate.getUTCFullYear(), newDate.getUTCMonth(), dayOfTheMonth);
 			} else if (businessDay) {
-				const daysInMonth = getDaysInMonth(newDate);
 				for (let i = 1; i <= daysInMonth; i++) {
 					if (i === businessDay) {
 						d = new Date(newDate.getUTCFullYear(), newDate.getUTCMonth(), i);
 						break;
 					}
 				}
+			} else if (isLastBusinessDay) {
+				d = lastBusinessDay;
 			}
 
 			const obj = {
@@ -125,7 +130,7 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 
 			transactionsToInsert.push(obj);
 
-			if (dayInMonth === dayOfTheMonth || businessDay === businessDayCount) {
+			if (dayInMonth === dayOfTheMonth || businessDay === businessDayCount || (isLastBusinessDay && lastBusinessDay.getUTCDate() === dayInMonth)) {
 				transactionsToInsert.push({
 					...obj,
 					date: moment(obj.date).add(1, 'months').toDate(),

@@ -32,7 +32,7 @@ async function getTotalBalanceStats(userId: string) {
 
 	const m = moment.utc();
 
-	const currentDay = m.day();
+	const currentDay = m.date();
 	const currentMonth = m.month();
 	const prevMonth = moment(m).subtract(1, 'months').month();
 	const nextMonth = moment(m).add(1, 'months').month();
@@ -63,6 +63,11 @@ async function getTotalBalanceStats(userId: string) {
 					),
 			},
 		},
+	});
+
+	console.log({
+		accountsThatClosesBeforeToday,
+		accountsThatClosed,
 	});
 
 	const currentCredit = {

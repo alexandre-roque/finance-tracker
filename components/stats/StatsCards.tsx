@@ -108,7 +108,8 @@ export function StatCard({
 		(value: number) => {
 			return formatter.format(value);
 		},
-		[formatter]
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[formatter, value]
 	);
 
 	return (

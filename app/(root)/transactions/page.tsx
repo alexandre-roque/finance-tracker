@@ -1,6 +1,6 @@
 'use client';
 
-import TransactionTable from '@/components/TransactionsTable';
+import TransactionTable from '@/components/transaction/TransactionsTable';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { MAX_DATE_RANGE_DAYS } from '@/constants';
 import { differenceInDays, endOfMonth, startOfMonth } from 'date-fns';

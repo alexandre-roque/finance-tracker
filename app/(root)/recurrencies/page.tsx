@@ -1,6 +1,6 @@
 'use client';
 
-import RecurrenciesTable from '@/components/RecurrenciesTable';
+import RecurrenciesTable from '@/components/transaction/RecurrenciesTable';
 import React from 'react';
 
 function RecurrenciesPage() {

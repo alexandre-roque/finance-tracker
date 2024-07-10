@@ -1,7 +1,7 @@
 'use client';
 
 import { GetInvoicesResponseType } from '@/app/api/invoices/route';
-import SkeletonWrapper from '@/components/SkeletonWrapper';
+import SkeletonWrapper from '@/components/common/SkeletonWrapper';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -13,7 +13,7 @@ import { bankingAccountsType, creditCardInvoicesType, userSettingsType } from '@
 import { GetFormatterForCurrency } from '@/lib/currencies';
 import { useMemo, useState } from 'react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
-import DeleteInvoiceDialog from '@/components/DeleteInvoiceDialog';
+import DeleteInvoiceDialog from '@/components/transaction/DeleteInvoiceDialog';
 import {
 	Dialog,
 	DialogClose,

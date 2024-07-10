@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
-import CurrencyComboBox from '@/components/CurrencyComboBox';
-import Logo from '@/components/Logo';
-import RevalidateAndRedirect from '@/components/RevalidateAndRedirect';
+import CurrencyComboBox from '@/components/common/CurrencyComboBox';
+import Logo from '@/components/common/Logo';
+import RevalidateAndRedirect from '@/components/common/RevalidateAndRedirect';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { redirect } from 'next/navigation';

@@ -1,16 +1,16 @@
 'use client';
 
-import BankingAccountComboBox from '@/components/BankingAccountComboBox';
-import BankingAccountsTable from '@/components/BankingAccountsTable';
-import CategoryPicker from '@/components/CategoryPicker';
-import CreateCategoryDialog from '@/components/CreateCategoryDialog';
-import { TransactionTitle } from '@/components/CreateTransactionDialog';
-import CurrencyComboBox from '@/components/CurrencyComboBox';
-import DeleteCategoryDialog from '@/components/DeleteCategoryDialog';
-import EditCategoryDialog from '@/components/EditCategoryDialog';
-import ManageUser from '@/components/ManageUser';
-import ManageUserSettings from '@/components/ManageUserSettings';
-import SkeletonWrapper from '@/components/SkeletonWrapper';
+import BankingAccountComboBox from '@/components/bankingAccount/BankingAccountComboBox';
+import BankingAccountsTable from '@/components/bankingAccount/BankingAccountsTable';
+import CategoryPicker from '@/components/category/CategoryPicker';
+import CreateCategoryDialog from '@/components/category/CreateCategoryDialog';
+import { TransactionTitle } from '@/components/transaction/CreateTransactionDialog';
+import CurrencyComboBox from '@/components/common/CurrencyComboBox';
+import DeleteCategoryDialog from '@/components/category/DeleteCategoryDialog';
+import EditCategoryDialog from '@/components/category/EditCategoryDialog';
+import ManageUser from '@/components/user/ManageUser';
+import ManageUserSettings from '@/components/user/ManageUserSettings';
+import SkeletonWrapper from '@/components/common/SkeletonWrapper';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';

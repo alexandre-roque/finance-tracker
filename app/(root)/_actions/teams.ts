@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@/auth';
-import { ResultQueryNotifications } from '@/components/NotificationsPopOver';
+import { ResultQueryNotifications } from '@/components/common/NotificationsPopOver';
 import { db } from '@/db';
 import { pendingTeamAprovals, teamMembers, teams } from '@/db/schema/finance';
 import {

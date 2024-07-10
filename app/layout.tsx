@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, IBM_Plex_Serif } from 'next/font/google';
 import './globals.css';
-import RootProviders from '@/components/RootProviders';
+import RootProviders from '@/components/common/RootProviders';
 import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'] });

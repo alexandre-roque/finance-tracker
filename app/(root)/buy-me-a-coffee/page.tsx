@@ -6,7 +6,7 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import CopyPixButton from '@/components/CopyPixButton';
+import CopyPixButton from '@/components/common/CopyPixButton';
 
 export default function Component() {
 	return (

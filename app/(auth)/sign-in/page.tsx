@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/components/ui/icons';
-import AuthForm from '../../../components/AuthForm';
+import AuthForm from '../../../components/common/AuthForm';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 

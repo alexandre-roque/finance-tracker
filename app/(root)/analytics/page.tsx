@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
-import Overview from '@/components/Overview';
-import History from '@/components/History';
+import Overview from '@/components/common/Overview';
+import History from '@/components/common/History';
 import { db } from '@/db';
 import { userSettings } from '@/db/schema/finance';
 import { eq } from 'drizzle-orm';

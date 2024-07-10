@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
@@ -7,11 +7,11 @@ import { createTransactionsSchema, createTransactionsSchemaType } from '@/schema
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form } from '@/components/ui/form';
-import TeamsComboBox from '@/components/TeamsComboBox';
+import TeamsComboBox from '@/components/team/TeamsComboBox';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import CategoryPicker from '@/components/CategoryPicker';
-import BankingAccountComboBox from '@/components/BankingAccountComboBox';
-import DateSelectorDialog from '@/components/DateSelectorDialog';
+import CategoryPicker from '@/components/category/CategoryPicker';
+import BankingAccountComboBox from '@/components/bankingAccount/BankingAccountComboBox';
+import DateSelectorDialog from '@/components/common/DateSelectorDialog';
 import { Loader2, PlusIcon, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreateTransaction } from '../_actions/transactions';

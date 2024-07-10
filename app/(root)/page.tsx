@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
-import CreateTransactionDialog from '@/components/CreateTransactionDialog';
-import Overview from '@/components/Overview';
-import History from '@/components/History';
+import CreateTransactionDialog from '@/components/transaction/CreateTransactionDialog';
+import Overview from '@/components/common/Overview';
+import History from '@/components/common/History';
 import { Button } from '@/components/ui/button';
 import { redirect } from 'next/navigation';
 import React from 'react';

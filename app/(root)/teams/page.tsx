@@ -1,13 +1,13 @@
 'use client';
 
-import CreateTeamDialog from '@/components/CreateTeamDialog';
-import DeleteTeamDialog from '@/components/DeleteTeamDialog';
-import EditTeamForm from '@/components/EditTeamForm';
-import InviteToTeamByLinkDialog from '@/components/InviteToTeamByLinkDialog';
-import InviteToTeamDialog from '@/components/InviteToTeamDialog';
-import SkeletonWrapper from '@/components/SkeletonWrapper';
-import TeamMembersTable from '@/components/TeamMembersTable';
-import TeamsComboBox from '@/components/TeamsComboBox';
+import CreateTeamDialog from '@/components/team/CreateTeamDialog';
+import DeleteTeamDialog from '@/components/team/DeleteTeamDialog';
+import EditTeamForm from '@/components/team/EditTeamForm';
+import InviteToTeamByLinkDialog from '@/components/team/InviteToTeamByLinkDialog';
+import InviteToTeamDialog from '@/components/team/InviteToTeamDialog';
+import SkeletonWrapper from '@/components/common/SkeletonWrapper';
+import TeamMembersTable from '@/components/team/TeamMembersTable';
+import TeamsComboBox from '@/components/team/TeamsComboBox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

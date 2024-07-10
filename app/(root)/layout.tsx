@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
-import Header from '@/components/Header';
-import Navbar from '@/components/Navbar';
+import Header from '@/components/common/Header';
+import Navbar from '@/components/common/Navbar';
 import { db } from '@/db';
 import { userSettings } from '@/db/schema/finance';
 import { HydrationBoundary, QueryClient, dehydrate } from '@tanstack/react-query';

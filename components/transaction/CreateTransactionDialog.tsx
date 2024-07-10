@@ -36,7 +36,7 @@ import { GetFormatterForCurrency } from '@/lib/currencies';
 import TeamsComboBox from '../team/TeamsComboBox';
 import DateSelectorDialog from '../common/DateSelectorDialog';
 import Link from 'next/link';
-import { Checkbox } from './ui/checkbox';
+import { Checkbox } from '../ui/checkbox';
 
 interface Props {
 	trigger: ReactNode;
@@ -386,22 +386,23 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 						{isRecurringValue && (
 							<FormField
 								control={form.control}
-								name="isLastBusinessDay"
+								name='isLastBusinessDay'
 								render={({ field }) => (
-								<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
-									<FormControl>
-									<Checkbox
-										checked={field.value || false}
-										onCheckedChange={field.onChange}
-										disabled={Boolean(businessDay && businessDay > 0) || Boolean(dayOfTheMonth && dayOfTheMonth > 0)}
-									/>
-									</FormControl>
-									<div className="space-y-1 leading-none">
-									<FormLabel>
-										Último dia útil do mês
-									</FormLabel>
-									</div>
-								</FormItem>
+									<FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow'>
+										<FormControl>
+											<Checkbox
+												checked={field.value || false}
+												onCheckedChange={field.onChange}
+												disabled={
+													Boolean(businessDay && businessDay > 0) ||
+													Boolean(dayOfTheMonth && dayOfTheMonth > 0)
+												}
+											/>
+										</FormControl>
+										<div className='space-y-1 leading-none'>
+											<FormLabel>Último dia útil do mês</FormLabel>
+										</div>
+									</FormItem>
 								)}
 							/>
 						)}

@@ -65,11 +65,6 @@ async function getTotalBalanceStats(userId: string) {
 		},
 	});
 
-	console.log({
-		accountsThatClosesBeforeToday,
-		accountsThatClosed,
-	});
-
 	const currentCredit = {
 		value: accountsThatClosesBeforeToday.reduce(
 			(acc, account) =>

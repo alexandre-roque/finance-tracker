@@ -13,7 +13,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -155,7 +155,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 
 			setOpen((prev) => !prev);
 		},
-		onError: (err) => {
+		onError: () => {
 			toast.error(`Erro ao criar transação`, {
 				id: 'create-transaction',
 			});

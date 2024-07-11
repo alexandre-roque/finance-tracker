@@ -13,7 +13,13 @@ import {
 	transactionsType,
 	yearHistories,
 } from '@/db/schema/finance';
-import { DateToUTCDate, TransactionType, getBusinessDayOfMonth, getLastBusinessDayOfTheMonth, isWeekday } from '@/lib/utils';
+import {
+	DateToUTCDate,
+	TransactionType,
+	getBusinessDayOfMonth,
+	getLastBusinessDayOfTheMonth,
+	isWeekday,
+} from '@/lib/utils';
 import {
 	createTransactionSchema,
 	createTransactionSchemaType,
@@ -92,14 +98,25 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 
 		if (recurringTransaction) {
 			const newDate = new Date();
+			const nextMonth = moment(date).add(1, 'months').toDate();
+
 			const dayInMonth = newDate.getUTCDate();
+
 			const businessDayCount = getBusinessDayOfMonth(newDate);
+
+			const daysInMonthOfNextMonth = getDaysInMonth(nextMonth);
 			const daysInMonth = getDaysInMonth(newDate);
+
 			const lastBusinessDay = getLastBusinessDayOfTheMonth(newDate);
+			const lastBusinessDayOfNextMonth = getLastBusinessDayOfTheMonth(nextMonth);
 
 			let d;
 			if (dayOfTheMonth) {
 				d = new Date(newDate.getUTCFullYear(), newDate.getUTCMonth(), dayOfTheMonth);
+
+				if ((moment(d).isBefore(moment(newDate)), 'day')) {
+					d = new Date(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth(), dayOfTheMonth);
+				}
 			} else if (businessDay) {
 				for (let i = 1; i <= daysInMonth; i++) {
 					if (i === businessDay) {
@@ -107,8 +124,20 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 						break;
 					}
 				}
+
+				if (moment(d).isBefore(moment(newDate), 'day')) {
+					for (let i = 1; i <= daysInMonthOfNextMonth; i++) {
+						if (i === businessDay) {
+							d = new Date(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth(), i);
+							break;
+						}
+					}
+				}
 			} else if (isLastBusinessDay) {
 				d = lastBusinessDay;
+				if (moment(d).isBefore(moment(newDate), 'day')) {
+					d = lastBusinessDayOfNextMonth;
+				}
 			}
 
 			const obj = {
@@ -130,10 +159,14 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 
 			transactionsToInsert.push(obj);
 
-			if (dayInMonth === dayOfTheMonth || businessDay === businessDayCount || (isLastBusinessDay && lastBusinessDay.getUTCDate() === dayInMonth)) {
+			if (
+				dayInMonth === dayOfTheMonth ||
+				businessDay === businessDayCount ||
+				(isLastBusinessDay && lastBusinessDay.getUTCDate() === dayInMonth)
+			) {
 				transactionsToInsert.push({
 					...obj,
-					date: moment(obj.date).add(1, 'months').toDate(),
+					date,
 					isToday: true,
 				});
 			}
@@ -166,7 +199,12 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 
 	for (const transaction of transactionsToInsert) {
 		try {
-			if (moment().isBefore(moment.utc(transaction.date).startOf('day')) && (transaction.type === 'income' || transaction.paymentType === 'debit' || (transaction.recurrenceId && !transaction.isToday))) {
+			if (
+				moment().isBefore(moment.utc(transaction.date), 'day') &&
+				(transaction.type === 'income' ||
+					transaction.paymentType === 'debit' ||
+					(transaction.recurrenceId && !transaction.isToday))
+			) {
 				transaction.isPaid = false;
 			}
 
@@ -194,8 +232,18 @@ export async function EditRecurrentTransaction(form: editRecurrentTransactionSch
 
 	const userId = session.user.id;
 
-	const { amount, category, description, type, teamId, bankingAccountId, transactionId, businessDay, dayOfTheMonth, paymentType } =
-		parsedBody.data;
+	const {
+		amount,
+		category,
+		description,
+		type,
+		teamId,
+		bankingAccountId,
+		transactionId,
+		businessDay,
+		dayOfTheMonth,
+		paymentType,
+	} = parsedBody.data;
 
 	const [categoryRow] = await db.select().from(categories).where(eq(categories.id, category));
 
@@ -208,7 +256,7 @@ export async function EditRecurrentTransaction(form: editRecurrentTransactionSch
 	});
 
 	if (!transactionsResult) {
-		throw new Error('Bad request');
+		return { error: 'Transação não encontrada' };
 	}
 
 	await db
@@ -267,7 +315,7 @@ export async function DeleteTransaction({
 	const transactionsResult = await db.select().from(transactions).where(query);
 
 	if (!transactionsResult?.length) {
-		throw new Error('Bad request');
+		return { error: 'Transação não encontrada' };
 	}
 
 	for (const transaction of transactionsResult) {
@@ -309,7 +357,7 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 	});
 
 	if (!oldTransaction) {
-		throw new Error('Bad request');
+		return { error: 'Transação não encontrada' };
 	}
 
 	const oldAmount = oldTransaction.amount;
@@ -349,8 +397,17 @@ export async function EditTransaction(form: editTransactionSchemaType) {
 
 			await SubtractFromHistories(trx, oldTransaction);
 			await SubtractFromInvoices(trx, oldTransaction);
-			await CreateOrUpdateHistories(trx, { date, type, amount, userId, teamId, bankingAccountId, paymentType });
-			await CreateOrUpdateInvoices(trx, { date, type, amount, userId, teamId, bankingAccountId, paymentType, isPaid });
+			await CreateOrUpdateHistories(trx, { date, type, amount, userId, teamId });
+			await CreateOrUpdateInvoices(trx, {
+				date,
+				type,
+				amount,
+				userId,
+				teamId,
+				bankingAccountId,
+				paymentType,
+				isPaid,
+			});
 		}
 	});
 }
@@ -419,8 +476,6 @@ async function CreateOrUpdateHistories(
 		amount,
 		userId,
 		teamId,
-		paymentType,
-		bankingAccountId,
 	}: Partial<transactionsType> & { date: Date; userId: string; type: string; amount: number }
 ) {
 	// Atualiza monthHistory
@@ -533,7 +588,7 @@ export async function CreateOrUpdateInvoices(
 						})
 						.where(eq(bankingAccounts.id, bankingAccountId));
 				}
-			} else if (paymentType === 'credit' && !recurrenceId) {
+			} else if (paymentType === 'credit' && isPaid) {
 				const correctDate = date.getUTCDate() < existingBankingAccount.closeDay ? previousMonthDate : date;
 
 				const creditCardInvoice = existingBankingAccount.creditCardInvoices.find((invoice) => {

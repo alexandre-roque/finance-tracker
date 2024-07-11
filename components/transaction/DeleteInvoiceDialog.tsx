@@ -32,7 +32,7 @@ function DeleteTeamDialog({ invoice, trigger }: Props) {
 		onSuccess: ({ error }) => {
 			if (error) {
 				toast.error(`Erro ao deletar fatura: ${error}`, {
-					id: 'delete-invoice-error',
+					id: invoice.id,
 				});
 				return;
 			}
@@ -46,12 +46,12 @@ function DeleteTeamDialog({ invoice, trigger }: Props) {
 			});
 
 			toast.success('Fatura deletada com sucesso', {
-				id: 'delete-invoice-success',
+				id: invoice.id,
 			});
 		},
 		onError: () => {
 			toast.error('Erro ao deletar fatura', {
-				id: 'delete-invoice-error',
+				id: invoice.id,
 			});
 		},
 	});

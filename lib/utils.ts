@@ -57,7 +57,7 @@ export function hashStringToHSL(str: string) {
 	const hash = hashCode(str);
 
 	// Fixar o matiz em 0 (vermelho)
-	const h = 15 + (hash % 10);
+	const h = 0 + (hash % 10);
 
 	// Calcular a saturação (s) e a luminosidade (l) a partir do hash
 	// Garantir que os valores estejam dentro dos limites aceitáveis
@@ -105,7 +105,7 @@ export function getLastBusinessDayOfTheMonth(date: Date) {
 		if (i > 20) {
 			throw new Error('Erro ao calcular o último dia útil do mês');
 		}
-		
+
 		lastDay.setDate(lastDay.getDate() - 1);
 	}
 

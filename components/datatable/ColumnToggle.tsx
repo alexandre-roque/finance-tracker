@@ -30,6 +30,8 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
 		bankingAccountId: 'Conta',
 		dayOfTheMonth: 'Dia do mês',
 		businessDay: 'Dia útil',
+		paymentType: 'Forma de pagamento',
+		isPaid: 'Pago?',
 	};
 	return (
 		<DropdownMenu>

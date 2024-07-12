@@ -170,6 +170,24 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
 		},
 	},
 	{
+		accessorKey: 'isPaid',
+		header: ({ column }) => <DataTableColumnHeader column={column} title='Pago?' />,
+		cell: ({ row }) => <div className='capitalize'>{row.original.isPaid === true ? 'Sim' : 'Não'}</div>,
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id));
+		},
+	},
+	{
+		accessorKey: 'paymentType',
+		header: ({ column }) => <DataTableColumnHeader column={column} title='Forma de pagamento' />,
+		cell: ({ row }) => (
+			<div className='capitalize'>{row.original.paymentType === 'credit' ? 'Crédito' : 'Débito'}</div>
+		),
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id));
+		},
+	},
+	{
 		accessorKey: 'type',
 		header: ({ column }) => <DataTableColumnHeader column={column} title='Tipo' />,
 		filterFn: (row, id, value) => {
@@ -223,7 +241,9 @@ function TransactionTable({ from, to }: Props) {
 		type: false,
 		userId: false,
 		teamId: false,
+		isPaid: false,
 		createdAt: false,
+		paymentType: false,
 		bankingAccountId: false,
 	});
 

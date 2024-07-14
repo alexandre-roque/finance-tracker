@@ -18,7 +18,7 @@ import Link from 'next/link';
 import { Separator } from '../ui/separator';
 
 interface Props {
-	onChange?: (value: string) => void;
+	onChange?: (value: string, isOnlyDebit: boolean) => void;
 	isConfiguring?: boolean;
 	userSettings?: userSettingsType;
 	firstSelectedValue?: string | null;
@@ -101,7 +101,9 @@ const BankingAccountComboBox = ({ userSettings, onChange, isConfiguring, firstSe
 
 	useEffect(() => {
 		if (selectedOption) {
-			if (onChange) onChange(selectedOption.id);
+			if (onChange) {
+				onChange(selectedOption.id, Boolean(selectedOption.isOnlyDebit));
+			}
 		}
 	}, [onChange, selectedOption]);
 

@@ -32,6 +32,7 @@ export const createBankingAccountSchema = z.object({
 	hideInBalance: z.boolean().default(false),
 	automaticDebitInvoices: z.boolean().default(false),
 	bankingAccountId: z.string().optional(),
+	isOnlyDebit: z.boolean().default(false),
 });
 
 export type createBankingAccountSchemaType = z.infer<typeof createBankingAccountSchema>;
@@ -55,6 +56,7 @@ export const createTransactionSchema = z.object({
 	isRecurring: z.coerce.boolean(),
 	userId: z.string().optional(),
 	recurrenceId: z.string().optional(),
+	isOnlyDebit: z.coerce.boolean().optional(),
 });
 
 export type createTransactionSchemaType = z.infer<typeof createTransactionSchema>;
@@ -128,6 +130,7 @@ export const editTransactionSchema = z.object({
 	type: z.union([z.literal('income'), z.literal('expense')]),
 	teamId: z.string().optional(),
 	paymentType: z.enum(possiblePaymentTypesArray).optional(),
+	isOnlyDebit: z.coerce.boolean().optional(),
 });
 
 export type editTransactionSchemaType = z.infer<typeof editTransactionSchema>;

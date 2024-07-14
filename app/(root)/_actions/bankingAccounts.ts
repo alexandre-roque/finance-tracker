@@ -29,6 +29,7 @@ export async function CreateOrUpdateBankingAccount(form: createBankingAccountSch
 					payDay: parsedBody.data.payDay,
 					closeDay: parsedBody.data.closeDay,
 					balance: parsedBody.data.balance,
+					isOnlyDebit: parsedBody.data.isOnlyDebit,
 					hideInBalance: parsedBody.data.hideInBalance,
 					automaticDebitInvoices: parsedBody.data.automaticDebitInvoices,
 				})
@@ -47,6 +48,7 @@ export async function CreateOrUpdateBankingAccount(form: createBankingAccountSch
 					payDay: parsedBody.data.payDay,
 					closeDay: parsedBody.data.closeDay,
 					balance: parsedBody.data.balance,
+					isOnlyDebit: parsedBody.data.isOnlyDebit,
 					hideInBalance: parsedBody.data.hideInBalance,
 					automaticDebitInvoices: parsedBody.data.automaticDebitInvoices,
 				})

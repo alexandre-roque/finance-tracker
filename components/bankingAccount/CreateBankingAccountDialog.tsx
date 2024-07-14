@@ -38,6 +38,8 @@ const CreateBankingAccountDialog = ({ trigger }: { trigger?: ReactNode }) => {
 		},
 	});
 
+	const isOnlyDebit = form.watch('isOnlyDebit');
+
 	const { mutate, isPending } = useMutation({
 		mutationFn: CreateOrUpdateBankingAccount,
 		onSuccess: ({ error }) => {
@@ -147,14 +149,14 @@ const CreateBankingAccountDialog = ({ trigger }: { trigger?: ReactNode }) => {
 
 						<FormField
 							control={form.control}
-							name='automaticDebitInvoices'
+							name='isOnlyDebit'
 							render={({ field }) => (
 								<FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
 									<div className='space-y-0.5'>
-										<FormLabel className='text-base'>Débito automático das faturas</FormLabel>
+										<FormLabel className='text-base'>Somente débito</FormLabel>
 										<FormDescription>
-											Essa opção faz com que no dia do pagamento da fatura, o valor seja debitado
-											automaticamente da conta
+											Essa opção faz com que somente seja exibida a opção de débito para compras
+											nessa conta bancária
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -163,6 +165,27 @@ const CreateBankingAccountDialog = ({ trigger }: { trigger?: ReactNode }) => {
 								</FormItem>
 							)}
 						/>
+
+						{!isOnlyDebit && (
+							<FormField
+								control={form.control}
+								name='automaticDebitInvoices'
+								render={({ field }) => (
+									<FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+										<div className='space-y-0.5'>
+											<FormLabel className='text-base'>Débito automático das faturas</FormLabel>
+											<FormDescription>
+												Essa opção faz com que no dia do pagamento da fatura, o valor seja
+												debitado automaticamente da conta
+											</FormDescription>
+										</div>
+										<FormControl>
+											<Switch checked={field.value} onCheckedChange={field.onChange} />
+										</FormControl>
+									</FormItem>
+								)}
+							/>
+						)}
 					</form>
 				</Form>
 				<DialogFooter>

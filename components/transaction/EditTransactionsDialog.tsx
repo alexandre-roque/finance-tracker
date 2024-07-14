@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
@@ -50,6 +50,13 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 	});
 
 	const dateValue = form.watch('date');
+	const isOnlyDebit = form.watch('isOnlyDebit');
+
+	useEffect(() => {
+		if (isOnlyDebit) {
+			form.setValue('paymentType', 'debit');
+		}
+	}, [isOnlyDebit, form]);
 
 	const handleCategoryChange = useCallback(
 		(value: string) => {
@@ -66,8 +73,9 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 	);
 
 	const handleBankingAccountChange = useCallback(
-		(value: string) => {
+		(value: string, isOnlyDebit: boolean) => {
 			form.setValue('bankingAccountId', value);
+			form.setValue('isOnlyDebit', isOnlyDebit);
 		},
 		[form]
 	);
@@ -162,45 +170,6 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 								</FormItem>
 							)}
 						/>
-						<div className='flex items-center gap-2'>
-							<CustomInput control={form.control} name='amount' label='Valor' type='number' />
-							{transaction.type === 'expense' && (
-								<FormField
-									control={form.control}
-									name='paymentType'
-									render={() => (
-										<FormItem className='flex flex-col w-1/2'>
-											<FormLabel className='pb-2'>Tipo de pagamento</FormLabel>
-											<FormControl>
-												<Select
-													onValueChange={(value) => {
-														form.setValue('paymentType', value as PossiblePaymentTypes);
-													}}
-													value={form.getValues('paymentType')}
-												>
-													<SelectTrigger className='w-full'>
-														<SelectValue placeholder='Selecionar tipo' />
-													</SelectTrigger>
-													<SelectContent>
-														{possiblePaymentTypesArray.map((type, i) => {
-															return (
-																<SelectItem key={i} value={type}>
-																	{
-																		PAYMENT_TYPES_MAP[
-																			type as keyof typeof PAYMENT_TYPES_MAP
-																		]
-																	}
-																</SelectItem>
-															);
-														})}
-													</SelectContent>
-												</Select>
-											</FormControl>
-										</FormItem>
-									)}
-								/>
-							)}
-						</div>
 
 						<div className='flex items-center gap-2'>
 							<FormField
@@ -238,6 +207,48 @@ function EditTransactionsDialog({ open, setOpen, transaction }: Props) {
 								)}
 							/>
 						</div>
+
+						<div className='flex items-center gap-2'>
+							<CustomInput control={form.control} name='amount' label='Valor' type='number' />
+							{transaction.type === 'expense' && (
+								<FormField
+									control={form.control}
+									name='paymentType'
+									render={() => (
+										<FormItem className='flex flex-col w-1/2'>
+											<FormLabel className='pb-2'>Tipo de pagamento</FormLabel>
+											<FormControl>
+												<Select
+													disabled={isOnlyDebit}
+													onValueChange={(value) => {
+														form.setValue('paymentType', value as PossiblePaymentTypes);
+													}}
+													value={form.getValues('paymentType')}
+												>
+													<SelectTrigger className='w-full'>
+														<SelectValue placeholder='Selecionar tipo' />
+													</SelectTrigger>
+													<SelectContent>
+														{possiblePaymentTypesArray.map((type, i) => {
+															return (
+																<SelectItem key={i} value={type}>
+																	{
+																		PAYMENT_TYPES_MAP[
+																			type as keyof typeof PAYMENT_TYPES_MAP
+																		]
+																	}
+																</SelectItem>
+															);
+														})}
+													</SelectContent>
+												</Select>
+											</FormControl>
+										</FormItem>
+									)}
+								/>
+							)}
+						</div>
+
 						<DateSelectorDialog control={form.control} dateValue={dateValue} />
 					</form>
 				</Form>

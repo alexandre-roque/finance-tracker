@@ -82,6 +82,13 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 	const isLastBusinessDay = form.watch('isLastBusinessDay');
 	const paymentType = form.watch('paymentType');
 	const amount = form.watch('amount');
+	const isOnlyDebit = form.watch('isOnlyDebit');
+
+	useEffect(() => {
+		if (isOnlyDebit) {
+			form.setValue('paymentType', 'debit');
+		}
+	}, [isOnlyDebit, form]);
 
 	useEffect(() => {
 		if (isSelected) {
@@ -104,8 +111,9 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 	);
 
 	const handleBankingAccountChange = useCallback(
-		(value: string) => {
+		(value: string, isOnlyDebit: boolean) => {
 			form.setValue('bankingAccountId', value);
+			form.setValue('isOnlyDebit', isOnlyDebit);
 		},
 		[form]
 	);
@@ -212,6 +220,45 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 								</FormItem>
 							)}
 						/>
+
+						<div className='flex items-center gap-2'>
+							<FormField
+								control={form.control}
+								name='category'
+								render={() => (
+									<FormItem className='flex flex-col w-1/2'>
+										<FormLabel>Categoria</FormLabel>
+										<FormControl>
+											<CategoryPicker
+												userSettings={userSettings}
+												type={type}
+												onChange={handleCategoryChange}
+												isTeamSelected={Boolean(form.watch('teamId'))}
+											/>
+										</FormControl>
+										<FormDescription>Selecione a categoria da sua transação</FormDescription>
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name='bankingAccountId'
+								render={() => (
+									<FormItem className='flex flex-col'>
+										<FormLabel>Conta bancária</FormLabel>
+										<FormControl>
+											<BankingAccountComboBox
+												userSettings={userSettings}
+												onChange={handleBankingAccountChange}
+											/>
+										</FormControl>
+										<FormDescription>Selecione a conta da sua transação</FormDescription>
+									</FormItem>
+								)}
+							/>
+						</div>
+
 						<div className='flex items-center gap-2'>
 							<CustomInput
 								fullWidth={type !== 'expense'}
@@ -229,6 +276,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 											<FormLabel className='pb-2'>Tipo de pagamento</FormLabel>
 											<FormControl>
 												<Select
+													disabled={isOnlyDebit}
 													onValueChange={(value) => {
 														form.setValue('paymentType', value as PossiblePaymentTypes);
 													}}
@@ -303,44 +351,6 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 								)}
 							/>
 						)}
-
-						<div className='flex items-center gap-2'>
-							<FormField
-								control={form.control}
-								name='category'
-								render={() => (
-									<FormItem className='flex flex-col w-1/2'>
-										<FormLabel>Categoria</FormLabel>
-										<FormControl>
-											<CategoryPicker
-												userSettings={userSettings}
-												type={type}
-												onChange={handleCategoryChange}
-												isTeamSelected={Boolean(form.watch('teamId'))}
-											/>
-										</FormControl>
-										<FormDescription>Selecione a categoria da sua transação</FormDescription>
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name='bankingAccountId'
-								render={() => (
-									<FormItem className='flex flex-col'>
-										<FormLabel>Conta bancária</FormLabel>
-										<FormControl>
-											<BankingAccountComboBox
-												userSettings={userSettings}
-												onChange={handleBankingAccountChange}
-											/>
-										</FormControl>
-										<FormDescription>Selecione a conta da sua transação</FormDescription>
-									</FormItem>
-								)}
-							/>
-						</div>
 
 						<FormField
 							control={form.control}

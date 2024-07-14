@@ -36,6 +36,7 @@ export const bankingAccounts = sqliteTable('bankingAccount', {
 	balance: integer('balance').default(0).notNull(),
 	automaticDebitInvoices: integer('automaticDebitInvoices', { mode: 'boolean' }).default(false),
 	hideInBalance: integer('hideInBalance', { mode: 'boolean' }).default(false),
+	isOnlyDebit: integer('isOnlyDebit', { mode: 'boolean' }).default(false),
 });
 
 export type bankingAccountsType = typeof bankingAccounts.$inferSelect;

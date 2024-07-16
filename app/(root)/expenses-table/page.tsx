@@ -3,9 +3,13 @@ import React, { useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
-import { createTransactionsSchema, createTransactionsSchemaType } from '@/schemas';
+import {
+	createTransactionsSchema,
+	createTransactionsSchemaType,
+	PossiblePaymentTypes,
+	possiblePaymentTypesArray,
+} from '@/schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Form } from '@/components/ui/form';
 import TeamsComboBox from '@/components/team/TeamsComboBox';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -18,6 +22,8 @@ import { CreateTransaction } from '../_actions/transactions';
 import { toast } from 'sonner';
 import { DateToUTCDate } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { PAYMENT_TYPES_MAP } from '@/components/transaction/CreateTransactionDialog';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 const ExpensesTable = () => {
 	const userSettingsQuery = useQuery({
@@ -28,7 +34,7 @@ const ExpensesTable = () => {
 	const form = useForm<createTransactionsSchemaType>({
 		resolver: zodResolver(createTransactionsSchema),
 		defaultValues: {
-			transactions: [{ amount: 0, description: '', date: new Date(), type: 'expense' }],
+			transactions: [{ amount: 0, description: '', date: new Date(), type: 'expense', paymentType: 'credit' }],
 		},
 	});
 
@@ -40,8 +46,12 @@ const ExpensesTable = () => {
 	);
 
 	const handleBankingAccountChange = useCallback(
-		({ value, index }: { value: string; index: number }) => {
+		({ value, index, isOnlyDebit }: { value: string; index: number; isOnlyDebit: boolean }) => {
 			form.setValue(`transactions.${index}.bankingAccountId`, value);
+			form.setValue(`transactions.${index}.isOnlyDebit`, isOnlyDebit);
+			if (isOnlyDebit) {
+				form.setValue(`transactions.${index}.paymentType`, 'debit');
+			}
 		},
 		[form]
 	);
@@ -78,6 +88,7 @@ const ExpensesTable = () => {
 			bankingAccountId: '',
 			type: 'expense',
 			teamId: '',
+			paymentType: 'credit',
 		} as createTransactionsSchemaType['transactions'][0]);
 	};
 
@@ -145,6 +156,7 @@ const ExpensesTable = () => {
 									<TableHead>Data</TableHead>
 									<TableHead>Descrição</TableHead>
 									<TableHead>Valor</TableHead>
+									<TableHead>Forma de pagamento</TableHead>
 									<TableHead>Time</TableHead>
 									<TableHead>Categoria</TableHead>
 									<TableHead>Conta</TableHead>
@@ -186,6 +198,40 @@ const ExpensesTable = () => {
 											/>
 										</TableCell>
 										<TableCell>
+											<Controller
+												name={`transactions.${index}.paymentType`}
+												control={form.control}
+												render={({ field }) => (
+													<Select
+														onValueChange={(value) => {
+															form.setValue(
+																`transactions.${index}.paymentType`,
+																value as PossiblePaymentTypes
+															);
+														}}
+														{...field}
+													>
+														<SelectTrigger className='w-full'>
+															<SelectValue placeholder='Selecionar tipo' />
+														</SelectTrigger>
+														<SelectContent>
+															{possiblePaymentTypesArray.map((type, i) => {
+																return (
+																	<SelectItem key={i} value={type}>
+																		{
+																			PAYMENT_TYPES_MAP[
+																				type as keyof typeof PAYMENT_TYPES_MAP
+																			]
+																		}
+																	</SelectItem>
+																);
+															})}
+														</SelectContent>
+													</Select>
+												)}
+											/>
+										</TableCell>
+										<TableCell>
 											<TeamsComboBox
 												userSettings={userSettingsQuery.data}
 												onChange={(value) => handleTeamChange({ value, index })}
@@ -201,7 +247,9 @@ const ExpensesTable = () => {
 										<TableCell>
 											<BankingAccountComboBox
 												userSettings={userSettingsQuery.data}
-												onChange={(value) => handleBankingAccountChange({ value, index })}
+												onChange={(value, isOnlyDebit) =>
+													handleBankingAccountChange({ value, index, isOnlyDebit })
+												}
 											/>
 										</TableCell>
 										<TableCell>
@@ -222,6 +270,7 @@ const ExpensesTable = () => {
 							<Button variant={'ghost'} type='button' onClick={handleAddTransaction}>
 								<PlusIcon /> Adicionar despesa
 							</Button>
+
 							<Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
 								{!isPending && 'Criar despesas'}
 								{isPending && (

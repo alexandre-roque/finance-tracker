@@ -183,7 +183,7 @@ function EmojiPickerFormItem({
 		'icon'
 	>;
 }) {
-	const hasSpaceToEmoji = useMediaQuery('(min-height: 900px)');
+	const hasSpaceToEmoji = useMediaQuery('(min-height: 1000px)');
 	const theme = useTheme();
 	const [open, setOpen] = useState(false);
 

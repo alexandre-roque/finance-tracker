@@ -157,7 +157,7 @@ export const Icons = {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             xmlnsXlink="http://www.w3.org/1999/xlink"
-            fill="#000000"
+            fill="#0e76a8"
             height="800px"
             width="800px"
             version="1.1"

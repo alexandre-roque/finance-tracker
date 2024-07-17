@@ -2,6 +2,7 @@ import Image from 'next/image';
 import CopyPixButton from '@/components/common/CopyPixButton';
 import Link from 'next/link';
 import { Icons } from '@/components/ui/icons';
+import { Mail } from 'lucide-react';
 
 export default function About() {
 	return (
@@ -64,6 +65,7 @@ export default function About() {
 									href='mailto:alexandre.roque1313@gmail.com'
 									className='inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50'
 								>
+									<Mail className='mr-2 h-4 w-4' />
 									Email
 								</Link>
 								<Link

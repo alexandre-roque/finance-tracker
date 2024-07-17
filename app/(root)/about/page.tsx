@@ -26,13 +26,13 @@ export default function About() {
 				</div>
 			</section>
 			<section className='w-full p-6 md:p-12 lg:p-16 bg-muted'>
-				<div className='container space-y-12 px-4 md:px-6 flex flex-col gap-2 items-center justify-center'>
+				<div className='container space-y-12 px-4 md:px-6 flex flex-row gap-2 items-center justify-center'>
 					<div className='flex flex-col items-center justify-center space-y-4 text-center'>
 						<div className='space-y-2'>
 							<div className='inline-block rounded-lg px-3 py-1 text-sm bg-muted-foreground text-muted'>
 								Skills &amp; Expertise
 							</div>
-							<h2 className='text-3xl font-bold tracking-tighter sm:text-5xl'>Arsenal de conhecimento</h2>
+							<h2 className='text-3xl font-bold tracking-tighter sm:text-5xl'>Experiências</h2>
 							<p className='max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed'>
 								Trabalho com desenvolvimento de software, majoritariamente focado na linguagem de
 								JavaScript e TypeScript, utilizando frameworks como ReactJS, AngularJS e StencilJS.

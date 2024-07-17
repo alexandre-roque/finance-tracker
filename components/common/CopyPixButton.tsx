@@ -20,8 +20,8 @@ const CopyPixButton = () => {
 
 	return (
 		<Button
-			variant='outline'
-			className='w-full hover:bg-muted-foreground hover:text-secondary'
+			variant='secondary'
+			className='hover:bg-muted-foreground hover:text-secondary'
 			onClick={handleCopy}
 			onMouseLeave={() => setCopied(false)}
 		>
@@ -31,7 +31,7 @@ const CopyPixButton = () => {
 				</>
 			) : (
 				<>
-					<Copy className='size-4' /> Copiar código
+					<Copy className='size-4' /> Copiar PIX
 				</>
 			)}
 		</Button>

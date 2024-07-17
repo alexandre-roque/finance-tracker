@@ -8,7 +8,7 @@ export const sideBarLinks = [
 	{ label: 'Analytics', route: '/analytics', icon: <LineChart /> },
 	{ label: 'Times', route: '/teams', icon: <HeartHandshake /> },
 	{ label: 'Gerenciar', route: '/manage', icon: <Settings /> },
-	{ label: 'Cafézin', route: '/buy-me-a-coffee', icon: <Coffee /> },
+	{ label: 'Sobre', route: '/about', icon: <Coffee /> },
 ];
 
 export const MAX_DATE_RANGE_DAYS = 90;

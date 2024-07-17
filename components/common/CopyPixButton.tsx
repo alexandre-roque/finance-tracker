@@ -26,13 +26,13 @@ const CopyPixButton = () => {
 			onMouseLeave={() => setCopied(false)}
 		>
 			{copied ? (
-				<>
+				<div className='flex items-center gap-2'>
 					<CopyCheck className='size-4' /> Copiado!
-				</>
+				</div>
 			) : (
-				<>
+				<div className='flex items-center gap-2'>
 					<Copy className='size-4' /> Copiar PIX
-				</>
+				</div>
 			)}
 		</Button>
 	);

@@ -21,7 +21,8 @@ O **Finance Tracker** é uma aplicação web desenvolvida para ajudar as pessoas
 
 -   Cadastro de despesas e receitas recorrentes e/ou pontuais
 -   Categorias personalizáveis
--   Relatórios financeiros
+-   Analytics
+-   Gerenciamento de faturas
 -   Visualização gráfica de dados
 -   Separação de times e percentuais de contribuição
 -   Exportação de dados
@@ -37,7 +38,7 @@ O **Finance Tracker** é uma aplicação web desenvolvida para ajudar as pessoas
 1. Clone o repositório:
 
     ```bash
-    git clone https://github.com/seu-usuario/finance-tracker.git
+    git clone https://github.com/alexandre-roque/finance-tracker.git
     ```
 
 2. Navegue até o diretório do projeto:
@@ -79,7 +80,7 @@ Contribuições são bem-vindas! Siga os passos abaixo para contribuir:
 
 1. Faça um fork do projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/nome-da-feature`)
-3. Comite suas mudanças (`git commit -m 'Adiciona nova feature'`)
+3. Dê commit em suas mudanças (`git commit -m 'Adiciona nova feature'`)
 4. Faça o push para a branch (`git push origin feature/nome-da-feature`)
 5. Abra um Pull Request
 
@@ -89,5 +90,5 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICE
 
 ## Contato
 
--   **Seu Nome** - [seu.email@exemplo.com](mailto:seu.email@exemplo.com)
--   **GitHub**: [seu-usuario](https://github.com/seu-usuario)
+-   **Alexandre Roque** - [alexandre.roque1313@gmail.com](mailto:alexandre.roque1313@gmail.com)
+-   **GitHub**: [alexandre-roque](https://github.com/alexandre-roque)

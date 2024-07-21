@@ -11,7 +11,7 @@ import { userSettingsType } from '@/db/schema/finance';
 import SkeletonWrapper from '@/components/common/SkeletonWrapper';
 import { toast } from 'sonner';
 import { UpdateUserTeam } from '@/app/wizard/_actions/userSettings';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, X } from 'lucide-react';
 import CreateTeamDialog from './CreateTeamDialog';
 import { cn } from '@/lib/utils';
 
@@ -121,6 +121,10 @@ const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedVal
 							<ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
 						</Button>
 					</PopoverTrigger>
+					<X
+						onClick={() => selectOption(null)}
+						className='absolute right-10 h-4 w-4 shrink-0 opacity-50 pointer top-[8.5rem]'
+					/>
 					<PopoverContent className='w-[200px] p-0' align='start'>
 						<OptionList
 							setOpen={setOpen}
@@ -143,6 +147,10 @@ const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedVal
 						<ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
 					</Button>
 				</DrawerTrigger>
+				<X
+					onClick={() => selectOption(null)}
+					className='absolute right-10 h-4 w-4 shrink-0 opacity-50 pointer top-[8.5rem]'
+				/>
 				<DrawerContent>
 					<div className='mt-4 border-t'>
 						<OptionList

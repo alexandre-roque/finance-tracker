@@ -45,7 +45,12 @@ const Invoices = () => {
 			<SkeletonWrapper isLoading={invoicesQuery.isPending}>
 				{invoicesQuery.data?.map((invoice) => (
 					<Card key={invoice.id} className='flex flex-col gap-2 p-4'>
-						<Accordion type='single' collapsible defaultValue={`${invoice.id}-${invoice.name}`}>
+						<Accordion
+							type='single'
+							collapsible
+							defaultValue={`${invoice.id}-${invoice.name}`}
+							disabled={invoice.creditCardInvoices.length < 1}
+						>
 							<AccordionItem value={`${invoice.id}-${invoice.name}`}>
 								<CardHeader className='pb-2'>
 									<AccordionTrigger>

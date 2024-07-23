@@ -33,6 +33,7 @@ const EditBankingAccountForm = ({
 			closeDay: bankingAccount.closeDay || 3,
 			balance: bankingAccount.balance || 0,
 			bankingAccountId: bankingAccount.id,
+			isOnlyDebit: bankingAccount.isOnlyDebit || false,
 			hideInBalance: bankingAccount.hideInBalance || false,
 			automaticDebitInvoices: bankingAccount.automaticDebitInvoices || false,
 		},

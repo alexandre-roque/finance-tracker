@@ -75,6 +75,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 	});
 
 	const [open, setOpen] = useState(false);
+	const [resetPing, setResetPing] = useState(false);
 	const isRecurringValue = form.watch('isRecurring');
 	const dateValue = form.watch('date');
 	const dayOfTheMonth = form.watch('dayOfTheMonth');
@@ -118,6 +119,10 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 		[form]
 	);
 
+	const pingReset = () => {
+		setResetPing((prevPing) => !prevPing); // Alterna o valor de ping
+	};
+
 	const queryClient = useQueryClient();
 
 	const { mutate, isPending } = useMutation({
@@ -143,6 +148,8 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 				businessDay: 0,
 				dayOfTheMonth: 0,
 			});
+
+			pingReset();
 
 			// After creating a transaction, we need to invalidate the overview query which will refetch data in the homepage
 			queryClient.invalidateQueries({
@@ -214,7 +221,11 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 								<FormItem className='flex flex-col'>
 									<FormLabel>Time</FormLabel>
 									<FormControl>
-										<TeamsComboBox userSettings={userSettings} onChange={handleTeamChange} />
+										<TeamsComboBox
+											resetPing={resetPing}
+											userSettings={userSettings}
+											onChange={handleTeamChange}
+										/>
 									</FormControl>
 									<FormDescription>Selecione o time para a transação</FormDescription>
 								</FormItem>
@@ -230,6 +241,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 										<FormLabel>Categoria</FormLabel>
 										<FormControl>
 											<CategoryPicker
+												resetPing={resetPing}
 												userSettings={userSettings}
 												type={type}
 												onChange={handleCategoryChange}

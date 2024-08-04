@@ -19,6 +19,7 @@ import { Separator } from '../ui/separator';
 
 interface Props {
 	type: TransactionType;
+	resetPing?: boolean;
 	onChange?: (value: string) => void;
 	isConfiguring?: boolean;
 	userSettings?: userSettingsType;
@@ -26,7 +27,15 @@ interface Props {
 	isTeamSelected?: boolean;
 }
 
-function CategoryPicker({ type, onChange, isConfiguring, userSettings, firstSelectedValue, isTeamSelected }: Props) {
+function CategoryPicker({
+	type,
+	onChange,
+	isConfiguring,
+	userSettings,
+	firstSelectedValue,
+	isTeamSelected,
+	resetPing,
+}: Props) {
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(
 		firstSelectedValue
@@ -71,6 +80,11 @@ function CategoryPicker({ type, onChange, isConfiguring, userSettings, firstSele
 		if (!value) return;
 		if (onChange) onChange(value);
 	}, [onChange, value]);
+
+	useEffect(() => {
+		setValue(type === 'income' ? userSettings?.mainIncomeCategory ?? '' : userSettings?.mainExpenseCategory ?? '');
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [resetPing]);
 
 	const handleConfiguring = useCallback(
 		(categoryId: string) => {

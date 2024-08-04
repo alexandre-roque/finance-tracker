@@ -16,6 +16,7 @@ import CreateTeamDialog from './CreateTeamDialog';
 import { cn } from '@/lib/utils';
 
 interface Props {
+	resetPing?: boolean;
 	onChange?: (value?: string) => void;
 	isConfiguring?: boolean;
 	userSettings?: userSettingsType;
@@ -37,7 +38,7 @@ export type teamsQueryType = {
 	};
 };
 
-const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedValue }: Props) => {
+const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedValue, resetPing }: Props) => {
 	const [open, setOpen] = useState(false);
 	const isDesktop = useMediaQuery('(min-width: 768px)');
 	const [selectedOption, setSelectedOption] = useState<teamsQueryType | null>(null);
@@ -106,6 +107,16 @@ const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedVal
 	useEffect(() => {
 		if (onChange) onChange(selectedOption?.team?.id);
 	}, [onChange, selectedOption]);
+
+	useEffect(() => {
+		const currentTeam = teamsQuery?.data?.find((teamMember) => teamMember.team.id === userSettings?.mainTeam);
+		if (currentTeam) {
+			setSelectedOption(currentTeam);
+		} else {
+			setSelectedOption(null);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [resetPing]);
 
 	if (isDesktop) {
 		return (

@@ -21,7 +21,7 @@ import { RankingInfo, rankItem, compareItems } from '@tanstack/match-sorter-util
 
 import { GetTransactionHistoryResponseType } from '@/app/api/transactions-history/route';
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import SkeletonWrapper from '@/components/common/SkeletonWrapper';
 import { DataTableColumnHeader } from '@/components/datatable/ColumnHeader';
 import { DateToUTCDate, cn } from '@/lib/utils';
@@ -76,18 +76,11 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 	return itemRank.passed;
 };
 
-// Define a custom fuzzy sort function that will sort by rank if the row has ranking information
-const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
-	let dir = 0;
-
-	// Only sort by rank if the column has ranking information
-	if (rowA.columnFiltersMeta[columnId]) {
-		dir = compareItems(rowA.columnFiltersMeta[columnId]?.itemRank!, rowB.columnFiltersMeta[columnId]?.itemRank!);
-	}
-
-	// Provide an alphanumeric fallback for when the item ranks are equal
-	return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
-};
+const formatter = new Intl.NumberFormat('pt-BR', {
+	style: 'currency',
+	minimumFractionDigits: 2,
+	currency: 'BRL',
+});
 
 const columns: ColumnDef<TransactionHistoryRow>[] = [
 	{
@@ -219,6 +212,13 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
 				{row.original.formattedAmount}
 			</div>
 		),
+		footer: ({ table }) => { 
+			const balance = table.getRowModel().rows.reduce((sum, row) => {
+				return sum + (row.original.type === 'income' ? row.original.amount : - row.original.amount);
+			}, 0); 
+
+			return (<div className={cn('rounded-lg text-center p-2', balance > 0 ? 'bg-emerald-400/10 text-emerald-500' : 'bg-red-400/10 text-red-500' )}> Total: {formatter.format(balance)} </div>)
+		}
 	},
 	{
 		id: 'actions',
@@ -269,7 +269,7 @@ function TransactionTable({ from, to }: Props) {
 		getCoreRowModel: getCoreRowModel(),
 		initialState: {
 			pagination: {
-				pageSize: 20,
+				pageSize: 50,
 			},
 		},
 		state: {
@@ -448,6 +448,17 @@ function TransactionTable({ from, to }: Props) {
 								</TableRow>
 							)}
 						</TableBody>
+						<TableFooter>
+							{table.getFooterGroups().map((footer) => (
+								<TableRow key={footer.id}>
+									{footer.headers.map((header) => (
+										<TableHead key={header.id}>
+											{flexRender(header.column.columnDef.footer, header.getContext())}
+										</TableHead>
+									))}
+								</TableRow>
+							))}
+						</TableFooter>
 					</Table>
 				</div>
 				<div className='flex items-center justify-end space-x-2 py-4'>

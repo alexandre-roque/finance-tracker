@@ -1,5 +1,4 @@
 import { db } from '@/db';
-import { bankingAccounts, categories } from '@/db/schema/finance';
 import { users } from '@/db/schema/users';
 import * as bcrypt from 'bcrypt';
 

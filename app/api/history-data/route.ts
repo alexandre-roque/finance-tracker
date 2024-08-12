@@ -7,7 +7,7 @@ import { Period, Timeframe, hashStringToHSL, orangeHSLToGreenHSL } from '@/lib/u
 import { getDaysInMonth } from 'date-fns';
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
+import { z } from '@/lib/i18nZod';
 
 const getHistoryDataSchema = z.object({
 	timeframe: z.enum(['month', 'year']),

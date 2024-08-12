@@ -5,7 +5,7 @@ import { db } from '@/db';
 import { categories } from '@/db/schema/finance';
 import { and, eq, inArray, or } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
+import { z } from '@/lib/i18nZod';
 
 export const GET = auth(async (req) => {
 	if (!req.auth?.user?.id) {

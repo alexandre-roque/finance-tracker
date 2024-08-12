@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import CustomInput from '../common/CustomInput';
-import { z } from 'zod';
+import { z } from '@/lib/i18nZod';
 import { authFormSchema } from '@/schemas';
 import Link from 'next/link';
 

@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createBankingAccountSchema, createBankingAccountSchemaType } from '@/schemas';
-import { z } from 'zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '../ui/form';
 import CustomInput from '../common/CustomInput';
 import { Loader2 } from 'lucide-react';

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from '@/lib/i18nZod';
 import { Currencies } from '@/lib/currencies';
 import { differenceInDays } from 'date-fns';
 import { MAX_DATE_RANGE_DAYS } from '@/constants';

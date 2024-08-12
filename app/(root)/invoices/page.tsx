@@ -1,7 +1,6 @@
 'use client';
 
 import { GetInvoicesResponseType } from '@/app/api/invoices/route';
-import SkeletonWrapper from '@/components/common/SkeletonWrapper';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -42,36 +41,36 @@ const Invoices = () => {
 
 	return (
 		<div className='flex flex-col gap-2 p-4'>
-			<SkeletonWrapper isLoading={invoicesQuery.isPending}>
-				{invoicesQuery.data?.map((invoice) => (
+			{invoicesQuery.isLoading && (
+				<div className='flex mt-20 w-full items-center justify-center'>
+					<div className='flex flex-col items-center space-y-4'>
+						<div className='animate-spin rounded-full border-4 border-gray-300 border-t-gray-900 h-12 w-12' />
+					</div>
+				</div>
+			)}
+			<Accordion type='multiple' defaultValue={['0']}>
+				{invoicesQuery.data?.map((invoice, index) => (
 					<Card key={invoice.id} className='flex flex-col gap-2 p-4'>
-						<Accordion
-							type='single'
-							collapsible
-							defaultValue={`${invoice.id}-${invoice.name}`}
-							disabled={invoice.creditCardInvoices.length < 1}
-						>
-							<AccordionItem value={`${invoice.id}-${invoice.name}`}>
-								<CardHeader className='pb-2'>
-									<AccordionTrigger>
-										<CardTitle className='text-lg font-semibold'>Conta: {invoice.name}</CardTitle>
-									</AccordionTrigger>
-								</CardHeader>
-								<AccordionContent className='grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2'>
-									{invoice.creditCardInvoices.map((creditCardInvoice) => (
-										<InvoiceComponent
-											key={creditCardInvoice.id}
-											creditCardInvoice={creditCardInvoice}
-											formatter={formatter}
-											invoice={invoice}
-										/>
-									))}
-								</AccordionContent>
-							</AccordionItem>
-						</Accordion>
+						<AccordionItem disabled={!invoice.creditCardInvoices.length} value={index.toString()}>
+							<CardHeader className='pb-2'>
+								<AccordionTrigger>
+									<CardTitle className='text-lg font-semibold'>Conta: {invoice.name}</CardTitle>
+								</AccordionTrigger>
+							</CardHeader>
+							<AccordionContent className='grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2'>
+								{invoice.creditCardInvoices.map((creditCardInvoice) => (
+									<InvoiceComponent
+										key={creditCardInvoice.id}
+										creditCardInvoice={creditCardInvoice}
+										formatter={formatter}
+										invoice={invoice}
+									/>
+								))}
+							</AccordionContent>
+						</AccordionItem>
 					</Card>
 				))}
-			</SkeletonWrapper>
+			</Accordion>
 		</div>
 	);
 };

@@ -5,6 +5,7 @@ import History from '@/components/common/History';
 import { Button } from '@/components/ui/button';
 import { redirect } from 'next/navigation';
 import React from 'react';
+import { TextEffect } from '@/components/ui/text-effect';
 
 const Home = async () => {
 	const session = await auth();
@@ -16,7 +17,9 @@ const Home = async () => {
 		<div className='h-full bg-background mb-12'>
 			<div className='border-b bg-card'>
 				<div className='container flex flex-wrap items-center justify-between gap-6 py-8'>
-					<p className='text-2xl font-bold'>Olá, {session.user.name}! 👋</p>
+					<TextEffect per='char' preset='fade' className='text-2xl font-bold'>
+						{`Olá, ${session.user.name || ''}!`}
+					</TextEffect>
 
 					<div className='flex items-center gap-3'>
 						<CreateTransactionDialog

@@ -23,6 +23,7 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 const Invoices = () => {
 	const userSettingsQuery = useQuery<userSettingsType>({
@@ -53,8 +54,21 @@ const Invoices = () => {
 					<Card key={invoice.id} className='flex flex-col gap-2 p-4'>
 						<AccordionItem disabled={!invoice.creditCardInvoices.length} value={index.toString()}>
 							<CardHeader className='pb-2'>
-								<AccordionTrigger>
-									<CardTitle className='text-lg font-semibold'>Conta: {invoice.name}</CardTitle>
+								<AccordionTrigger
+									disabled={!invoice.creditCardInvoices.length}
+									className={cn(
+										!invoice.creditCardInvoices.length &&
+											'hover:no-underline hover:cursor-not-allowed'
+									)}
+								>
+									<CardTitle
+										className={cn(
+											'text-lg font-semibold',
+											!invoice.creditCardInvoices.length && 'text-muted-foreground'
+										)}
+									>
+										Conta: {invoice.name}
+									</CardTitle>
 								</AccordionTrigger>
 							</CardHeader>
 							<AccordionContent className='grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2'>

@@ -15,6 +15,7 @@ export const GET = auth(async (req) => {
 	const userId = req.auth.user.id;
 	const { searchParams } = new URL(req.url);
 	const type = searchParams.get('type');
+	const onlyFromUser = searchParams.get('onlyFromUser');
 
 	const validator = z.enum(['expense', 'income']).nullable();
 
@@ -40,19 +41,24 @@ export const GET = auth(async (req) => {
 		where: (teamMembers, { eq }) => eq(teamMembers.userId, userId),
 	});
 
-	const userIdConstraint = or(
-		and(
-			inArray(
-				categories.userId,
-				[userId].concat(teams.flatMap((team) => team.team.members.map((member) => member.userId)))
+	if (!onlyFromUser) {
+		const userIdConstraint = or(
+			and(
+				inArray(
+					categories.userId,
+					[userId].concat(teams.flatMap((team) => team.team.members.map((member) => member.userId)))
+				),
+				eq(categories.sharable, true)
 			),
-			eq(categories.sharable, true)
-		),
-		eq(categories.userId, userId)
-	);
+			eq(categories.userId, userId)
+		);
 
-	const constraint = type ? and(userIdConstraint, eq(categories.type, type)) : userIdConstraint;
+		const constraint = type ? and(userIdConstraint, eq(categories.type, type)) : userIdConstraint;
 
+		const resultCategories = await db.select().from(categories).where(constraint);
+		return Response.json(resultCategories);
+	}
+	const constraint = and(eq(categories.userId, userId), type ? eq(categories.type, type) : undefined);
 	const resultCategories = await db.select().from(categories).where(constraint);
 	return Response.json(resultCategories);
 });

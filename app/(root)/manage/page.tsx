@@ -96,8 +96,8 @@ function BankingAccountsList() {
 
 function CategoryList({ type, userSettings }: { type: TransactionType; userSettings?: userSettingsType }) {
 	const categoriesQuery = useQuery({
-		queryKey: ['categories', type],
-		queryFn: () => fetch(`/api/categories?type=${type}`).then((res) => res.json()),
+		queryKey: ['categories', type, 'onlyFromUser'],
+		queryFn: () => fetch(`/api/categories?type=${type}&onlyFromUser=1`).then((res) => res.json()),
 	});
 
 	const dataAvailable = categoriesQuery.data && categoriesQuery.data.length > 0;

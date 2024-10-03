@@ -42,6 +42,8 @@ import {
 import DeleteTransactionDialog from './DeleteTransactionsDialog';
 import EditTransactionsDialog from '../transaction/EditTransactionsDialog';
 import DebouncedInput from '../ui/debounced-input';
+import { PAYMENT_TYPES_MAP } from './CreateTransactionDialog';
+import { possiblePaymentTypesArray } from '@/schemas';
 
 interface Props {
 	from: Date;
@@ -212,13 +214,23 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
 				{row.original.formattedAmount}
 			</div>
 		),
-		footer: ({ table }) => { 
+		footer: ({ table }) => {
 			const balance = table.getRowModel().rows.reduce((sum, row) => {
-				return sum + (row.original.type === 'income' ? row.original.amount : - row.original.amount);
-			}, 0); 
+				return sum + (row.original.type === 'income' ? row.original.amount : -row.original.amount);
+			}, 0);
 
-			return (<div className={cn('rounded-lg text-center p-2', balance > 0 ? 'bg-emerald-400/10 text-emerald-500' : 'bg-red-400/10 text-red-500' )}> Total: {formatter.format(balance)} </div>)
-		}
+			return (
+				<div
+					className={cn(
+						'rounded-lg text-center p-2',
+						balance > 0 ? 'bg-emerald-400/10 text-emerald-500' : 'bg-red-400/10 text-red-500'
+					)}
+				>
+					{' '}
+					Total: {formatter.format(balance)}{' '}
+				</div>
+			);
+		},
 	},
 	{
 		id: 'actions',
@@ -338,7 +350,7 @@ function TransactionTable({ from, to }: Props) {
 
 	return (
 		<div className='w-full'>
-			<div className='flex flex-wrap items-end justify-between gap-2 py-4'>
+			<div className='flex flex-wrap items-end justify-between gap-2 py-4 sm:'>
 				<DebouncedInput
 					value={globalFilter ?? ''}
 					onChange={(value) => setGlobalFilter(String(value))}
@@ -346,7 +358,7 @@ function TransactionTable({ from, to }: Props) {
 					placeholder='Pesquisar por transações...'
 					debounce={300}
 				/>
-				<div className='flex gap-2'>
+				<div className='lg:flex gap-2 sm:grid sm:grid-cols-4'>
 					{table.getColumn('category') && (
 						<DataTableFacetedFilter
 							title='Categoria'
@@ -383,6 +395,16 @@ function TransactionTable({ from, to }: Props) {
 							title='Usuário'
 							column={table.getColumn('userId')}
 							options={userOptions}
+						/>
+					)}
+					{table.getColumn('paymentType') && (
+						<DataTableFacetedFilter
+							title='Tipo de pagamento'
+							column={table.getColumn('paymentType')}
+							options={possiblePaymentTypesArray.map((value) => ({
+								value,
+								label: PAYMENT_TYPES_MAP[value],
+							}))}
 						/>
 					)}
 				</div>

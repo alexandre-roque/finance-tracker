@@ -21,6 +21,7 @@ interface Props {
 	isConfiguring?: boolean;
 	userSettings?: userSettingsType;
 	firstSelectedValue?: string | null;
+	isExpensesTable?: boolean;
 }
 
 export type teamsQueryType = {
@@ -38,7 +39,14 @@ export type teamsQueryType = {
 	};
 };
 
-const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedValue, resetPing }: Props) => {
+const TeamsComboBox = ({
+	userSettings,
+	onChange,
+	isConfiguring,
+	firstSelectedValue,
+	resetPing,
+	isExpensesTable,
+}: Props) => {
 	const [open, setOpen] = useState(false);
 	const isDesktop = useMediaQuery('(min-width: 768px)');
 	const [selectedOption, setSelectedOption] = useState<teamsQueryType | null>(null);
@@ -132,10 +140,12 @@ const TeamsComboBox = ({ userSettings, onChange, isConfiguring, firstSelectedVal
 							<ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
 						</Button>
 					</PopoverTrigger>
-					<X
-						onClick={() => selectOption(null)}
-						className='absolute right-10 h-4 w-4 shrink-0 opacity-50 pointer top-[8.5rem]'
-					/>
+					{!isExpensesTable && (
+						<X
+							onClick={() => selectOption(null)}
+							className='absolute right-10 h-4 w-4 shrink-0 opacity-50 pointer top-[8.5rem]'
+						/>
+					)}
 					<PopoverContent className='w-[200px] p-0' align='start'>
 						<OptionList
 							setOpen={setOpen}

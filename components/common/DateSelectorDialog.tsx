@@ -69,6 +69,7 @@ const DateSelectorDialog = ({
 										<DialogTitle>Data da transação</DialogTitle>
 									</DialogHeader>
 									<Calendar
+										defaultMonth={dateValue}
 										locale={ptBR}
 										mode='single'
 										selected={dateValue}

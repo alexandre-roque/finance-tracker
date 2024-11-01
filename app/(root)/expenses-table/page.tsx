@@ -233,6 +233,7 @@ const ExpensesTable = () => {
 										</TableCell>
 										<TableCell>
 											<TeamsComboBox
+												isExpensesTable
 												userSettings={userSettingsQuery.data}
 												onChange={(value) => handleTeamChange({ value, index })}
 											/>

@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
@@ -26,6 +26,8 @@ import { PAYMENT_TYPES_MAP } from '@/components/transaction/CreateTransactionDia
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 const ExpensesTable = () => {
+	const [lastSelectedDate, setLastSelectedDate] = useState<Date | null>(null);
+
 	const userSettingsQuery = useQuery({
 		queryKey: ['user-settings', { type: 'manage' }],
 		queryFn: () => fetch('/api/user-settings').then((res) => res.json()),
@@ -65,6 +67,7 @@ const ExpensesTable = () => {
 
 	const handleDateChange = useCallback(
 		({ value, index }: { value: Date; index: number }) => {
+			setLastSelectedDate(value);
 			form.setValue(`transactions.${index}.date`, value);
 		},
 		[form]
@@ -83,7 +86,7 @@ const ExpensesTable = () => {
 		append({
 			amount: 0,
 			description: '',
-			date: new Date(),
+			date: new Date(lastSelectedDate || new Date()),
 			category: '',
 			bankingAccountId: '',
 			type: 'expense',

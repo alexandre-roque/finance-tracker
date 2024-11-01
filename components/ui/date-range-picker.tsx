@@ -12,7 +12,7 @@ import { Switch } from './switch';
 import { ChevronUpIcon, ChevronDownIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './dialog';
-import { endOfDay } from 'date-fns';
+import { endOfDay, startOfDay } from 'date-fns';
 
 export interface DateRangePickerProps {
 	/** Click handler for applying the updates from DateRangePicker. */
@@ -425,7 +425,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 												const toDate = range.to == null || date > range.to ? date : range.to;
 												setRange((prevRange) => ({
 													...prevRange,
-													from: date,
+													from: startOfDay(date),
 													to: endOfDay(toDate),
 												}));
 											}}
@@ -437,7 +437,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 												const fromDate = date < range.from ? date : range.from;
 												setRange((prevRange) => ({
 													...prevRange,
-													from: fromDate,
+													from: startOfDay(fromDate),
 													to: endOfDay(date),
 												}));
 											}}

@@ -16,7 +16,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import CategoryPicker from '@/components/category/CategoryPicker';
 import BankingAccountComboBox from '@/components/bankingAccount/BankingAccountComboBox';
 import DateSelectorDialog from '@/components/common/DateSelectorDialog';
-import { Loader2, PlusIcon, Trash2 } from 'lucide-react';
+import { Loader2, Minus, Plus, PlusIcon, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreateTransaction } from '../_actions/transactions';
 import { toast } from 'sonner';
@@ -112,7 +112,9 @@ const ExpensesTable = () => {
 			});
 
 			form.reset({
-				transactions: [{ amount: 0, description: '', date: new Date(), type: 'expense' }],
+				transactions: [
+					{ amount: 0, description: '', date: new Date(lastSelectedDate || new Date()), type: 'expense' },
+				],
 			});
 
 			// After creating a transaction, we need to invalidate the overview query which will refetch data in the homepage
@@ -169,13 +171,36 @@ const ExpensesTable = () => {
 							<TableBody>
 								{transactions.map((_, index) => (
 									<TableRow key={index}>
-										<TableCell>
+										<TableCell className='flex flex-row gap-2 items-center'>
+											<Minus
+												className='hover:'
+												onClick={() => {
+													const date = form.getValues()?.transactions?.[index]?.date;
+													if (!date) {
+														return;
+													}
+													const newDate = new Date(date);
+													newDate.setDate(newDate.getDate() - 1);
+													handleDateChange({ value: newDate, index });
+												}}
+											/>
 											<DateSelectorDialog
 												onlyDigitsFormat
 												showLabel={false}
 												control={form.control}
 												dateValue={form.watch(`transactions.${index}.date`)}
 												onChange={(value) => handleDateChange({ value, index })}
+											/>
+											<Plus
+												onClick={() => {
+													const date = form.getValues()?.transactions?.[index]?.date;
+													if (!date) {
+														return;
+													}
+													const newDate = new Date(date);
+													newDate.setDate(newDate.getDate() + 1);
+													handleDateChange({ value: newDate, index });
+												}}
 											/>
 										</TableCell>
 										<TableCell>

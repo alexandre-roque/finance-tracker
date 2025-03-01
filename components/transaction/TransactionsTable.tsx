@@ -117,7 +117,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
 			const sort = new Date(rowA.original.date).getTime() - new Date(rowB.original.date).getTime();
 			if (sort === 0) {
 				if (!rowA.original.createdAt || !rowB.original.createdAt) return 0;
-				return rowA.original.createdAt?.getTime() - rowB.original.createdAt.getTime();
+				return new Date(rowA.original.createdAt).getTime() - new Date(rowB.original.createdAt).getTime();
 			}
 
 			return sort;

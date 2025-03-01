@@ -45,12 +45,6 @@ function CategoryPicker({
 			: userSettings?.mainExpenseCategory ?? ''
 	);
 
-	console.log({
-		firstSelectedValue,
-		userSettings,
-		value,
-	});
-
 	const [label, setLabel] = useState('');
 	const isDesktop = useMediaQuery('(min-width: 768px)');
 	const queryClient = useQueryClient();

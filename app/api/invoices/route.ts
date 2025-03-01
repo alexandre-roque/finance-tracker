@@ -21,8 +21,8 @@ async function getInvoices(userId: string) {
 		where: (bankingAccounts, { eq }) => eq(bankingAccounts.userId, userId),
 		with: {
 			creditCardInvoices: {
-				orderBy: (creditCardInvoices, { asc }) =>
-					asc(sql`(${creditCardInvoices.year} * 100 + ${creditCardInvoices.month})`),
+				orderBy: (creditCardInvoices, { desc }) =>
+					desc(sql`(${creditCardInvoices.year} * 100 + ${creditCardInvoices.month})`),
 			},
 		},
 	});

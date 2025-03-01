@@ -130,10 +130,11 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
 			if (!row.original.createdAt) return <div className='text-muted-foreground'>Sem data</div>;
 			const date = new Date(row.original.createdAt);
 			const formattedDate = date.toLocaleDateString('default', {
-				timeZone: 'UTC',
 				year: 'numeric',
 				month: '2-digit',
 				day: '2-digit',
+				hour: 'numeric',
+				minute: 'numeric',
 			});
 			return <div className='text-muted-foreground'>{formattedDate}</div>;
 		},

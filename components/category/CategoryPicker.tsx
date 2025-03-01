@@ -44,6 +44,13 @@ function CategoryPicker({
 			? userSettings?.mainIncomeCategory ?? ''
 			: userSettings?.mainExpenseCategory ?? ''
 	);
+
+	console.log({
+		firstSelectedValue,
+		userSettings,
+		value,
+	});
+
 	const [label, setLabel] = useState('');
 	const isDesktop = useMediaQuery('(min-width: 768px)');
 	const queryClient = useQueryClient();
@@ -82,9 +89,13 @@ function CategoryPicker({
 	}, [onChange, value]);
 
 	useEffect(() => {
-		setValue(type === 'income' ? userSettings?.mainIncomeCategory ?? '' : userSettings?.mainExpenseCategory ?? '');
+		setValue(
+			type === 'income'
+				? userSettings?.mainIncomeCategory ?? firstSelectedValue ?? ''
+				: userSettings?.mainExpenseCategory ?? firstSelectedValue ?? ''
+		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [resetPing]);
+	}, [userSettings]);
 
 	const handleConfiguring = useCallback(
 		(categoryId: string) => {

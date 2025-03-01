@@ -99,32 +99,18 @@ const TeamsComboBox = ({
 	);
 
 	useEffect(() => {
-		if (!userSettings) return;
 		if (!teamsQuery.data) return;
-		const currentTeam = teamsQuery.data.find((teamMember) => teamMember.team.id === userSettings.mainTeam);
+		if (!userSettings && !firstSelectedValue) return;
+		const currentTeam = teamsQuery.data.find((teamMember) => {
+			if (firstSelectedValue) return teamMember.team.id === firstSelectedValue;
+			return teamMember.team.id === userSettings?.mainTeam;
+		});
 		if (currentTeam) setSelectedOption(currentTeam);
-	}, [teamsQuery.data, userSettings]);
-
-	useEffect(() => {
-		if (!firstSelectedValue) return;
-		if (!teamsQuery.data) return;
-		const currentTeam = teamsQuery.data.find((teamMember) => teamMember.team.id === firstSelectedValue);
-		if (currentTeam) setSelectedOption(currentTeam);
-	}, [teamsQuery.data, firstSelectedValue]);
+	}, [teamsQuery.data, userSettings, firstSelectedValue]);
 
 	useEffect(() => {
 		if (onChange) onChange(selectedOption?.team?.id);
 	}, [onChange, selectedOption]);
-
-	useEffect(() => {
-		const currentTeam = teamsQuery?.data?.find((teamMember) => teamMember.team.id === userSettings?.mainTeam);
-		if (currentTeam) {
-			setSelectedOption(currentTeam);
-		} else {
-			setSelectedOption(null);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [resetPing]);
 
 	if (isDesktop) {
 		return (

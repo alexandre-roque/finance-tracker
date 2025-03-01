@@ -111,6 +111,17 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
 			});
 			return <div className='text-muted-foreground'>{formattedDate}</div>;
 		},
+		sortingFn: (rowA, rowB) => {
+			if (!rowA.original.date || !rowB.original.date) return 0;
+
+			const sort = new Date(rowA.original.date).getTime() - new Date(rowB.original.date).getTime();
+			if (sort === 0) {
+				if (!rowA.original.createdAt || !rowB.original.createdAt) return 0;
+				return rowA.original.createdAt?.getTime() - rowB.original.createdAt.getTime();
+			}
+
+			return sort;
+		},
 	},
 	{
 		accessorKey: 'createdAt',

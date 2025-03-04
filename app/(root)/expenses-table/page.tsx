@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useState } from 'react';
+import React, { use, useCallback, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
@@ -39,7 +39,7 @@ const ExpensesTable = () => {
 	const form = useForm<createTransactionsSchemaType>({
 		resolver: zodResolver(createTransactionsSchema),
 		defaultValues: {
-			transactions: [{ amount: 0, description: '', date: new Date(), type: 'expense', paymentType: 'credit' }],
+			transactions: [{ description: '', date: new Date(), type: 'expense', paymentType: 'credit' }],
 		},
 	});
 
@@ -50,7 +50,7 @@ const ExpensesTable = () => {
 				return prev;
 			});
 
-			form.setValue(`transactions.${index}.amount`, value?.amount || 0);
+			form.setValue(`transactions.${index}.amount`, value?.amount || undefined);
 			form.setValue(
 				`transactions.${index}.paymentType`,
 				(value?.paymentType as keyof typeof PAYMENT_TYPES_MAP) || `credit`
@@ -107,7 +107,6 @@ const ExpensesTable = () => {
 
 	const handleAddTransaction = () => {
 		append({
-			amount: 0,
 			description: '',
 			date: new Date(lastSelectedDate || new Date()),
 			category: '',
@@ -136,7 +135,12 @@ const ExpensesTable = () => {
 
 			form.reset({
 				transactions: [
-					{ amount: 0, description: '', date: new Date(lastSelectedDate || new Date()), type: 'expense' },
+					{
+						description: '',
+						date: new Date(lastSelectedDate || new Date()),
+						type: 'expense',
+						amount: undefined,
+					},
 				],
 			});
 
@@ -296,28 +300,46 @@ const ExpensesTable = () => {
 											/>
 										</TableCell>
 										<TableCell>
-											<TeamsComboBox
-												isExpensesTable
-												userSettings={userSettingsQuery.data}
-												onChange={(value) => handleTeamChange({ value, index })}
-												firstSelectedValue={selectedMacros?.[index]?.teamId}
+											<Controller
+												name={`transactions.${index}.teamId`}
+												control={form.control}
+												render={({ field }) => (
+													<TeamsComboBox
+														isExpensesTable
+														userSettings={userSettingsQuery.data}
+														onChange={(value) => handleTeamChange({ value, index })}
+														firstSelectedValue={selectedMacros?.[index]?.teamId}
+													/>
+												)}
 											/>
 										</TableCell>
 										<TableCell>
-											<CategoryPicker
-												userSettings={userSettingsQuery.data}
-												type={'expense'}
-												onChange={(value) => handleCategoryChange({ value, index })}
-												firstSelectedValue={selectedMacros?.[index]?.categoryId}
+											<Controller
+												name={`transactions.${index}.category`}
+												control={form.control}
+												render={({ field }) => (
+													<CategoryPicker
+														userSettings={userSettingsQuery.data}
+														type={'expense'}
+														onChange={(value) => handleCategoryChange({ value, index })}
+														firstSelectedValue={selectedMacros?.[index]?.categoryId}
+													/>
+												)}
 											/>
 										</TableCell>
 										<TableCell>
-											<BankingAccountComboBox
-												userSettings={userSettingsQuery.data}
-												onChange={(value, isOnlyDebit) =>
-													handleBankingAccountChange({ value, index, isOnlyDebit })
-												}
-												firstSelectedValue={selectedMacros?.[index]?.bankingAccountId}
+											<Controller
+												name={`transactions.${index}.bankingAccountId`}
+												control={form.control}
+												render={({ field }) => (
+													<BankingAccountComboBox
+														userSettings={userSettingsQuery.data}
+														onChange={(value, isOnlyDebit) =>
+															handleBankingAccountChange({ value, index, isOnlyDebit })
+														}
+														firstSelectedValue={selectedMacros?.[index]?.bankingAccountId}
+													/>
+												)}
 											/>
 										</TableCell>
 										<TableCell>

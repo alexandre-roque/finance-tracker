@@ -122,7 +122,7 @@ export const macros = sqliteTable('macro', {
 		.references(() => users.id, { onDelete: 'cascade' }),
 	amount: integer('amount'),
 	description: text('description'),
-	type: text('type').default('income').notNull(),
+	type: text('type').default('expense').notNull(),
 	paymentType: text('paymentType').default('credit'),
 	bankingAccountId: text('bankingAccountId').references(() => bankingAccounts.id, { onDelete: 'set null' }),
 	categoryId: text('categoryId').references(() => categories.id, { onDelete: 'set null' }),

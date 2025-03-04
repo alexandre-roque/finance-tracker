@@ -223,12 +223,15 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 
 				<Form {...form}>
 					<form className='space-y-4' onSubmit={form.handleSubmit(onSubmit)}>
-						<FormItem className='flex flex-col'>
-							<FormLabel>Macro</FormLabel>
-							<FormControl>
-								<MacroComboBox onChange={handleMacroChange} />
-							</FormControl>
-						</FormItem>
+						{type === 'expense' && (
+							<FormItem className='flex flex-col'>
+								<FormLabel>Macro</FormLabel>
+								<FormControl>
+									<MacroComboBox onChange={handleMacroChange} />
+								</FormControl>
+							</FormItem>
+						)}
+
 						<CustomInput
 							control={form.control}
 							name='description'

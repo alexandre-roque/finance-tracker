@@ -50,7 +50,10 @@ const ExpensesTable = () => {
 				return prev;
 			});
 
-			form.setValue(`transactions.${index}.amount`, value?.amount || undefined);
+			if (value?.amount) {
+				form.setValue(`transactions.${index}.amount`, value.amount);
+			}
+
 			form.setValue(
 				`transactions.${index}.paymentType`,
 				(value?.paymentType as keyof typeof PAYMENT_TYPES_MAP) || `credit`

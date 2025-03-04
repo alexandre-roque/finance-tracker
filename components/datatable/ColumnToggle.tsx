@@ -46,12 +46,16 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
 				<DropdownMenuSeparator />
 				{table
 					.getAllColumns()
-					.filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide())
+					.filter(
+						(column) =>
+							typeof column.accessorFn !== 'undefined' &&
+							column.getCanHide() &&
+							COLUMN_MAP[column.id as keyof typeof COLUMN_MAP]
+					)
 					.map((column) => {
 						return (
 							<DropdownMenuCheckboxItem
 								key={column.id}
-								className='capitalize'
 								checked={column.getIsVisible()}
 								onCheckedChange={(value) => column.toggleVisibility(!!value)}
 							>

@@ -24,9 +24,12 @@ import { DateToUTCDate } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PAYMENT_TYPES_MAP } from '@/components/transaction/CreateTransactionDialog';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import MacroComboBox from '@/components/transaction/MacroComboBox';
+import { macroType } from '@/db/schema/finance';
 
 const ExpensesTable = () => {
 	const [lastSelectedDate, setLastSelectedDate] = useState<Date | null>(null);
+	const [selectedMacros, setSelectedMacros] = useState<Record<number, macroType>>({});
 
 	const userSettingsQuery = useQuery({
 		queryKey: ['user-settings', { type: 'manage' }],
@@ -39,6 +42,26 @@ const ExpensesTable = () => {
 			transactions: [{ amount: 0, description: '', date: new Date(), type: 'expense', paymentType: 'credit' }],
 		},
 	});
+
+	const handleMacroChange = useCallback(
+		({ value, index }: { value: macroType; index: number }) => {
+			setSelectedMacros((prev) => {
+				prev[index] = value;
+				return prev;
+			});
+
+			form.setValue(`transactions.${index}.amount`, value?.amount || 0);
+			form.setValue(
+				`transactions.${index}.paymentType`,
+				(value?.paymentType as keyof typeof PAYMENT_TYPES_MAP) || `credit`
+			);
+			form.setValue(`transactions.${index}.description`, value?.description || '');
+			form.setValue(`transactions.${index}.teamId`, value?.teamId || '');
+			form.setValue(`transactions.${index}.category`, value?.categoryId || '');
+			form.setValue(`transactions.${index}.bankingAccountId`, value?.bankingAccountId || '');
+		},
+		[form]
+	);
 
 	const handleTeamChange = useCallback(
 		({ value, index }: { value?: string; index: number }) => {
@@ -159,6 +182,7 @@ const ExpensesTable = () => {
 							<TableHeader>
 								<TableRow>
 									<TableHead>Data</TableHead>
+									<TableHead>Macro</TableHead>
 									<TableHead>Descrição</TableHead>
 									<TableHead>Valor</TableHead>
 									<TableHead>Forma de pagamento</TableHead>
@@ -201,6 +225,18 @@ const ExpensesTable = () => {
 													newDate.setDate(newDate.getDate() + 1);
 													handleDateChange({ value: newDate, index });
 												}}
+											/>
+										</TableCell>
+										<TableCell>
+											<Controller
+												name={`transactions.${index}.description`}
+												control={form.control}
+												render={({ field }) => (
+													<MacroComboBox
+														small
+														onChange={(value) => handleMacroChange({ value, index })}
+													/>
+												)}
 											/>
 										</TableCell>
 										<TableCell>
@@ -264,6 +300,7 @@ const ExpensesTable = () => {
 												isExpensesTable
 												userSettings={userSettingsQuery.data}
 												onChange={(value) => handleTeamChange({ value, index })}
+												firstSelectedValue={selectedMacros?.[index]?.teamId}
 											/>
 										</TableCell>
 										<TableCell>
@@ -271,6 +308,7 @@ const ExpensesTable = () => {
 												userSettings={userSettingsQuery.data}
 												type={'expense'}
 												onChange={(value) => handleCategoryChange({ value, index })}
+												firstSelectedValue={selectedMacros?.[index]?.categoryId}
 											/>
 										</TableCell>
 										<TableCell>
@@ -279,6 +317,7 @@ const ExpensesTable = () => {
 												onChange={(value, isOnlyDebit) =>
 													handleBankingAccountChange({ value, index, isOnlyDebit })
 												}
+												firstSelectedValue={selectedMacros?.[index]?.bankingAccountId}
 											/>
 										</TableCell>
 										<TableCell>

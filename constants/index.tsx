@@ -1,4 +1,14 @@
-import { Coffee, CreditCard, HeartHandshake, Home, LineChart, Settings, SquareKanban, Timer } from 'lucide-react';
+import {
+	Coffee,
+	CreditCard,
+	HandHelping,
+	HeartHandshake,
+	Home,
+	LineChart,
+	Settings,
+	SquareKanban,
+	Timer,
+} from 'lucide-react';
 
 export const sideBarLinks = [
 	{ label: 'Dashboard', route: '/', icon: <Home /> },
@@ -7,6 +17,7 @@ export const sideBarLinks = [
 	{ label: 'Faturas', route: '/invoices', icon: <SquareKanban /> },
 	{ label: 'Analytics', route: '/analytics', icon: <LineChart /> },
 	{ label: 'Times', route: '/teams', icon: <HeartHandshake /> },
+	{ label: 'Macro', route: '/macro', icon: <HandHelping /> },
 	{ label: 'Gerenciar', route: '/manage', icon: <Settings /> },
 	{ label: 'Sobre', route: '/about', icon: <Coffee /> },
 ];

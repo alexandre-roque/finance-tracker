@@ -29,7 +29,7 @@ import CustomInput from '../common/CustomInput';
 import { Switch } from '../ui/switch';
 import CategoryPicker from '../category/CategoryPicker';
 import { CreateTransaction } from '@/app/(root)/_actions/transactions';
-import { userSettingsType } from '@/db/schema/finance';
+import { macroType, userSettingsType } from '@/db/schema/finance';
 import BankingAccountComboBox from '../bankingAccount/BankingAccountComboBox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { GetFormatterForCurrency } from '@/lib/currencies';
@@ -37,6 +37,7 @@ import TeamsComboBox from '../team/TeamsComboBox';
 import DateSelectorDialog from '../common/DateSelectorDialog';
 import Link from 'next/link';
 import { Checkbox } from '../ui/checkbox';
+import MacroComboBox from './MacroComboBox';
 
 interface Props {
 	trigger: ReactNode;
@@ -75,6 +76,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 	});
 
 	const [open, setOpen] = useState(false);
+	const [selectedMacro, setSelectedMacro] = useState<macroType | null>(null);
 	const [resetPing, setResetPing] = useState(false);
 	const isRecurringValue = form.watch('isRecurring');
 	const dateValue = form.watch('date');
@@ -100,6 +102,19 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 	const handleCategoryChange = useCallback(
 		(value: string) => {
 			form.setValue('category', value);
+		},
+		[form]
+	);
+
+	const handleMacroChange = useCallback(
+		(value: macroType | null) => {
+			setSelectedMacro(value);
+			form.setValue('amount', value?.amount || 0);
+			form.setValue('paymentType', (value?.paymentType as keyof typeof PAYMENT_TYPES_MAP) || 'credit');
+			form.setValue('description', value?.description || '');
+			form.setValue('teamId', value?.teamId || '');
+			form.setValue('category', value?.categoryId || '');
+			form.setValue('bankingAccountId', value?.bankingAccountId || '');
 		},
 		[form]
 	);
@@ -208,6 +223,12 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 
 				<Form {...form}>
 					<form className='space-y-4' onSubmit={form.handleSubmit(onSubmit)}>
+						<FormItem className='flex flex-col'>
+							<FormLabel>Macro</FormLabel>
+							<FormControl>
+								<MacroComboBox onChange={handleMacroChange} />
+							</FormControl>
+						</FormItem>
 						<CustomInput
 							control={form.control}
 							name='description'
@@ -225,6 +246,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 											resetPing={resetPing}
 											userSettings={userSettings}
 											onChange={handleTeamChange}
+											firstSelectedValue={selectedMacro?.teamId}
 										/>
 									</FormControl>
 									<FormDescription>Selecione o time para a transação</FormDescription>
@@ -246,6 +268,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 												type={type}
 												onChange={handleCategoryChange}
 												isTeamSelected={Boolean(form.watch('teamId'))}
+												firstSelectedValue={selectedMacro?.categoryId}
 											/>
 										</FormControl>
 										<FormDescription>Selecione a categoria da sua transação</FormDescription>
@@ -263,6 +286,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 											<BankingAccountComboBox
 												userSettings={userSettings}
 												onChange={handleBankingAccountChange}
+												firstSelectedValue={selectedMacro?.bankingAccountId}
 											/>
 										</FormControl>
 										<FormDescription>Selecione a conta da sua transação</FormDescription>

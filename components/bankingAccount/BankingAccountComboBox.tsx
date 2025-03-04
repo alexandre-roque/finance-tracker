@@ -82,22 +82,14 @@ const BankingAccountComboBox = ({ userSettings, onChange, isConfiguring, firstSe
 	);
 
 	useEffect(() => {
-		if (!userSettings) return;
 		if (!bankingAccountsQuery.data) return;
-		const currentBankingAccount = bankingAccountsQuery.data.find(
-			(bankingAccount) => bankingAccount.id === userSettings.mainBankingAccount
-		);
+		if (!userSettings && !firstSelectedValue) return;
+		const currentBankingAccount = bankingAccountsQuery.data.find((bankingAccount) => {
+			if (firstSelectedValue) return bankingAccount.id === firstSelectedValue;
+			return bankingAccount.id === userSettings?.mainBankingAccount;
+		});
 		if (currentBankingAccount) setSelectedOption(currentBankingAccount);
-	}, [bankingAccountsQuery.data, userSettings]);
-
-	useEffect(() => {
-		if (!firstSelectedValue) return;
-		if (!bankingAccountsQuery.data) return;
-		const currentBankingAccount = bankingAccountsQuery.data.find(
-			(bankingAccount) => bankingAccount.id === firstSelectedValue
-		);
-		if (currentBankingAccount) setSelectedOption(currentBankingAccount);
-	}, [bankingAccountsQuery.data, firstSelectedValue]);
+	}, [bankingAccountsQuery.data, userSettings, firstSelectedValue]);
 
 	useEffect(() => {
 		if (selectedOption) {

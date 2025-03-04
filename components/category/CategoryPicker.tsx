@@ -84,12 +84,14 @@ function CategoryPicker({
 
 	useEffect(() => {
 		setValue(
-			type === 'income'
-				? userSettings?.mainIncomeCategory ?? firstSelectedValue ?? ''
-				: userSettings?.mainExpenseCategory ?? firstSelectedValue ?? ''
+			(firstSelectedValue
+				? firstSelectedValue
+				: type === 'income'
+				? userSettings?.mainIncomeCategory
+				: userSettings?.mainExpenseCategory) ?? ''
 		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [userSettings]);
+	}, [userSettings, firstSelectedValue]);
 
 	const handleConfiguring = useCallback(
 		(categoryId: string) => {

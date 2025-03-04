@@ -135,6 +135,21 @@ export const editTransactionSchema = z.object({
 
 export type editTransactionSchemaType = z.infer<typeof editTransactionSchema>;
 
+export const createOrEditMacroSchema = z.object({
+	macroId: z.string().optional(),
+	name: z.string(),
+	amount: z.coerce.number().positive().multipleOf(0.01).optional(),
+	description: z.string().optional(),
+	type: z.union([z.literal('income'), z.literal('expense')]),
+	paymentType: z.enum(possiblePaymentTypesArray).optional(),
+	categoryId: z.string().optional(),
+	bankingAccountId: z.string().optional(),
+	teamId: z.string().optional(),
+	isOnlyDebit: z.coerce.boolean().optional(),
+});
+
+export type createOrEditMacroSchemaType = z.infer<typeof createOrEditMacroSchema>;
+
 export const editRecurrentTransactionSchema = z.object({
 	transactionId: z.string(),
 	amount: z.coerce.number().positive().multipleOf(0.01),

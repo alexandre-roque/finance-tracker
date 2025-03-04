@@ -110,6 +110,27 @@ export const transactions = sqliteTable('transaction', {
 
 export type transactionsType = typeof transactions.$inferSelect;
 
+export const macros = sqliteTable('macro', {
+	name: text('name').notNull(),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => ulid()),
+	createdAt: integer('createdAt', { mode: 'timestamp_ms' }).default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+	updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+	userId: text('userId')
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' }),
+	amount: integer('amount'),
+	description: text('description'),
+	type: text('type').default('income').notNull(),
+	paymentType: text('paymentType').default('credit'),
+	bankingAccountId: text('bankingAccountId').references(() => bankingAccounts.id, { onDelete: 'set null' }),
+	categoryId: text('categoryId').references(() => categories.id, { onDelete: 'set null' }),
+	teamId: text('teamId').references(() => teams.id, { onDelete: 'set null' }),
+});
+
+export type macroType = typeof macros.$inferSelect;
+
 export const recurringTransactions = sqliteTable('recurringTransaction', {
 	id: text('id')
 		.primaryKey()
@@ -391,5 +412,24 @@ export const pendingTeamApprovalRelations = relations(pendingTeamAprovals, ({ on
 	team: one(teams, {
 		fields: [pendingTeamAprovals.teamId],
 		references: [teams.id],
+	}),
+}));
+
+export const macroRelations = relations(macros, ({ one }) => ({
+	user: one(users, {
+		fields: [macros.userId],
+		references: [users.id],
+	}),
+	team: one(teams, {
+		fields: [macros.teamId],
+		references: [teams.id],
+	}),
+	bankingAccount: one(bankingAccounts, {
+		fields: [macros.bankingAccountId],
+		references: [bankingAccounts.id],
+	}),
+	category: one(categories, {
+		fields: [macros.categoryId],
+		references: [categories.id],
 	}),
 }));

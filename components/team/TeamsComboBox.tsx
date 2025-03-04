@@ -129,7 +129,7 @@ const TeamsComboBox = ({
 					{!isExpensesTable && (
 						<X
 							onClick={() => selectOption(null)}
-							className='absolute right-10 h-4 w-4 shrink-0 opacity-50 pointer top-[8.5rem]'
+							className='absolute right-10 h-4 w-4 shrink-0 opacity-50 pointer top-[13.5rem]'
 						/>
 					)}
 					<PopoverContent className='w-[200px] p-0' align='start'>

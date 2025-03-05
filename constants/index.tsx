@@ -22,4 +22,4 @@ export const sideBarLinks = [
 	{ label: 'Sobre', route: '/about', icon: <Coffee /> },
 ];
 
-export const MAX_DATE_RANGE_DAYS = 180;
+export const MAX_DATE_RANGE_DAYS = 365;

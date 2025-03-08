@@ -308,7 +308,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 								control={form.control}
 								name='amount'
 								label='Valor'
-								type='currency'
+								type='number'
 							/>
 							{type === 'expense' && (
 								<FormField

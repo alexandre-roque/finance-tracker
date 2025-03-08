@@ -255,7 +255,13 @@ const ExpensesTable = () => {
 												name={`transactions.${index}.amount`}
 												control={form.control}
 												render={({ field }) => (
-													<Input type='currency' className='w-24' {...field} />
+													<Input
+														className='w-24'
+														type='number'
+														step='0.1'
+														placeholder='Valor'
+														{...field}
+													/>
 												)}
 											/>
 										</TableCell>

@@ -4,6 +4,8 @@ import { Input } from '../ui/input';
 
 import { Control, FieldPath } from 'react-hook-form';
 import { PasswordInput } from '../ui/password-input';
+import { Numeric } from '../ui/numeric-input';
+
 interface CustomInput {
 	control: Control<any>;
 	name: FieldPath<any>;
@@ -33,6 +35,7 @@ const CustomInput = ({
 	type = 'text',
 	disabled = false,
 	isPassword = false,
+	isCurrency = false,
 }: CustomInput) => {
 	return (
 		<FormField
@@ -50,6 +53,8 @@ const CustomInput = ({
 									autoComplete='current-password'
 									{...field}
 								/>
+							) : isCurrency ? (
+								<Numeric {...field} />
 							) : (
 								<Input
 									placeholder={placeholder}

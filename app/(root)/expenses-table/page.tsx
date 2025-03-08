@@ -26,6 +26,7 @@ import { PAYMENT_TYPES_MAP } from '@/components/transaction/CreateTransactionDia
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import MacroComboBox from '@/components/transaction/MacroComboBox';
 import { macroType } from '@/db/schema/finance';
+import { Numeric } from '@/components/ui/numeric-input';
 
 const ExpensesTable = () => {
 	const [lastSelectedDate, setLastSelectedDate] = useState<Date | null>(null);
@@ -254,15 +255,7 @@ const ExpensesTable = () => {
 											<Controller
 												name={`transactions.${index}.amount`}
 												control={form.control}
-												render={({ field }) => (
-													<Input
-														className='w-24'
-														type='number'
-														step='0.1'
-														placeholder='Valor'
-														{...field}
-													/>
-												)}
+												render={({ field }) => <Numeric {...field} />}
 											/>
 										</TableCell>
 										<TableCell>

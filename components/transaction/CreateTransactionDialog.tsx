@@ -249,7 +249,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 											resetPing={resetPing}
 											userSettings={userSettings}
 											onChange={handleTeamChange}
-											firstSelectedValue={selectedMacro?.teamId}
+											firstSelectedValue={selectedMacro ? selectedMacro.teamId ?? 'none' : null}
 										/>
 									</FormControl>
 									<FormDescription>Selecione o time para a transação</FormDescription>
@@ -271,7 +271,9 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 												type={type}
 												onChange={handleCategoryChange}
 												isTeamSelected={Boolean(form.watch('teamId'))}
-												firstSelectedValue={selectedMacro?.categoryId}
+												firstSelectedValue={
+													selectedMacro ? selectedMacro.categoryId ?? 'none' : null
+												}
 											/>
 										</FormControl>
 										<FormDescription>Selecione a categoria da sua transação</FormDescription>
@@ -289,7 +291,9 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 											<BankingAccountComboBox
 												userSettings={userSettings}
 												onChange={handleBankingAccountChange}
-												firstSelectedValue={selectedMacro?.bankingAccountId}
+												firstSelectedValue={
+													selectedMacro ? selectedMacro.bankingAccountId ?? 'none' : null
+												}
 											/>
 										</FormControl>
 										<FormDescription>Selecione a conta da sua transação</FormDescription>
@@ -304,7 +308,7 @@ function CreateTransactionDialog({ trigger, type = 'income', isSelected }: Props
 								control={form.control}
 								name='amount'
 								label='Valor'
-								type='number'
+								type='currency'
 							/>
 							{type === 'expense' && (
 								<FormField

@@ -83,6 +83,11 @@ function CategoryPicker({
 	}, [onChange, value]);
 
 	useEffect(() => {
+		if (firstSelectedValue === 'none') {
+			setValue('');
+			return;
+		}
+
 		setValue(
 			(firstSelectedValue
 				? firstSelectedValue

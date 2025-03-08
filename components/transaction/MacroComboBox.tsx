@@ -28,8 +28,8 @@ const MacroComboBox = ({ onChange, small }: Props) => {
 		queryFn: () => fetch('/api/macros').then((res) => res.json()),
 	});
 
-	const selectOption = useCallback((macroId: macroType | null) => {
-		setSelectedOption(macroId);
+	const selectOption = useCallback((macro: macroType | null) => {
+		setSelectedOption(macro);
 	}, []);
 
 	useEffect(() => {

@@ -101,6 +101,12 @@ const TeamsComboBox = ({
 	useEffect(() => {
 		if (!teamsQuery.data) return;
 		if (!userSettings && !firstSelectedValue) return;
+
+		if (firstSelectedValue === 'none') {
+			setSelectedOption(null);
+			return;
+		}
+
 		const currentTeam = teamsQuery.data.find((teamMember) => {
 			if (firstSelectedValue) return teamMember.team.id === firstSelectedValue;
 			return teamMember.team.id === userSettings?.mainTeam;

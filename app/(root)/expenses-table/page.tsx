@@ -50,10 +50,7 @@ const ExpensesTable = () => {
 				return prev;
 			});
 
-			if (value?.amount) {
-				form.setValue(`transactions.${index}.amount`, value.amount);
-			}
-
+			form.setValue(`transactions.${index}.amount`, value.amount ?? 0);
 			form.setValue(
 				`transactions.${index}.paymentType`,
 				(value?.paymentType as keyof typeof PAYMENT_TYPES_MAP) || `credit`
@@ -258,13 +255,7 @@ const ExpensesTable = () => {
 												name={`transactions.${index}.amount`}
 												control={form.control}
 												render={({ field }) => (
-													<Input
-														className='w-24'
-														type='number'
-														step='0.1'
-														placeholder='Valor'
-														{...field}
-													/>
+													<Input type='currency' className='w-24' {...field} />
 												)}
 											/>
 										</TableCell>

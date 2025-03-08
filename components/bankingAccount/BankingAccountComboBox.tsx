@@ -84,6 +84,12 @@ const BankingAccountComboBox = ({ userSettings, onChange, isConfiguring, firstSe
 	useEffect(() => {
 		if (!bankingAccountsQuery.data) return;
 		if (!userSettings && !firstSelectedValue) return;
+
+		if (firstSelectedValue === 'none') {
+			setSelectedOption(null);
+			return;
+		}
+
 		const currentBankingAccount = bankingAccountsQuery.data.find((bankingAccount) => {
 			if (firstSelectedValue) return bankingAccount.id === firstSelectedValue;
 			return bankingAccount.id === userSettings?.mainBankingAccount;

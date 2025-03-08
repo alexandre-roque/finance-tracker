@@ -17,6 +17,7 @@ interface CustomInput {
 	max?: number;
 	step?: string;
 	isPassword?: boolean;
+	isCurrency?: boolean;
 }
 
 const CustomInput = ({

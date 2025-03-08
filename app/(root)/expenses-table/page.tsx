@@ -45,13 +45,15 @@ const ExpensesTable = () => {
 	});
 
 	const handleMacroChange = useCallback(
-		({ value, index }: { value: macroType; index: number }) => {
+		(value: macroType, index: number) => {
 			setSelectedMacros((prev) => {
 				prev[index] = value;
 				return prev;
 			});
 
-			form.setValue(`transactions.${index}.amount`, value.amount ?? 0);
+			if (value.amount) {
+				form.setValue(`transactions.${index}.amount`, value.amount ?? 0);
+			}
 			form.setValue(
 				`transactions.${index}.paymentType`,
 				(value?.paymentType as keyof typeof PAYMENT_TYPES_MAP) || `credit`
@@ -65,14 +67,14 @@ const ExpensesTable = () => {
 	);
 
 	const handleTeamChange = useCallback(
-		({ value, index }: { value?: string; index: number }) => {
+		(value: string, index: number) => {
 			form.setValue(`transactions.${index}.teamId`, value);
 		},
 		[form]
 	);
 
 	const handleBankingAccountChange = useCallback(
-		({ value, index, isOnlyDebit }: { value: string; index: number; isOnlyDebit: boolean }) => {
+		(value: string, index: number, isOnlyDebit: boolean) => {
 			form.setValue(`transactions.${index}.bankingAccountId`, value);
 			form.setValue(`transactions.${index}.isOnlyDebit`, isOnlyDebit);
 			if (isOnlyDebit) {
@@ -83,14 +85,14 @@ const ExpensesTable = () => {
 	);
 
 	const handleCategoryChange = useCallback(
-		({ value, index }: { value: string; index: number }) => {
+		(value: string, index: number) => {
 			form.setValue(`transactions.${index}.category`, value);
 		},
 		[form]
 	);
 
 	const handleDateChange = useCallback(
-		({ value, index }: { value: Date; index: number }) => {
+		(value: Date, index: number) => {
 			setLastSelectedDate(value);
 			form.setValue(`transactions.${index}.date`, value);
 		},
@@ -210,7 +212,7 @@ const ExpensesTable = () => {
 													}
 													const newDate = new Date(date);
 													newDate.setDate(newDate.getDate() - 1);
-													handleDateChange({ value: newDate, index });
+													handleDateChange(newDate, index);
 												}}
 											/>
 											<DateSelectorDialog
@@ -218,7 +220,7 @@ const ExpensesTable = () => {
 												showLabel={false}
 												control={form.control}
 												dateValue={form.watch(`transactions.${index}.date`)}
-												onChange={(value) => handleDateChange({ value, index })}
+												onChange={(value) => handleDateChange(value, index)}
 											/>
 											<Plus
 												onClick={() => {
@@ -228,7 +230,7 @@ const ExpensesTable = () => {
 													}
 													const newDate = new Date(date);
 													newDate.setDate(newDate.getDate() + 1);
-													handleDateChange({ value: newDate, index });
+													handleDateChange(newDate, index);
 												}}
 											/>
 										</TableCell>
@@ -239,7 +241,7 @@ const ExpensesTable = () => {
 												render={({ field }) => (
 													<MacroComboBox
 														small
-														onChange={(value) => handleMacroChange({ value, index })}
+														onChange={(value) => handleMacroChange(value, index)}
 													/>
 												)}
 											/>
@@ -300,7 +302,7 @@ const ExpensesTable = () => {
 													<TeamsComboBox
 														isExpensesTable
 														userSettings={userSettingsQuery.data}
-														onChange={(value) => handleTeamChange({ value, index })}
+														onChange={(value) => handleTeamChange(value ?? '', index)}
 														firstSelectedValue={selectedMacros?.[index]?.teamId}
 													/>
 												)}
@@ -314,7 +316,7 @@ const ExpensesTable = () => {
 													<CategoryPicker
 														userSettings={userSettingsQuery.data}
 														type={'expense'}
-														onChange={(value) => handleCategoryChange({ value, index })}
+														onChange={(value) => handleCategoryChange(value, index)}
 														firstSelectedValue={selectedMacros?.[index]?.categoryId}
 													/>
 												)}
@@ -328,7 +330,7 @@ const ExpensesTable = () => {
 													<BankingAccountComboBox
 														userSettings={userSettingsQuery.data}
 														onChange={(value, isOnlyDebit) =>
-															handleBankingAccountChange({ value, index, isOnlyDebit })
+															handleBankingAccountChange(value, index, isOnlyDebit)
 														}
 														firstSelectedValue={selectedMacros?.[index]?.bankingAccountId}
 													/>

@@ -28,7 +28,7 @@ import {
 	editTransactionSchema,
 	editTransactionSchemaType,
 } from '@/schemas';
-import { and, eq, is } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { ulid } from 'ulid';
 import { getDaysInMonth, startOfDay } from 'date-fns';

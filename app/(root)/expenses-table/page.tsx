@@ -173,6 +173,7 @@ const ExpensesTable = () => {
 			for (const transaction of values.transactions) {
 				mutate({
 					...transaction,
+					teamId: transaction.teamId || undefined,
 					date: DateToUTCDate(transaction.date),
 				});
 			}

@@ -251,12 +251,6 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
 	},
 ];
 
-const csvConfig = mkConfig({
-	fieldSeparator: ',',
-	decimalSeparator: '.',
-	useKeysAsHeaders: true,
-});
-
 function TransactionTable({ from, to }: Props) {
 	const [sorting, setSorting] = useState<SortingState>([{ id: 'date', desc: true }]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -280,6 +274,13 @@ function TransactionTable({ from, to }: Props) {
 	});
 
 	const handleExportCSV = (data: any[]) => {
+		const csvConfig = mkConfig({
+			fieldSeparator: ',',
+			decimalSeparator: '.',
+			useKeysAsHeaders: true,
+			filename: 'Transações',
+		});
+
 		const csv = generateCsv(csvConfig)(data);
 		download(csvConfig)(csv);
 	};
@@ -426,16 +427,26 @@ function TransactionTable({ from, to }: Props) {
 						size={'sm'}
 						className='ml-auto h-8 lg:flex'
 						onClick={() => {
-							const data = table.getFilteredRowModel().rows.map((row) => ({
-								Categoria: `${row.original.categoryIcon} ${row.original.category}`,
-								Data: row.original.date,
-								Descrição: row.original.description,
-								Time: row.original.team?.name ?? 'Eu',
-								Conta: row.original.bankingAccount?.name ?? 'Nenhuma',
-								Usuário: row.original.user?.name,
-								Tipo: row.original.type === 'income' ? 'Receita' : 'Despesa',
-								Valor: row.original.formattedAmount,
-							}));
+							const data = table
+								.getFilteredRowModel()
+								.rows.sort((a, b) => {
+									if (a.original.date && b.original.date) {
+										return (
+											new Date(a.original.date).getTime() - new Date(b.original.date).getTime()
+										);
+									}
+									return 0;
+								})
+								.map((row) => ({
+									Categoria: `${row.original.categoryIcon} ${row.original.category}`,
+									Data: row.original.date,
+									Descrição: row.original.description,
+									Time: row.original.team?.name ?? 'Eu',
+									Conta: row.original.bankingAccount?.name ?? 'Nenhuma',
+									Usuário: row.original.user?.name,
+									Tipo: row.original.type === 'income' ? 'Receita' : 'Despesa',
+									Valor: row.original.formattedAmount,
+								}));
 							handleExportCSV(data);
 						}}
 					>

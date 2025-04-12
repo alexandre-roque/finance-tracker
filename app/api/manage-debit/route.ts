@@ -5,8 +5,11 @@ import { db } from '@/db';
 import { bankingAccounts, creditCardInvoices, dailyDebitCheckers } from '@/db/schema/finance';
 import { and, eq, sql } from 'drizzle-orm';
 
-export async function GET() {
-	const date = new Date();
+export async function GET(request: Request) {
+	const { searchParams } = new URL(request.url);
+	const dateFromUrl = searchParams.get('date');
+	const date = dateFromUrl ? new Date(dateFromUrl) : new Date();
+
 	const [dailyChecker] = await db
 		.select()
 		.from(dailyDebitCheckers)

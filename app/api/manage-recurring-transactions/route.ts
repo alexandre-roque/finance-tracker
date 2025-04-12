@@ -7,8 +7,11 @@ import { getBusinessDayOfMonth, getLastBusinessDayOfTheMonth, isWeekday } from '
 import { and, eq, or } from 'drizzle-orm';
 import moment from 'moment';
 
-export async function GET() {
-	const date = new Date();
+export async function GET(request: Request) {
+	const { searchParams } = new URL(request.url);
+	const dateFromUrl = searchParams.get('date');
+	const date = dateFromUrl ? new Date(dateFromUrl) : new Date();
+
 	const [dailyChecker] = await db
 		.select()
 		.from(dailyRecurrenceCheckers)
@@ -34,23 +37,20 @@ export async function GET() {
 	const dayInMonth = nextMonthDate.getUTCDate();
 	const businessDayCount = isWeekday(nextMonthDate) ? getBusinessDayOfMonth(nextMonthDate) : 380;
 	const lastBusinessDay = getLastBusinessDayOfTheMonth(nextMonthDate);
-	const isLastBusinessDay = isWeekday(nextMonthDate) && (lastBusinessDay.getUTCDate() === dayInMonth);
+	const isLastBusinessDay = isWeekday(nextMonthDate) && lastBusinessDay.getUTCDate() === dayInMonth;
 
-	const whereQuery = isLastBusinessDay 
+	const whereQuery = isLastBusinessDay
 		? or(
-			eq(recurringTransactions.businessDay, businessDayCount),
-			eq(recurringTransactions.dayOfTheMonth, dayInMonth),
-			eq(recurringTransactions.isLastBusinessDay, true),
-		) 
+				eq(recurringTransactions.businessDay, businessDayCount),
+				eq(recurringTransactions.dayOfTheMonth, dayInMonth),
+				eq(recurringTransactions.isLastBusinessDay, true)
+		  )
 		: or(
-			eq(recurringTransactions.businessDay, businessDayCount),
-			eq(recurringTransactions.dayOfTheMonth, dayInMonth),
-		);
+				eq(recurringTransactions.businessDay, businessDayCount),
+				eq(recurringTransactions.dayOfTheMonth, dayInMonth)
+		  );
 
-	const recurringTransactionsResult = await db
-		.select()
-		.from(recurringTransactions)
-		.where(whereQuery);
+	const recurringTransactionsResult = await db.select().from(recurringTransactions).where(whereQuery);
 
 	if (recurringTransactionsResult && recurringTransactionsResult.length) {
 		for (const recurringTransaction of recurringTransactionsResult) {

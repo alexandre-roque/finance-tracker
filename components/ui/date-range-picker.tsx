@@ -510,7 +510,10 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 									mode='range'
 									onSelect={(value: { from?: Date; to?: Date } | undefined) => {
 										if (value?.from != null) {
-											setRange({ from: value.from, to: value?.to && endOfDay(value?.to) });
+											setRange({
+												from: value?.from && startOfDay(value.from),
+												to: value?.to && endOfDay(value?.to),
+											});
 										}
 									}}
 									selected={range}

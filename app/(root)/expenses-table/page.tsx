@@ -1,5 +1,5 @@
 'use client';
-import React, { use, useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
@@ -18,7 +18,7 @@ import BankingAccountComboBox from '@/components/bankingAccount/BankingAccountCo
 import DateSelectorDialog from '@/components/common/DateSelectorDialog';
 import { Loader2, Minus, Plus, PlusIcon, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { CreateTransaction } from '../_actions/transactions';
+import { CreateTransactionsInBatch } from '../_actions/transactions'; // <--- MUDANÇA AQUI
 import { toast } from 'sonner';
 import { DateToUTCDate } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -123,16 +123,18 @@ const ExpensesTable = () => {
 	const queryClient = useQueryClient();
 
 	const { mutate, isPending } = useMutation({
-		mutationFn: CreateTransaction,
-		onSuccess: (obj) => {
-			if (obj && 'error' in obj) {
-				toast.error(obj.error, {
+		mutationFn: (transactions: createTransactionsSchemaType['transactions']) => {
+			return CreateTransactionsInBatch({ transactions });
+		},
+		onSuccess: (result) => {
+			if (result?.error) {
+				toast.error(result.error || 'Ocorreu um erro ao criar as transações.', {
 					id: 'create-transactions',
 				});
 				return;
 			}
 
-			toast.success('Transação criada com sucesso 🎉', {
+			toast.success('Transações criadas com sucesso 🎉', {
 				id: 'create-transactions',
 			});
 
@@ -147,39 +149,51 @@ const ExpensesTable = () => {
 				],
 			});
 
-			// After creating a transaction, we need to invalidate the overview query which will refetch data in the homepage
-			queryClient.invalidateQueries({
-				queryKey: ['overview'],
-			});
+			setSelectedMacros({});
 
-			queryClient.invalidateQueries({
-				queryKey: ['transactions'],
-			});
-
-			queryClient.invalidateQueries({
-				queryKey: ['recurrent-transactions'],
-			});
+			queryClient.invalidateQueries({ queryKey: ['overview'] });
+			queryClient.invalidateQueries({ queryKey: ['transactions'] });
+			queryClient.invalidateQueries({ queryKey: ['recurrent-transactions'] });
 		},
-		onError: (err) => {
-			toast.error(`Erro ao criar transação`, {
+		onError: (error) => {
+			toast.error('Falha ao criar as transações. Verifique sua conexão.', {
 				id: 'create-transactions',
 			});
+			console.error('Falha na criação em lote de transações:', error);
 		},
 	});
 
 	const onSubmit = useCallback(
 		(values: createTransactionsSchemaType) => {
-			toast.loading('Criando transações...', { id: 'create-transactions' });
-			for (const transaction of values.transactions) {
-				mutate({
-					...transaction,
-					teamId: transaction.teamId || undefined,
-					date: DateToUTCDate(transaction.date),
-				});
+			if (!values.transactions || values.transactions.length === 0) {
+				toast.error('Nenhuma transação para criar.');
+				return;
 			}
+
+			toast.loading('Criando transações... Favor não sair da página', { id: 'create-transactions' });
+
+			mutate(values.transactions);
 		},
 		[mutate]
 	);
+
+	useEffect(() => {
+		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+			// Impede a saída imediata
+			e.preventDefault();
+			// Mensagem padrão do navegador será exibida
+			e.returnValue = '';
+			return '';
+		};
+
+		if (isPending) {
+			window.addEventListener('beforeunload', handleBeforeUnload);
+		}
+
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
+	}, [isPending]);
 
 	return (
 		<Card className='overflow-x-auto m-4'>
@@ -201,8 +215,8 @@ const ExpensesTable = () => {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{transactions.map((_, index) => (
-									<TableRow key={index}>
+								{transactions.map((transaction, index) => (
+									<TableRow key={transaction.id}>
 										<TableCell className='flex flex-row gap-2 items-center'>
 											<Minus
 												className='hover:'

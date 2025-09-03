@@ -23,15 +23,18 @@ import {
 import {
 	createTransactionSchema,
 	createTransactionSchemaType,
+	createTransactionsSchema,
+	createTransactionsSchemaType,
 	editRecurrentTransactionSchema,
 	editRecurrentTransactionSchemaType,
 	editTransactionSchema,
 	editTransactionSchemaType,
 } from '@/schemas';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { ulid } from 'ulid';
 import { getDaysInMonth, startOfDay } from 'date-fns';
+import { revalidatePath } from 'next/cache';
 
 type DBTransactionType = Parameters<typeof db.transaction>[0] extends (trx: infer T) => Promise<any> ? T : never;
 
@@ -219,6 +222,219 @@ export async function CreateTransaction(form: createTransactionSchemaType) {
 	}
 }
 
+export async function CreateTransactionsInBatch(form: createTransactionsSchemaType) {
+	// Passo 1: Validar o corpo inteiro da requisição que contém o array
+	const parsedBody = createTransactionsSchema.safeParse(form);
+	if (!parsedBody.success) {
+		return { error: 'Dados inválidos.' };
+	}
+
+	// Passo 2: Autenticação - Feita uma única vez para o lote inteiro
+	const session = await auth();
+	if (!session?.user?.id) {
+		redirect('/sign-in');
+	}
+	const userId = session.user.id;
+	const allTransactionsData = parsedBody.data.transactions;
+
+	// Passo 3: Otimização - Coletar todos os IDs de categoria necessários
+	// Isso evita fazer uma consulta ao banco de dados para cada transação dentro do loop (problema N+1)
+	const categoryIds = Array.from(new Set(allTransactionsData.map((t) => t.category)));
+	const categoryRows = await db.select().from(categories).where(inArray(categories.id, categoryIds));
+
+	// Criamos um "mapa" para acesso rápido às informações da categoria dentro do loop
+	const categoryMap = new Map(categoryRows.map((c) => [c.id, c]));
+
+	// --- Ponto Crítico: Iniciar a Transação de Banco de Dados ---
+	// Tudo aqui dentro ou funciona por completo, ou falha por completo (rollback).
+	try {
+		await db.transaction(async (trx) => {
+			// Loop principal: processar cada transação enviada pelo formulário
+			for (const transactionData of allTransactionsData) {
+				// Pega a categoria do nosso mapa pré-buscado. Se não existir, falha a transação inteira.
+				const categoryRow = categoryMap.get(transactionData.category);
+				if (!categoryRow) {
+					// Lançar um erro aqui fará com que o db.transaction realize o rollback
+					throw new Error(`Categoria com ID ${transactionData.category} não encontrada.`);
+				}
+
+				// Extrai os dados da transação atual
+				const {
+					amount,
+					category,
+					date,
+					description,
+					type,
+					teamId,
+					isRecurring,
+					businessDay,
+					dayOfTheMonth,
+					bankingAccountId,
+					installments,
+					paymentType,
+					recurrenceId,
+					isLastBusinessDay,
+				} = transactionData;
+
+				// Array para guardar as transações que serão de fato inseridas (ex: parcelas)
+				const transactionsToInsert = [];
+
+				// Reutilizamos a sua lógica de negócio original, mas agora dentro do loop
+				if (isRecurring) {
+					// Sua lógica de recorrência complexa vai aqui...
+					// IMPORTANTE: Todas as chamadas ao DB devem usar 'trx' em vez de 'db'
+					const [recurringTransaction] = await trx
+						.insert(recurringTransactions)
+						.values({
+							userId,
+							amount,
+							type,
+							teamId,
+							bankingAccountId,
+							dayOfTheMonth: dayOfTheMonth ?? null,
+							businessDay: businessDay ?? null,
+							description: description || '',
+							category: categoryRow.name,
+							categoryIcon: categoryRow.icon,
+							categoryId: category,
+							paymentType: paymentType,
+							isLastBusinessDay,
+						})
+						.returning();
+
+					if (recurringTransaction) {
+						const newDate = new Date();
+						const nextMonth = moment(date).add(1, 'months').toDate();
+
+						const dayInMonth = newDate.getUTCDate();
+
+						const businessDayCount = getBusinessDayOfMonth(newDate);
+
+						const daysInMonthOfNextMonth = getDaysInMonth(nextMonth);
+						const daysInMonth = getDaysInMonth(newDate);
+
+						const lastBusinessDay = getLastBusinessDayOfTheMonth(newDate);
+						const lastBusinessDayOfNextMonth = getLastBusinessDayOfTheMonth(nextMonth);
+
+						let d;
+						if (dayOfTheMonth) {
+							d = new Date(newDate.getUTCFullYear(), newDate.getUTCMonth(), dayOfTheMonth);
+
+							if ((moment(d).isBefore(moment(newDate)), 'day')) {
+								d = new Date(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth(), dayOfTheMonth);
+							}
+						} else if (businessDay) {
+							for (let i = 1; i <= daysInMonth; i++) {
+								if (i === businessDay) {
+									d = new Date(newDate.getUTCFullYear(), newDate.getUTCMonth(), i);
+									break;
+								}
+							}
+
+							if (moment(d).isBefore(moment(newDate), 'day')) {
+								for (let i = 1; i <= daysInMonthOfNextMonth; i++) {
+									if (i === businessDay) {
+										d = new Date(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth(), i);
+										break;
+									}
+								}
+							}
+						} else if (isLastBusinessDay) {
+							d = lastBusinessDay;
+							if (moment(d).isBefore(moment(newDate), 'day')) {
+								d = lastBusinessDayOfNextMonth;
+							}
+						}
+
+						const obj = {
+							userId,
+							amount,
+							type,
+							teamId,
+							bankingAccountId,
+							description: description || '',
+							category: categoryRow.name,
+							categoryIcon: categoryRow.icon,
+							categoryId: category,
+							paymentType: paymentType,
+							date: DateToUTCDate(d || newDate),
+							isPaid: true,
+							recurrenceId: recurringTransaction.id,
+							isToday: false,
+						};
+
+						transactionsToInsert.push(obj);
+
+						if (
+							dayInMonth === dayOfTheMonth ||
+							businessDay === businessDayCount ||
+							(isLastBusinessDay && lastBusinessDay.getUTCDate() === dayInMonth)
+						) {
+							transactionsToInsert.push({
+								...obj,
+								date,
+								isToday: true,
+							});
+						}
+					}
+				} else {
+					// Lógica para transações normais e parceladas
+					const howManyInstallments = installments || 1;
+					const installmentId = installments > 1 ? ulid() : null;
+
+					for (let i = 0; i < howManyInstallments; i++) {
+						transactionsToInsert.push({
+							userId,
+							amount: amount / howManyInstallments,
+							date: moment(date).add(i, 'months').toDate(),
+							type,
+							teamId,
+							installmentId,
+							bankingAccountId,
+							description:
+								(description || '') +
+								(howManyInstallments > 1 ? ` (${i + 1}/${howManyInstallments})` : ''),
+							category: categoryRow.name,
+							categoryIcon: categoryRow.icon,
+							categoryId: category,
+							paymentType: paymentType,
+							isPaid: true,
+							recurrenceId,
+							isToday: false,
+						});
+					}
+				}
+
+				// Após gerar as transações (sejam únicas, parceladas ou recorrentes),
+				// nós as inserimos no banco de dados.
+				if (transactionsToInsert.length === 0) {
+					continue; // Pula para a próxima iteração se nada foi gerado
+				}
+
+				for (const transaction of transactionsToInsert) {
+					// Sua lógica para definir se a transação está paga ou não
+					if (moment().isBefore(moment.utc(transaction.date), 'day') /* && ...outras condições */) {
+						transaction.isPaid = false;
+					}
+
+					// Insere a transação e atualiza as tabelas relacionadas
+					// Note que não precisamos mais de um 'trx.transaction' aninhado.
+					await trx.insert(transactions).values(transaction);
+					// IMPORTANTE: Passe o 'trx' para suas funções auxiliares
+					await CreateOrUpdateHistories(trx, transaction);
+					await CreateOrUpdateInvoices(trx, transaction);
+				}
+			} // Fim do loop for...of
+		}); // Fim do db.transaction
+
+		// Se chegou até aqui, tudo deu certo!
+		revalidatePath('/'); // Invalide os caches necessários
+		return { success: true };
+	} catch (e) {
+		console.error('ERRO NA TRANSAÇÃO EM LOTE:', e);
+		return { error: e instanceof Error ? e.message : 'Ocorreu um erro inesperado ao salvar as transações.' };
+	}
+}
 export async function EditRecurrentTransaction(form: editRecurrentTransactionSchemaType) {
 	const parsedBody = editRecurrentTransactionSchema.safeParse(form);
 	if (!parsedBody.success) {
